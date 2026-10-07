@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ultra-Smart AI Intraday Assistant (Live Candlestick Patterns & 6-Pillar Intel)</title>
+  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Local TradingView Lightweight Candlestick Charts & Chart.js for 100% fast offline rendering -->
+  <script src="lightweight-charts.js"></script>
+  <script src="chart.js"></script>
+</head>
+<body class="dark-theme">
+  <!-- Header -->
+  <header class="app-header">
+    <div class="logo-area">
+      <div class="logo-icon">⚡</div>
+      <div>
+        <h1>Sameer AI — Smart Intraday Assistant</h1>
+        <span class="badge live-badge">● SAMEER AI DIRECTIONAL ENGINE ACTIVE</span>
+      </div>
+    </div>
+
+    <!-- Search & Stock Selector -->
+    <div class="stock-search-container">
+      <div class="search-box">
+        <input type="text" id="symbolInput" placeholder="Stock symbol (e.g. NIFTY, BANKNIFTY, RELIANCE)..." value="NIFTY">
+        <button id="searchBtn" class="btn btn-primary">Analyze 🔍</button>
+      </div>
+      <div class="quick-chips">
+        <span class="chip active index-chip" data-symbol="NIFTY">⭐ NIFTY 50</span>
+        <span class="chip index-chip" data-symbol="BANKNIFTY">🏦 BANK NIFTY</span>
+        <span class="chip" data-symbol="NIFTYBEES" style="border-color: #38bdf8; color: #38bdf8;">📈 NIFTYBEES</span>
+        <span class="chip" data-symbol="TATASTEEL" style="border-color: #f59e0b; color: #f59e0b;">🏭 TATASTEEL</span>
+        <span class="chip" data-symbol="RELIANCE">RELIANCE</span>
+        <span class="chip" data-symbol="ICICIBANK">ICICIBANK</span>
+        <span class="chip" data-symbol="HDFCBANK">HDFCBANK</span>
+        <span class="chip" data-symbol="SBIN">SBIN</span>
+        <span class="chip" data-symbol="TATAMOTORS">TATAMOTORS</span>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="header-actions">
+      <div class="timeframe-selector">
+        <button class="tf-btn" data-tf="1m">1m</button>
+        <button class="tf-btn active" data-tf="5m">5m</button>
+        <button class="tf-btn" data-tf="15m">15m</button>
+      </div>
+      <button id="refreshBtn" class="btn btn-secondary" title="Refresh Live Data">🔄 Refresh</button>
+      <a href="/premarket.html" class="btn" style="background:linear-gradient(135deg,#f59e0b,#ec4899);color:#fff;border:none;font-weight:700;font-size:0.8rem;padding:0.45rem 0.9rem;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:0.35rem;" title="Next Day Opening & FII Radar">🌅 कल कहाँ खुलेगा? (FII Radar)</a>
+      <a href="/banknifty-radar.html" class="btn" style="background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border:none;font-weight:700;font-size:0.8rem;padding:0.45rem 0.9rem;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:0.35rem;" title="Bank Nifty 10-11 AM 1-Way Direction Radar">🎯 10-11 AM Radar</a>
+      <a href="/footprint.html" class="btn" style="background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff;border:none;font-weight:700;font-size:0.8rem;padding:0.45rem 0.9rem;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:0.35rem;" title="Volume Footprint & Order Flow Terminal">🔬 Footprint Chart</a>
+      <a href="/footprint-replay.html" class="btn" style="background:linear-gradient(135deg,#a855f7,#6366f1);color:#fff;border:none;font-weight:700;font-size:0.8rem;padding:0.45rem 0.9rem;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:0.35rem;" title="Footprint Replay Simulator & Paper Trading">🎮 Replay Simulator</a>
+      <a href="/option-chain.html" class="btn" style="background:linear-gradient(135deg,#7c3aed,#0ea5e9);color:#fff;border:none;font-weight:700;font-size:0.8rem;padding:0.45rem 0.9rem;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:0.35rem;" title="Option Chain Intelligence">📊 Option Chain</a>
+      <a href="/golden-checklist.html" class="btn" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;font-weight:700;font-size:0.8rem;padding:0.45rem 0.9rem;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:0.35rem;" title="30-Second Golden Checklist & PDF Cheat Sheet" target="_blank">📋 30s Checklist (PDF)</a>
+      <button id="alertCenterBtn" class="btn btn-alert-bell" title="🔔 Smart Trade Alerts & Exit Notifier">
+        🔔 Alerts <span class="alert-count-badge hidden" id="unreadAlertCount">0</span>
+      </button>
+      <div class="auto-refresh-pill">
+        <input type="checkbox" id="autoRefresh" checked>
+        <label for="autoRefresh">Auto 10s</label>
+      </div>
+    </div>
+  </header>
+
+
+  <!-- 🌟 SAMEER AI SELF-AWARENESS SCORE BANNER -->
+  <section class="self-awareness-hero-banner">
+    <div class="awareness-gauge-container">
+      <div class="awareness-score-circle">
+        <span class="score-val" id="awarenessScoreVal">85.0</span>
+        <small>/ 100</small>
+      </div>
+      <div class="awareness-info">
+        <div class="awareness-title-row">
+          <h2>Sameer AI Self-Awareness & Meta-Cognition Index</h2>
+          <span class="awareness-badge" id="awarenessLevelBadge">HIGH CLARITY & ULTRA SMART</span>
+        </div>
+        <p id="awarenessSubtitle">Sameer AI सभी 6 पिलर्स (कैंडलस्टिक पैटर्न्स, मल्टी-टाइमफ्रेम, मार्केट रेजीम, निफ्टी रिलेटिव स्ट्रेंथ, वॉल्यूम प्रोफाइल व वीटो सुरक्षा) का लाइव विश्लेषण कर रहा है।</p>
+      </div>
+    </div>
+
+    <!-- 6 Pillar Sub-Scores Bar -->
+    <div class="pillars-subscore-grid">
+      <div class="pillar-pill">
+        <small>⏱️ MTF Confluence</small>
+        <b id="scoreMtf">100%</b>
+      </div>
+      <div class="pillar-pill">
+        <small>🌪️ Market Regime</small>
+        <b id="scoreRegime">90%</b>
+      </div>
+      <div class="pillar-pill">
+        <small>⚖️ Relative Strength</small>
+        <b id="scoreRs">85%</b>
+      </div>
+      <div class="pillar-pill">
+        <small>🛡️ Trade Veto Guard</small>
+        <b id="scoreVeto">95%</b>
+      </div>
+      <div class="pillar-pill">
+        <small>📊 POC / Order Flow</small>
+        <b id="scoreOrderFlow">88%</b>
+      </div>
+      <div class="pillar-pill">
+        <small>🧠 Post-Mortem Acc.</small>
+        <b id="scoreMemory">75%</b>
+      </div>
+      <div class="pillar-pill" style="border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.08);">
+        <small>📊 Option Chain PCR</small>
+        <b id="scoreOcPcr" style="color: #38bdf8;">1.15 (Bullish)</b>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🎯 TODAY'S TOP AI STOCK PICKS RADAR -->
+  <section class="top-picks-radar-section">
+    <div class="top-picks-header">
+      <div class="tph-title-area">
+        <span class="tph-fire-icon">🔥</span>
+        <div>
+          <h3>🎯 आज किस शेयर में ट्रेड करना चाहिए? (Today's Top Stock Opportunities)</h3>
+          <small>AI 6-Pillars, Momentum, Relative Strength और Volume के आधार पर आज के बेस्ट शेयर्स की रैंकिंग</small>
+        </div>
+      </div>
+      <div class="tph-right">
+        <!-- Budget / Category Filter Tabs -->
+        <div class="top-picks-filter-tabs">
+          <button class="tp-tab-btn active" data-cat="all">🔥 All Picks</button>
+          <button class="tp-tab-btn" data-cat="small_cap">💰 Small Budget (₹100–₹500)</button>
+          <button class="tp-tab-btn" data-cat="index">📈 Index &amp; ETFs</button>
+        </div>
+        <span class="tph-scan-time" id="tphScanTime">Scanning Market...</span>
+        <button id="refreshTopPicksBtn" class="btn btn-outline-sm" title="Refresh Hot Picks">🔄 Scan Now</button>
+      </div>
+    </div>
+
+    <div class="top-picks-grid" id="topPicksGrid">
+      <!-- Dynamic Top Stock Cards rendered by JS -->
+      <div class="top-pick-card rank-1 skeleton-card">
+        <div class="skeleton-line" style="width: 60%; height: 20px;"></div>
+        <div class="skeleton-line" style="width: 90%; height: 14px; margin-top: 8px;"></div>
+      </div>
+      <div class="top-pick-card rank-2 skeleton-card">
+        <div class="skeleton-line" style="width: 60%; height: 20px;"></div>
+        <div class="skeleton-line" style="width: 90%; height: 14px; margin-top: 8px;"></div>
+      </div>
+      <div class="top-pick-card rank-avoid skeleton-card">
+        <div class="skeleton-line" style="width: 60%; height: 20px;"></div>
+        <div class="skeleton-line" style="width: 90%; height: 14px; margin-top: 8px;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🌅 NEXT DAY OPENING & FII RADAR BANNER LINK -->
+  <div style="margin: 0 1.5rem 1.5rem; background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(236,72,153,0.12)); border: 1px solid rgba(245,158,11,0.35); border-radius: 14px; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+    <div style="display:flex; align-items:center; gap: 1rem;">
+      <div style="font-size: 2.2rem;">🌅</div>
+      <div>
+        <div style="display:flex; align-items:center; gap: 0.5rem;">
+          <h3 style="margin:0; font-size:1.1rem; color:#fff; font-weight:700;">कल बाज़ार कहाँ खुलेगा? &amp; FIIs Entry Radar</h3>
+          <span style="background:#f59e0b; color:#000; font-size:0.65rem; font-weight:800; padding:0.15rem 0.5rem; border-radius:4px;">NEW DEDICATED PAGE</span>
+        </div>
+        <p style="margin:0.25rem 0 0; font-size:0.85rem; color:#94a3b8;">FIIs कब एंट्री लेते हैं (09:15, 11:15, 01:30, 02:45) और एंट्री के बाद बाज़ार का रिएक्शन, अपेक्षित पॉइंट्स मूव और 1:2 R:R एक्शन प्लान।</p>
+      </div>
+    </div>
+    <a href="/premarket.html" class="btn" style="background: linear-gradient(135deg, #f59e0b, #ec4899); color: #fff; text-decoration: none; font-weight: 700; font-size: 0.9rem; padding: 0.6rem 1.3rem; border-radius: 10px; box-shadow: 0 4px 15px rgba(245,158,11,0.3); transition: transform 0.2s;">
+      FII Radar व कल का प्रेडिक्शन खोलें 🚀
+    </a>
+  </div>
+
+  <!-- Main Grid -->
+  <main class="dashboard-grid">
+    
+    <!-- LEFT PANEL: Real-time Price, AI Signal & 10-Step Forward Forecast -->
+    <section class="panel left-panel">
+      <div class="panel-header">
+        <h2>🤖 AI Signal & Strategy Verdict</h2>
+        <span id="lastUpdated" class="timestamp">Updating...</span>
+      </div>
+
+      <!-- Current Price Card -->
+      <div class="price-hero-card">
+        <div>
+          <span class="stock-title" id="stockNameDisplay">NIFTY 50</span>
+          <div class="price-row">
+            <span class="current-price" id="currentPriceDisplay">₹0.00</span>
+            <span class="change-pill" id="changePercentDisplay">+0.00%</span>
+          </div>
+        </div>
+        <div class="day-range">
+          <div><small>Day High</small><b id="dayHighDisplay">₹0.00</b></div>
+          <div><small>Day Low</small><b id="dayLowDisplay">₹0.00</b></div>
+        </div>
+      </div>
+
+      <!-- 🕒 SAMEER AI: 30-MIN & 1-HOUR DIRECTIONAL TRAJECTORY CARD -->
+      <div class="direction-forecast-card">
+        <div class="df-header">
+          <div class="df-title-area">
+            <span class="df-icon">🔮</span>
+            <div>
+              <h3>अगले 30 मिनट व 1 घंटे का डायरेक्शनल अनुमान</h3>
+              <small>Sameer AI Pattern &amp; Momentum Directional Trajectory</small>
+            </div>
+          </div>
+          <span class="df-badge-main" id="dfMainBiasBadge">Direction: Calculating...</span>
+        </div>
+
+        <div class="df-horizons-grid">
+          <!-- 30 Min Horizon -->
+          <div class="df-horizon-box box-30m">
+            <div class="df-box-top">
+              <span class="df-time-pill">⏱️ Next 30 Mins</span>
+              <span class="df-prob" id="dfProb30m">--% Probability</span>
+            </div>
+            <div class="df-direction-title" id="dfDir30m">ANALYZING...</div>
+            <div class="df-targets-row">
+              <div><small>Target Price</small><b id="dfTarget30m">₹0.00</b></div>
+              <div><small>Expected Move</small><b id="dfMove30m">+0.0 pts (+0.0%)</b></div>
+            </div>
+            <p class="df-rationale-text" id="dfRationale30m">Loading 30m pattern trajectory...</p>
+          </div>
+
+          <!-- 1 Hour Horizon -->
+          <div class="df-horizon-box box-1h">
+            <div class="df-box-top">
+              <span class="df-time-pill">⏰ Next 1 Hour</span>
+              <span class="df-prob" id="dfProb1h">--% Probability</span>
+            </div>
+            <div class="df-direction-title" id="dfDir1h">ANALYZING...</div>
+            <div class="df-targets-row">
+              <div><small>Target Price</small><b id="dfTarget1h">₹0.00</b></div>
+              <div><small>Range (Floor - Ceiling)</small><b id="dfRange1h">₹0 - ₹0</b></div>
+            </div>
+            <p class="df-rationale-text" id="dfStrategy1h">Loading 1-hour strategy...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 🛡️ SMART TRADE VETO & CAPITAL PRESERVATION BANNER -->
+      <div class="trade-veto-card" id="tradeVetoCard">
+        <div class="veto-header">
+          <span class="veto-icon" id="vetoIcon">🛡️</span>
+          <div>
+            <h3 id="vetoTitle">✅ Trade Approved (High Conviction)</h3>
+            <small id="vetoSubtitle">Capital Preservation Gate Active</small>
+          </div>
+        </div>
+        <p id="vetoExplanation" class="veto-text">सभी 6 सुरक्षा फिल्टर्स पास हो चुके हैं।</p>
+      </div>
+
+      <!-- AI Action Recommendation Banner -->
+      <div class="ai-signal-card" id="aiSignalBox">
+        <div class="signal-badge-wrapper">
+          <div class="signal-type-badge" id="signalBadge">LOADING...</div>
+          <div class="confidence-tag">Confidence: <span id="confidenceScore">0%</span></div>
+        </div>
+
+        <div class="ai-explanation-box">
+          <p id="aiVerdictText">Analyzing live market indicators and price action patterns...</p>
+        </div>
+
+        <!-- Levels: Entry, SL, Target 1, Target 2 -->
+        <div class="trade-levels-grid">
+          <div class="level-card entry-level">
+            <label>Suggested Entry</label>
+            <span id="entryLevel">₹0.00</span>
+          </div>
+          <div class="level-card sl-level">
+            <label>Adaptive Stop Loss (SL)</label>
+            <span id="slLevel">₹0.00</span>
+          </div>
+          <div class="level-card t1-level">
+            <label>Target 1</label>
+            <span id="target1Level">₹0.00</span>
+          </div>
+          <div class="level-card t2-level">
+            <label>Target 2</label>
+            <span id="target2Level">₹0.00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 🧮 SMART MARGIN & CAPITAL POSITION SIZING CALCULATOR -->
+      <div class="margin-calc-card">
+        <div class="calc-header">
+          <div class="calc-title-area">
+            <span class="calc-icon">🧮</span>
+            <div>
+              <h3>स्मार्ट कैपिटल &amp; 5x मार्जिन कैलकुलेटर (Small Capital Sizer)</h3>
+              <small>₹1,000 / ₹2,000 कैपिटल पर एग्जैक्ट शेयर्स, रिस्क (₹) व टारगेट प्रॉफिट (₹) निकालें</small>
+            </div>
+          </div>
+          <span class="calc-badge-5x">5x Intraday Margin Active</span>
+        </div>
+
+        <div class="calc-body">
+          <div class="calc-inputs-row">
+            <div class="calc-input-group">
+              <label for="calcCapitalInput">💵 Your Capital (रुपये)</label>
+              <div class="calc-input-wrap">
+                <span class="calc-curr-sym">₹</span>
+                <input type="number" id="calcCapitalInput" value="1000" min="100" max="1000000" step="100">
+              </div>
+            </div>
+            <div class="calc-preset-pills">
+              <button class="calc-preset-btn active" data-amount="1000">₹1,000</button>
+              <button class="calc-preset-btn" data-amount="2000">₹2,000</button>
+              <button class="calc-preset-btn" data-amount="5000">₹5,000</button>
+            </div>
+          </div>
+
+          <div class="calc-results-grid">
+            <div class="calc-res-item">
+              <small>📦 Qty (Shares)</small>
+              <b id="calcSharesDisplay">-- Qty</b>
+            </div>
+            <div class="calc-res-item">
+              <small>⚡ Margin Used</small>
+              <b id="calcMarginDisplay">₹0</b>
+            </div>
+            <div class="calc-res-item risk-item">
+              <small>🛡️ Max Risk (SL)</small>
+              <b id="calcRiskDisplay" style="color: #ef4444;">-₹0</b>
+            </div>
+            <div class="calc-res-item reward-item">
+              <small>🎯 Target 1 Profit</small>
+              <b id="calcProfit1Display" style="color: #10b981;">+₹0</b>
+            </div>
+            <div class="calc-res-item reward-item">
+              <small>🚀 Target 2 Profit</small>
+              <b id="calcProfit2Display" style="color: #06b6d4;">+₹0</b>
+            </div>
+            <div class="calc-res-item">
+              <small>⚖️ Risk : Reward</small>
+              <b id="calcRrDisplay">1 : 2.0</b>
+            </div>
+          </div>
+
+          <div class="calc-action-row">
+            <div class="calc-advice-pill" id="calcAdvicePill">
+              💡 <b>Sameer AI Advice:</b> ₹1,000 कैपिटल में 5x मार्जिन से सुरक्षित ट्रेड करें।
+            </div>
+            <button id="calcTradeOneClickBtn" class="btn btn-primary btn-sm">⚡ 1-Click Paper Trade Now</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 🕯️ DETECTED CANDLESTICK PATTERNS RADAR CARD -->
+      <div class="patterns-panel-card">
+        <div class="patterns-header">
+          <div>
+            <h3>🕯️ Detected Candlestick Patterns Radar</h3>
+            <small>Hammer, Engulfing, Pin-bar, Marubozu & Doji Alerts</small>
+          </div>
+          <span class="patterns-count-badge" id="patternCountBadge">0 Patterns</span>
+        </div>
+
+        <div class="patterns-cards-list" id="patternsCardsList">
+          <!-- Dynamic Detected Candle Patterns -->
+        </div>
+      </div>
+
+      <!-- 🔮 10-STEP AHEAD PRICE PREDICTION CARD -->
+      <div class="forecast-panel-card">
+        <div class="forecast-header">
+          <div>
+            <h3>🔮 अगले 10 कदम (10-Candles Future Forecast)</h3>
+            <small>AI Velocity, ATR Volatility Cone & Trend Projection</small>
+          </div>
+          <span class="forecast-badge" id="forecastTrajectoryBadge">Calculating...</span>
+        </div>
+
+        <div class="forecast-summary-box">
+          <p id="forecastSummaryText">Calculating forward momentum trajectory...</p>
+        </div>
+
+        <!-- 10 Steps Mini Table with Future Candlestick Patterns -->
+        <div class="forecast-table-wrapper">
+          <table class="forecast-table">
+            <thead>
+              <tr>
+                <th>Step</th>
+                <th>Offset</th>
+                <th>Predicted Candle Pattern</th>
+                <th>Projected OHLC</th>
+                <th>Move %</th>
+              </tr>
+            </thead>
+            <tbody id="forecastTableBody">
+              <!-- Dynamically loaded 10 steps with candle patterns -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Detected Patterns & Conditions Checklist -->
+      <div class="panel-sub-section">
+        <h3>🔍 Technical Signals & Triggers</h3>
+        <div class="signals-list" id="signalsList">
+          <!-- Dynamic signals will appear here -->
+        </div>
+      </div>
+
+      <!-- 🧠 SAMEER AI — LLM REAL INTELLIGENCE BRAIN CARD -->
+      <div class="llm-brain-card" id="llmBrainCard">
+        <div class="llm-brain-header">
+          <div class="llm-brain-title-area">
+            <span class="llm-brain-icon">🧠</span>
+            <div>
+              <h3>Sameer AI — LLM Real Intelligence Brain</h3>
+              <small id="llmBrainStatus">Calculator नहीं, Expert Trader की सोच • Gemini 3.6 Flash Powered</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- 💬 Interactive User Question Input Bar -->
+        <div class="llm-chat-input-bar">
+          <input type="text" id="llmUserQuestionInput" placeholder="Sameer से अपना सवाल पूछें... (उदा: क्या अभी 1260 पर Call ले सकते हैं?)" />
+          <button id="askSameerCustomBtn" class="btn-ask-brain">
+            🚀 पूछें
+          </button>
+        </div>
+
+        <!-- ⚡ Quick Question Chips -->
+        <div class="llm-quick-questions">
+          <span class="llm-q-chip" data-q="क्या अभी इस शेयर में Entry लेना safe है या Trap है?">🎯 Entry Safe है?</span>
+          <span class="llm-q-chip" data-q="Stop Loss और Target कहाँ लगाना चाहिए और क्यों?">🛡️ SL & Target कहाँ?</span>
+          <span class="llm-q-chip" data-q="आज FII का क्या रुख है और Traps से कैसे बचें?">📊 FII Flow & Traps?</span>
+          <span class="llm-q-chip" data-q="इस शेयर का पूरा 360° AI Analysis और Final Verdict दो।">⚡ 360° Full Verdict</span>
+        </div>
+
+        <div id="llmBrainOutput" class="llm-brain-output hidden">
+          <!-- LLM Response appears here -->
+        </div>
+        <div id="llmBrainLoading" class="llm-loading hidden">
+          <div class="llm-loading-dots"><span></span><span></span><span></span></div>
+          <p>Sameer सोच रहा है... Market Context, FII Flow, Failed Levels सब analyse हो रहा है...</p>
+        </div>
+        <!-- API Key Setup Notice -->
+        <div id="llmKeyNotice" class="llm-key-notice">
+          <span>🔑</span>
+          <div style="flex: 1;">
+            <b>Gemini API Key Setup (100% Free):</b>
+            <p style="margin-bottom: 0.45rem; font-size: 0.74rem;">
+              अपनी Free Key लें: <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#38bdf8; text-decoration: underline; font-weight: 600;">aistudio.google.com/app/apikey</a>
+            </p>
+            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+              <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy... यहाँ पेस्ट करें" style="background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.25); border-radius: 6px; padding: 0.4rem 0.6rem; color: #fff; font-size: 0.8rem; min-width: 230px; flex: 1;">
+              <button id="saveApiKeyBtn" class="btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 0.4rem 0.9rem; border-radius: 6px; font-weight: 700; font-size: 0.8rem; cursor: pointer;">Connect 🚀</button>
+            </div>
+            <small id="keySaveStatus" style="display:block; margin-top: 0.3rem; font-size: 0.72rem; color: #94a3b8;"></small>
+          </div>
+        </div>
+      </div>
+
+      <!-- One-Click Paper Trade from AI Signal with Custom Target & SL Inputs -->
+
+      <div class="quick-trade-action-card">
+        <div class="quick-trade-header">
+          <h3>⚡ Execute Instant Paper Trade</h3>
+          <button id="autoSetRRBtn" class="btn-auto-rr" title="Pre-fill 1:2 R:R Stop Loss & Target from AI Signal">🎯 Auto 1:2 R:R</button>
+        </div>
+
+        <div class="trade-inputs-grid">
+          <div class="trade-field">
+            <label for="tradeQty">Quantity (Qty)</label>
+            <input type="number" id="tradeQty" value="10" min="1" step="1" placeholder="Qty">
+          </div>
+          <div class="trade-field">
+            <label for="tradeSL">Stop Loss (SL ₹)</label>
+            <input type="number" id="tradeSL" step="0.05" placeholder="e.g. SL ₹">
+          </div>
+          <div class="trade-field">
+            <label for="tradeTarget">Target Profit (TP ₹)</label>
+            <input type="number" id="tradeTarget" step="0.05" placeholder="e.g. TP ₹">
+          </div>
+        </div>
+
+        <div class="trade-rr-preview" id="tradeRrPreview">
+          <span>⚖️ R:R Ratio: <b id="tradeRrRatioVal">1 : 2.0</b></span>
+          <span>Risk: <b id="tradeRiskVal" style="color: #ef4444;">-₹--</b></span>
+          <span>Profit: <b id="tradeProfitVal" style="color: #10b981;">+₹--</b></span>
+        </div>
+
+        <div class="trade-action-buttons">
+          <button id="quickBuyBtn" class="btn btn-success">🟢 Buy Paper Trade</button>
+          <button id="quickSellBtn" class="btn btn-danger">🔴 Sell / Short</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: Live Candlestick Chart + 6-Pillars Matrix + Post-Mortem + News -->
+    <section class="panel right-panel">
+      
+      <!-- 6-PILLAR LIVE RADAR CARDS GRID -->
+      <div class="six-pillars-grid">
+        <!-- Pillar 1: Multi-Timeframe Alignment -->
+        <div class="pillar-radar-card">
+          <div class="pillar-card-header">
+            <h4>⏱️ Multi-Timeframe (MTF)</h4>
+            <span class="badge-mini" id="mtfOverallStatus">Aligned</span>
+          </div>
+          <div class="mtf-badges-row">
+            <div class="mtf-item" id="mtf1mBadge">1m: <b>--</b></div>
+            <div class="mtf-item" id="mtf5mBadge">5m: <b>--</b></div>
+            <div class="mtf-item" id="mtf15mBadge">15m: <b>--</b></div>
+          </div>
+        </div>
+
+        <!-- Pillar 2: Market Regime -->
+        <div class="pillar-radar-card">
+          <div class="pillar-card-header">
+            <h4>🌪️ Market Regime</h4>
+            <span class="badge-mini" id="regimeBadge">Detecting...</span>
+          </div>
+          <p class="pillar-desc" id="regimeStrategyDesc">Analyzing market trend structure...</p>
+        </div>
+
+        <!-- Pillar 4: Relative Strength vs Nifty -->
+        <div class="pillar-radar-card">
+          <div class="pillar-card-header">
+            <h4>⚖️ Relative Strength (RS)</h4>
+            <span class="badge-mini" id="rsAlphaBadge">Alpha: +0.0%</span>
+          </div>
+          <p class="pillar-desc" id="rsDescText">Comparing with NIFTY 50 benchmark...</p>
+        </div>
+
+        <!-- Pillar 6: Institutional POC & Value Area -->
+        <div class="pillar-radar-card">
+          <div class="pillar-card-header">
+            <h4>📊 Order Flow POC</h4>
+            <span class="badge-mini" id="pocBadge">POC: ₹--</span>
+          </div>
+          <div class="poc-levels-row">
+            <small>VAL: <b id="valDisplay">₹--</b></small>
+            <small>POC: <b id="pocDisplay">₹--</b></small>
+            <small>VAH: <b id="vahDisplay">₹--</b></small>
+          </div>
+        </div>
+      </div>
+
+      <!-- 🕯️ LIVE CANDLESTICK CHART CONTAINER (TradingView Engine) -->
+      <div class="chart-container-wrapper">
+        <div class="chart-header">
+          <div class="chart-title-area">
+            <h3>🕯️ Live Candlestick & Pattern Chart</h3>
+            <small>Green/Red Candles + VWAP + EMA 9 + Pattern Overlays & Forecast Corridor</small>
+          </div>
+          <div class="chart-actions-toolbar">
+            <!-- Zoom & Pan Controls -->
+            <div class="chart-zoom-group">
+              <button class="zoom-btn" id="zoomInBtn" title="Zoom In (+)">🔍 +</button>
+              <button class="zoom-btn" id="zoomOutBtn" title="Zoom Out (-)">🔍 -</button>
+              <button class="zoom-btn" id="resetZoomBtn" title="Reset View (Fit)">⟲ Reset</button>
+              <button class="zoom-btn" id="fullscreenBtn" title="Fullscreen">⛶</button>
+            </div>
+            <!-- View Switch -->
+            <div class="chart-view-switch">
+              <button class="view-btn active" id="viewCandlesBtn">🕯️ Candles</button>
+              <button class="view-btn" id="viewLineBtn">📈 Line</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart Legends -->
+        <div class="chart-legends-bar">
+          <span class="legend-pill" style="color:#38bdf8; font-weight:700;"><span class="legend-color-box" style="background:#38bdf8;"></span> 🇮🇳 Indian Standard Time (IST)</span>
+          <span class="legend-pill"><span class="legend-color-box green-box"></span> Green (Bullish Candle)</span>
+          <span class="legend-pill"><span class="legend-color-box red-box"></span> Red (Bearish Candle)</span>
+          <span class="legend-pill"><span class="legend-color-box vwap-box"></span> VWAP (Orange)</span>
+          <span class="legend-pill"><span class="legend-color-box ema-box"></span> EMA 9 (Cyan)</span>
+          <span class="legend-pill"><span class="legend-color-box forecast-box"></span> 10-Step Forecast (Purple)</span>
+        </div>
+
+        <!-- TradingView Chart Container -->
+        <div class="chart-box-main" id="candlestickChartContainer"></div>
+
+        <!-- Fallback Line Chart -->
+        <div class="chart-box-line hidden" id="lineChartContainer">
+          <canvas id="intradayLineChart"></canvas>
+        </div>
+      </div>
+
+      <!-- 🧠 AI POST-MORTEM & SELF-LEARNING DIAGNOSTIC ENGINE -->
+      <div class="postmortem-panel-card">
+        <div class="postmortem-header">
+          <div class="postmortem-title-area">
+            <div class="brain-icon">🧠</div>
+            <div>
+              <h3>AI Post-Mortem & Self-Correction Engine</h3>
+              <small>जब प्रिडिक्शन गलत होती है, तो AI कारण (Root Cause) एनालाइज़ करके खुद के नियम सुधारता है</small>
+            </div>
+          </div>
+          <div class="accuracy-score-pill">
+            <span class="accuracy-label">Forecast Accuracy</span>
+            <b class="accuracy-number" id="accuracyScoreDisplay">75.0%</b>
+          </div>
+        </div>
+
+        <!-- Accuracy Metrics Row -->
+        <div class="postmortem-metrics-row">
+          <div class="pm-metric-item">
+            <small>Total Audited</small>
+            <b id="pmTotalCount">0</b>
+          </div>
+          <div class="pm-metric-item success">
+            <small>Target Achieved</small>
+            <b id="pmSuccessCount">0</b>
+          </div>
+          <div class="pm-metric-item failed">
+            <small>Missed / Traps</small>
+            <b id="pmFailedCount">0</b>
+          </div>
+        </div>
+
+        <!-- AI Continuous Training & Weight Recalibration Box -->
+        <div class="model-training-action-box">
+          <div class="training-info-row">
+            <div>
+              <h4>⚡ Continuous Reinforcement Learning & Trap Calibration</h4>
+              <small>पिछले 5-दिनों के Real Intraday Data, Support Bounces और Traps के आधार पर AI Model को Train करें</small>
+            </div>
+            <div class="training-btn-group" style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+              <button id="trainModelBtn" class="btn btn-primary-glow" title="Train currently selected symbol">
+                ⚡ Train Current Stock (<span id="trainCurrentSymLabel">NIFTY</span>)
+              </button>
+              <button id="trainAllModelsBtn" class="btn btn-success-glow" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; font-size: 0.85rem; font-weight: 700; padding: 0.55rem 1.15rem; border-radius: 8px; cursor: pointer; box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); transition: all 0.2s ease;" title="1-Click: Retrain all stocks & resolve 100% failure bank mistakes">
+                🌐 Master Train All Assets (100% Traps Solve)
+              </button>
+            </div>
+          </div>
+          <div id="trainingStatusFeedback" class="training-feedback hidden">
+            <!-- Training progress and calibrated weights feedback -->
+          </div>
+        </div>
+
+        <!-- Adaptive Rules Checklist -->
+        <div class="adaptive-rules-box">
+          <h4>🛠️ AI ने गलतियों से क्या नया सीखा (Active Self-Adjusted Rules):</h4>
+          <ul id="adaptiveRulesList">
+            <!-- Dynamic Learned Rules -->
+          </ul>
+        </div>
+
+        <!-- 🚨 AI Error Black-Box & Mistakes Training Bank -->
+        <div class="failure-bank-container">
+          <div class="failure-bank-header">
+            <div class="fb-title">
+              <span class="pulse-red-dot"></span>
+              <h4>🚨 AI Mistakes & Traps Black-Box (गलतियों का रिकॉर्ड बैंक)</h4>
+            </div>
+            <div class="fb-badges">
+              <span class="fb-badge recorded">Recorded Traps: <b id="fbRecordedCount">0</b></span>
+              <span class="fb-badge resolved">Resolved in Training: <b id="fbResolvedCount">0</b></span>
+            </div>
+          </div>
+          <small class="fb-subtext">हर गलत प्रिडिक्शन और ट्रैप का पूरा ब्लैक-बॉक्स स्नैपशॉट यहाँ रिकॉर्ड होता है ताकि AI इसे दोबारा न दोहराए</small>
+          <div class="failure-bank-list" id="failureBankList">
+            <!-- Dynamic Failure Records -->
+          </div>
+        </div>
+
+        <!-- Historical Audit Log Breakdown -->
+        <div class="audit-history-section">
+          <h4>📋 Recent Forecast Post-Mortem Audits (Kyu Galat / Sahi Hua):</h4>
+          <div class="audit-cards-list" id="auditCardsList">
+            <!-- Dynamic Audit Cards -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 📰 NEWS IMPACT & FUNDAMENTAL CATALYSTS RADAR -->
+      <div class="catalysts-news-grid">
+        <div class="catalyst-card">
+          <div class="catalyst-card-header">
+            <h3>🏢 शेयर को इफ़ेक्ट करने वाले मुख्य फैक्टर्स</h3>
+            <span class="sector-badge" id="stockSectorBadge">Energy & Telecom</span>
+          </div>
+          <div class="factors-list" id="factorsList">
+            <!-- Dynamic Key Factors -->
+          </div>
+        </div>
+
+        <div class="news-sentiment-card">
+          <div class="catalyst-card-header">
+            <h3>📰 Live News Sentiment & Headlines</h3>
+            <span class="sentiment-pill" id="newsSentimentPill">Scanning News...</span>
+          </div>
+          <div class="news-list" id="newsList">
+            <!-- Dynamic Live Headlines -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Technical Indicators Dashboard -->
+      <div class="indicators-grid">
+        <div class="metric-card">
+          <span class="metric-label">RSI (14-Period)</span>
+          <span class="metric-val" id="metricRsi">--</span>
+          <span class="metric-sub" id="rsiStatus">Neutral</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">VWAP Level</span>
+          <span class="metric-val" id="metricVwap">₹--</span>
+          <span class="metric-sub" id="vwapStatus">--</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">EMA 9 / EMA 21</span>
+          <span class="metric-val" id="metricEma">₹-- / ₹--</span>
+          <span class="metric-sub" id="emaStatus">--</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">ATR (Volatility)</span>
+          <span class="metric-val" id="metricAtr">₹--</span>
+          <span class="metric-sub">Dynamic SL Buffer</span>
+        </div>
+      </div>
+
+      <!-- Pivot Points Support / Resistance Table -->
+      <div class="pivots-section">
+        <h3>🎯 Today's Pivot Support & Resistance Levels</h3>
+        <div class="pivots-grid">
+          <div class="pivot-pill r2"><small>R2 (Major Res)</small><span id="pivotR2">₹0.00</span></div>
+          <div class="pivot-pill r1"><small>R1 (Res)</small><span id="pivotR1">₹0.00</span></div>
+          <div class="pivot-pill pp"><small>PP (Pivot)</small><span id="pivotPP">₹0.00</span></div>
+          <div class="pivot-pill s1"><small>S1 (Support)</small><span id="pivotS1">₹0.00</span></div>
+          <div class="pivot-pill s2"><small>S2 (Major Sup)</small><span id="pivotS2">₹0.00</span></div>
+        </div>
+      </div>
+
+      <!-- 🤖 AUTONOMOUS AI TRADING AGENT & TIME-WINDOW RADAR -->
+      <div class="auto-trader-panel-card">
+        <div class="auto-trader-header">
+          <div class="at-title-area">
+            <div class="agent-avatar-pulse">🤖</div>
+            <div>
+              <h3>Autonomous AI Trading Agent (ऑटो-ट्रेडिंग एजेंट)</h3>
+              <small>यह AI एजेंट आपके बदले में सिर्फ हाई-कनविक्शन (75%+ Clarity) ट्रेड्स लेगा और गलत समय पर ट्रेड ब्लॉक करेगा</small>
+            </div>
+          </div>
+          <div class="at-controls">
+            <span class="agent-status-badge paused" id="agentStatusBadge">⏸️ Agent: PAUSED</span>
+            <button id="agentToggleBtn" class="btn btn-agent-toggle">⚡ Activate Auto-Trader</button>
+          </div>
+        </div>
+
+        <!-- Optimal Time-Window Radar -->
+        <div class="time-window-radar-box">
+          <div class="twr-header">
+            <div class="twr-current-window">
+              <span class="twr-label">🕒 Current Market Session & Win-Probability:</span>
+              <div class="twr-badge-row">
+                <span class="twr-pill" id="currentWindowPill">⭐ Scanning Session...</span>
+                <span class="twr-winrate" id="currentWindowWinRate">Win Rate: --%</span>
+              </div>
+            </div>
+            <div class="twr-best-upcoming">
+              <small>Best Upcoming Time Window:</small>
+              <b id="bestUpcomingWindowText">09:30 AM - 10:45 AM</b>
+            </div>
+          </div>
+
+          <div class="twr-advice-box" id="twrAdviceHindi">
+            💡 <strong>टाइमिंग गाइडेंस:</strong> AI मार्केट सेशन के अनुसार सबसे सुरक्षित समय पर ट्रेड करेगा और लंच चॉप ज़ोन में ट्रेड्स ब्लॉक रखेगा।
+          </div>
+
+          <!-- Hourly Time-to-Trade Heatmap -->
+          <div class="hourly-heatmap-container">
+            <div class="heatmap-title">📊 Hourly Win-Rate & Session Probability Heatmap (किस समय ट्रेड करना है):</div>
+            <div class="hourly-heatmap-grid" id="hourlyHeatmapGrid">
+              <!-- Dynamic Heatmap Bars -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Real-Time Agent Decision Feed -->
+        <div class="agent-terminal-box">
+          <div class="terminal-header">
+            <span>💻 Live Autonomous Agent Decision Feed & Trailing SL Terminal</span>
+            <span class="terminal-dot"></span>
+          </div>
+          <div class="agent-logs-list" id="agentLogsList">
+            <!-- Dynamic Agent Decision Logs -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 🧪 SAMEER AI: HISTORICAL BACKTESTING & DATE SELECTOR LAB -->
+      <div class="backtest-lab-card" id="backtestLabSection">
+        <div class="backtest-header">
+          <div class="bt-title-area">
+            <span class="bt-icon">🧪</span>
+            <div>
+              <h3>Sameer AI Backtest &amp; Historical Simulation Lab</h3>
+              <small>किसी भी पिछली तारीख (Date) का 09:15 AM से 03:30 PM तक बार-दर-बार टेस्ट व प्रॉफिट/लॉस रिपोर्ट</small>
+            </div>
+          </div>
+          <span class="bt-status-badge" id="btStatusBadge">Ready for Simulation</span>
+        </div>
+
+        <!-- Backtest Controls & Date Selector Toolbar -->
+        <div class="bt-controls-toolbar">
+          <div class="bt-control-group">
+            <label for="btStockSelect">📌 Select Stock / Index:</label>
+            <select id="btStockSelect" class="bt-select">
+              <option value="NIFTY" selected>⭐ NIFTY 50</option>
+              <option value="BANKNIFTY">🏦 BANK NIFTY</option>
+              <option value="NIFTYBEES">📈 NIFTYBEES (ETF)</option>
+              <option value="TATASTEEL">🏭 TATASTEEL (Tata Steel)</option>
+              <option value="RELIANCE">RELIANCE</option>
+              <option value="ICICIBANK">ICICIBANK</option>
+              <option value="HDFCBANK">HDFCBANK</option>
+              <option value="SBIN">SBIN</option>
+              <option value="TATAMOTORS">TATAMOTORS</option>
+            </select>
+          </div>
+
+          <div class="bt-control-group">
+            <label for="btDateSelect">📅 Select Trading Date (तारीख):</label>
+            <select id="btDateSelect" class="bt-select">
+              <option value="2026-09-04" selected>04 Sep 2026 (Friday) — Last Session</option>
+              <option value="2026-09-03">03 Sep 2026 (Thursday)</option>
+              <option value="2026-09-02">02 Sep 2026 (Wednesday)</option>
+              <option value="2026-09-01">01 Sep 2026 (Tuesday)</option>
+              <option value="2026-08-28">28 Aug 2026 (Friday)</option>
+              <option value="2026-08-27">27 Aug 2026 (Thursday)</option>
+            </select>
+          </div>
+
+          <div class="bt-control-group">
+            <label for="btTpSelect">🎯 Profit Capture (Target):</label>
+            <select id="btTpSelect" class="bt-select">
+              <option value="1.5">1:1.5 Risk-Reward (Quick)</option>
+              <option value="2.0" selected>1:2.0 Risk-Reward (Optimal)</option>
+              <option value="2.5">1:2.5 Risk-Reward (Big Runner)</option>
+            </select>
+          </div>
+
+          <div class="bt-control-group">
+            <label for="btSlSelect">🛡️ Stop-Loss Buffer:</label>
+            <select id="btSlSelect" class="bt-select">
+              <option value="1.0">Tight (1.0x ATR)</option>
+              <option value="1.2" selected>Standard (1.2x ATR)</option>
+              <option value="1.5">Wide (1.5x ATR)</option>
+            </select>
+          </div>
+
+          <div class="bt-control-group">
+            <label for="btQtyInput">📦 Quantity (मात्रा / Lots):</label>
+            <div class="bt-qty-input-wrap" style="display: flex; align-items: center; gap: 0.35rem;">
+              <input type="number" id="btQtyInput" class="bt-select bt-qty-input" value="25" min="1" max="50000" step="1" style="width: 90px; text-align: center; font-weight: 700; color: #38bdf8; font-family: 'JetBrains Mono', monospace;" title="Enter trade quantity or lot size">
+              <select id="btQtyPresetSelect" class="bt-select" style="width: 120px; font-size: 0.78rem;" title="Quick Lot Presets">
+                <option value="25" selected>1 Lot (25)</option>
+                <option value="50">2 Lots (50)</option>
+                <option value="100">4 Lots (100)</option>
+                <option value="250">10 Lots (250)</option>
+                <option value="500">20 Lots (500)</option>
+                <option value="custom">Custom...</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="bt-control-group bt-action-group">
+            <label>&nbsp;</label>
+            <button id="runBacktestBtn" class="btn btn-primary btn-run-bt">🚀 Run Backtest Now</button>
+          </div>
+        </div>
+
+        <!-- Backtest KPI Scorecards Grid -->
+        <div class="bt-kpis-grid" id="btKpisGrid">
+          <div class="bt-kpi-card profit-card">
+            <small>💰 Total Net P&amp;L</small>
+            <span class="bt-kpi-val" id="btNetPnl">₹0.00</span>
+            <span class="bt-kpi-sub" id="btProfitFactor">Profit Factor: --</span>
+          </div>
+          <div class="bt-kpi-card">
+            <small>🎯 AI Win Rate</small>
+            <span class="bt-kpi-val" id="btWinRate">0.0%</span>
+            <span class="bt-kpi-sub" id="btTradesRatio">0 Wins / 0 Losses</span>
+          </div>
+          <div class="bt-kpi-card veto-card">
+            <small>🛡️ Traps Avoided (AI Veto)</small>
+            <span class="bt-kpi-val" id="btTrapsAvoided">0 Traps</span>
+            <span class="bt-kpi-sub" id="btLossPrevented">₹0 Loss Prevented</span>
+          </div>
+          <div class="bt-kpi-card">
+            <small>⭐ Best Winning Trade</small>
+            <span class="bt-kpi-val" id="btBestTrade">+₹0.00</span>
+            <span class="bt-kpi-sub" id="btWorstTrade">Worst: ₹0.00</span>
+          </div>
+        </div>
+
+        <!-- Sameer AI Hindi Performance Review Banner -->
+        <div class="bt-ai-summary-box" id="btAiSummaryBox">
+          <div class="bt-ai-summary-title">🤖 <strong>Sameer AI Daily Backtest Analysis:</strong></div>
+          <p id="btAiSummaryText">तारीख चुनें और "Run Backtest Now" दबाएं — समीर AI पूरे दिन का सिम्युलेशन रन करेगा।</p>
+        </div>
+
+        <!-- Backtest Candlestick Chart View Container -->
+        <div class="bt-chart-wrapper">
+          <div class="bt-chart-header">
+            <div>
+              <h4>📊 Replay Candlestick Chart with AI Buy/Sell &amp; 1:2 R:R Markers</h4>
+              <span class="bt-chart-note">Markers: 🟢 Buy Entry | 🔴 Sell Entry | ⭐ Trailed SL | 🎯 Target 2 Exit (Zoom/Scroll enabled)</span>
+            </div>
+            <!-- Interactive Zoom & Indian Time Toolbar -->
+            <div class="bt-zoom-toolbar">
+              <span class="bt-zoom-badge" id="btZoomBadge" title="Current Zoom Level">🔍 1.0x (100%)</span>
+              <button class="btn-bt-zoom" id="btZoomInBtn" title="Zoom In (or Scroll Wheel Up)">➕ Zoom In</button>
+              <button class="btn-bt-zoom" id="btZoomOutBtn" title="Zoom Out (or Scroll Wheel Down)">➖ Zoom Out</button>
+              <button class="btn-bt-zoom" id="btPanLeftBtn" title="Pan Left (◀)">◀ Left</button>
+              <button class="btn-bt-zoom" id="btPanRightBtn" title="Pan Right (▶)">Right ▶</button>
+              <button class="btn-bt-zoom btn-bt-reset" id="btResetViewBtn" title="Reset View to 100% Full Day">🔄 Reset (Full Day)</button>
+              <span class="bt-time-badge" title="All candles and trade markers displayed in Indian Standard Time">🇮🇳 Indian Time (IST)</span>
+            </div>
+          </div>
+          <div id="btChartContainer" class="bt-chart-canvas"></div>
+        </div>
+
+        <!-- 📍 VISUAL TRADE JOURNEYS: EXACT ENTRY CANDLE TO EXIT CANDLE INSPECTOR -->
+        <div class="bt-journeys-wrapper" id="btJourneysWrapper">
+          <div class="bt-journeys-header">
+            <h4>📍 Trade Journeys: Exact Entry Candle ➔ Exit Candle Breakdown (ट्रेड एंट्री से एग्जिट तक का पूरा रास्ता)</h4>
+            <span class="bt-journeys-subtitle">हर ट्रेड की एंट्री कैंडल, होल्डिंग समय, टार्गेट/स्टॉपलॉस व एग्जिट कैंडल का लाइव ब्रेकडाउन</span>
+          </div>
+          <div class="bt-journeys-list" id="btJourneysList">
+            <!-- Dynamic Trade Journey Cards rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Backtest Trade Execution Ledger Table -->
+        <div class="bt-ledger-wrapper">
+          <h4>📋 Complete Trade-by-Trade Execution Ledger</h4>
+          <div class="table-responsive">
+            <table class="positions-table bt-ledger-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Entry Time</th>
+                  <th>Exit Time</th>
+                  <th>Type</th>
+                  <th>Pattern Trigger</th>
+                  <th>Entry Price</th>
+                  <th>Exit Price</th>
+                  <th>Exit Reason</th>
+                  <th>P&amp;L (₹)</th>
+                </tr>
+              </thead>
+              <tbody id="btLedgerTableBody">
+                <tr>
+                  <td colspan="9" class="empty-state">No backtest run yet. Select a date above and click "Run Backtest Now"!</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Traps Avoided Table -->
+        <div class="bt-traps-wrapper" id="btTrapsWrapper">
+          <h4>🛡️ Traps &amp; Fakeouts Avoided by AI Veto (बचाए गए नुकसान)</h4>
+          <div class="table-responsive">
+            <table class="positions-table bt-traps-table">
+              <thead>
+                <tr>
+                  <th>Time (IST)</th>
+                  <th>Attempted Action</th>
+                  <th>Pattern Trigger</th>
+                  <th>Price</th>
+                  <th>AI Veto Block Reason</th>
+                  <th>Saved Loss Est.</th>
+                </tr>
+              </thead>
+              <tbody id="btTrapsTableBody">
+                <tr>
+                  <td colspan="6" class="empty-state">No traps recorded for this session.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Virtual Paper Trading Portfolio & Live P&L -->
+      <div class="paper-trading-card">
+        <div class="paper-header">
+          <div>
+            <h3>💼 Paper Trading Portfolio &amp; 1-Click Profit Capture</h3>
+            <small>Live open positions, 1-Click "🎯 Capture Profit Now" aur "🛡️ Trail SL to Cost" controls</small>
+          </div>
+          <div class="virtual-balance">
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.2rem;">
+              <div style="display: flex; align-items: center; gap: 0.4rem;">
+                <label for="paperBalancePresetSelect" style="font-size: 0.72rem; color: var(--text-muted);">Budget:</label>
+                <select id="paperBalancePresetSelect" class="btn-outline-sm" style="background: rgba(255,255,255,0.06); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.2rem 0.4rem; font-size: 0.78rem;">
+                  <option value="1000">₹1,000 (Small Budget Mode)</option>
+                  <option value="2000">₹2,000 (Starter Mode)</option>
+                  <option value="5000">₹5,000 (Pro Mode)</option>
+                  <option value="10000">₹10,000 (Trader Mode)</option>
+                  <option value="1000000" selected>₹10,00,000 (Demo Fund)</option>
+                </select>
+                <button id="resetAccountBtn" class="btn btn-outline-sm" title="Reset Wallet Balance">🔄 Reset</button>
+              </div>
+              <div style="display: flex; gap: 0.8rem; align-items: baseline;">
+                <span>Available Cash: <b id="virtualCashDisplay">₹10,00,000.00</b></span>
+                <span style="font-size:0.75rem; color: var(--text-muted);">Unrealized P&amp;L: <b id="totalPortfolioPnl" style="font-family:'JetBrains Mono',monospace;">₹0.00</b></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="positions-table">
+            <thead>
+              <tr>
+                <th>Stock</th>
+                <th>Type</th>
+                <th>Qty</th>
+                <th>Entry Price</th>
+                <th>Live Price</th>
+                <th>SL &amp; Target</th>
+                <th>Unrealized P&amp;L</th>
+                <th>1-Click Actions</th>
+              </tr>
+            </thead>
+            <tbody id="positionsTableBody">
+              <tr>
+                <td colspan="8" class="empty-state">No open positions. Use the Buy/Sell buttons above to place a paper trade!</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="toast">Alert message</div>
+
+  <!-- 💬 AI Chat Assistant Floating Widget -->
+  <div id="chatWidget" class="chat-widget">
+    <!-- Chat Toggle Button -->
+    <button id="chatToggleBtn" class="chat-toggle-btn" title="AI Trading Assistant से बात करें">
+      <span id="chatToggleIcon">💬</span>
+      <span class="chat-unread-badge hidden" id="chatUnreadBadge">1</span>
+    </button>
+
+    <!-- Chat Panel -->
+    <div id="chatPanel" class="chat-panel hidden">
+      <div class="chat-panel-header">
+        <div class="chat-header-left">
+          <div class="chat-ai-avatar">🤖</div>
+          <div>
+            <div class="chat-ai-name">Sameer AI (समीर ट्रेडिंग एनालिस्ट)</div>
+            <div class="chat-ai-status" id="chatAiStatus">🟢 Online — Live Market Active</div>
+          </div>
+        </div>
+        <button id="chatCloseBtn" class="chat-close-btn">✕</button>
+      </div>
+
+      <div class="chat-messages" id="chatMessages">
+        <!-- Welcome message will be injected by JS -->
+      </div>
+
+      <div class="chat-quick-questions">
+        <span class="cq-label">Quick:</span>
+        <button class="cq-btn" data-q="Kal subah 9:15 par kya karna hai?">🌅 कल 9:15 गेमप्लान</button>
+        <button class="cq-btn" data-q="Put (PE) ka matlab buy karna hai ya sell?">❓ Put मतलब Buy या Sell?</button>
+        <button class="cq-btn" data-q="Mere paas 1000 rupaye hain, kis stock me trade lu?">💰 ₹1,000 में बेस्ट स्टॉक</button>
+        <button class="cq-btn" data-q="Option chain PCR ka kya matlab hai?">📊 PCR का मतलब?</button>
+        <button class="cq-btn" data-q="Sameer AI ne trade veto kyu lagaya?">🛡️ Veto क्यों लगा?</button>
+        <button class="cq-btn" data-q="AI ne aaj kya sikha aur memory kaisa hai?">🧠 AI लर्निंग रिपोर्ट</button>
+      </div>
+
+      <div class="chat-input-area">
+        <textarea id="chatInput" class="chat-input" placeholder="Kuch bhi pucho — NIFTY, RSI, trend, trade..." rows="1"></textarea>
+        <button id="chatSendBtn" class="chat-send-btn">➤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔔 SMART ALERTS & EXIT NOTIFIER MODAL -->
+  <div id="alertCenterModal" class="alert-center-modal hidden">
+    <div class="alert-modal-backdrop" id="alertModalBackdrop"></div>
+    <div class="alert-modal-content">
+      <div class="alert-modal-header">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <span style="font-size: 1.5rem;">🔔</span>
+          <div>
+            <h3 style="margin: 0; font-size: 1.05rem; color: #38bdf8;">Smart Trade Alerts & Auto-Exit Notifier</h3>
+            <small style="color: var(--text-muted); font-size: 0.72rem;">BUY/SELL Signals, Target Reached, Stop Loss & Price Notifications</small>
+          </div>
+        </div>
+        <button id="closeAlertModalBtn" class="chat-close-btn" style="color: #94a3b8; font-size: 1.2rem; cursor: pointer; background:none; border:none;">✕</button>
+      </div>
+
+      <!-- Quick Toggles Row -->
+      <div class="alert-toggles-bar">
+        <button id="toggleDesktopPermBtn" class="alert-toggle-btn">
+          💻 Desktop Alerts: <span id="desktopPermStatus" style="font-weight: 700; color: #fbbf24;">Request Permission</span>
+        </button>
+        <button id="toggleSoundBtn" class="alert-toggle-btn active">
+          🔊 Audio Chimes: <span id="soundStatusText" style="font-weight: 700; color: #34d399;">ON</span>
+        </button>
+        <button id="testAlertChimeBtn" class="alert-toggle-btn" style="border-color: #38bdf8; color: #38bdf8;">
+          🎵 Test Sound Chime
+        </button>
+      </div>
+
+      <!-- Notification Rules & Custom Alert Creation Form -->
+      <div class="alert-builder-box">
+        <div style="font-size: 0.82rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.5rem;">
+          ➕ नया Alert Rule जोड़ें (e.g. RELIANCE BUY / SELL / Target Exit):
+        </div>
+        <div class="alert-builder-grid">
+          <select id="alertSymbolSelect" class="alert-input">
+            <option value="RELIANCE">RELIANCE</option>
+            <option value="NIFTY">NIFTY 50</option>
+            <option value="BANKNIFTY">BANK NIFTY</option>
+            <option value="TCS">TCS</option>
+            <option value="INFY">INFY</option>
+            <option value="ICICIBANK">ICICIBANK</option>
+            <option value="HDFCBANK">HDFCBANK</option>
+            <option value="SBIN">SBIN</option>
+            <option value="TATAMOTORS">TATAMOTORS</option>
+            <option value="TATASTEEL">TATASTEEL</option>
+          </select>
+
+          <select id="alertTypeSelect" class="alert-input">
+            <option value="SIGNAL_ENTRY">🟢 Entry: जब BUY या SELL Signal बने</option>
+            <option value="POSITION_EXIT">🎯 Exit: Target Hit या Stop Loss Hit होने पर</option>
+            <option value="PRICE_ABOVE">📈 Price >= Level (Breakout / Target)</option>
+            <option value="PRICE_BELOW">📉 Price <= Level (Support / SL)</option>
+          </select>
+
+          <input type="number" id="alertTargetPrice" class="alert-input" placeholder="Price ₹ (for Price alerts)" step="0.5" style="display: none;">
+
+          <button id="createAlertRuleBtn" class="btn" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; font-weight: 700; font-size: 0.8rem; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">
+            + Alert सेट करें
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Rules Section -->
+      <div class="active-rules-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+          <small style="font-weight: 700; color: #94a3b8; font-size: 0.75rem;">सक्रिय Alert Rules (Active Rules):</small>
+          <small id="activeRulesCount" style="color: #38bdf8; font-size: 0.72rem;">0 Rules Active</small>
+        </div>
+        <div id="activeRulesList" class="active-rules-list">
+          <!-- Active rule pills will be rendered by JS -->
+        </div>
+      </div>
+
+      <!-- Triggered Alerts Log / Feed -->
+      <div class="triggered-feed-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+          <small style="font-weight: 700; color: #94a3b8; font-size: 0.75rem;">🔔 Triggered Alerts History (आज के Alerts):</small>
+          <button id="clearAlertsHistoryBtn" style="background: none; border: none; color: #64748b; font-size: 0.7rem; cursor: pointer;">Clear History 🗑️</button>
+        </div>
+        <div id="triggeredAlertsFeed" class="triggered-feed-list">
+          <div style="color: #64748b; font-size: 0.78rem; text-align: center; padding: 1rem;">
+            यहाँ नए BUY, SELL और EXIT Alerts लाइव दिखाई देंगे।
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=3"></script>
+</body>
+</html>

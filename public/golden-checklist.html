@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>30-सेकंड गोल्डन चेकलिस्ट & Footprint Advantage | Sameer AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #070a12;
+      --bg-card: rgba(16, 23, 41, 0.95);
+      --border-color: rgba(255, 255, 255, 0.1);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --color-green: #10b981;
+      --color-red: #ef4444;
+      --color-cyan: #06b6d4;
+      --color-amber: #f59e0b;
+      --color-purple: #a855f7;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      padding: 1.5rem 1rem 3rem;
+    }
+
+    .container {
+      max-width: 1050px;
+      margin: 0 auto;
+    }
+
+    /* Header & Action Bar */
+    .top-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .back-btn, .print-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1.15rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .back-btn {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+    }
+    .back-btn:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+    .print-btn {
+      background: linear-gradient(135deg, #0284c7, #38bdf8);
+      color: #fff;
+      border: none;
+      box-shadow: 0 4px 15px rgba(2, 132, 199, 0.35);
+    }
+    .print-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
+    }
+
+    /* Main Poster Card */
+    .poster-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      margin-bottom: 2rem;
+    }
+
+    .poster-header {
+      padding: 1.5rem 2rem;
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(168, 85, 247, 0.15));
+      border-bottom: 1px solid var(--border-color);
+      text-align: center;
+    }
+    .poster-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #38bdf8, #c084fc, #fbbf24);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.4rem;
+    }
+    .poster-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+    }
+
+    /* Poster Layout Grid */
+    .poster-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      padding: 1.5rem 2rem;
+    }
+    @media (max-width: 820px) {
+      .poster-body { grid-template-columns: 1fr; }
+    }
+
+    .poster-image-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .poster-img {
+      width: 100%;
+      max-width: 440px;
+      border-radius: 12px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .checklist-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .rule-box {
+      background: rgba(10, 15, 29, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-left: 4px solid var(--box-accent, #38bdf8);
+      border-radius: 10px;
+      padding: 1rem;
+      transition: all 0.2s ease;
+    }
+    .rule-box:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      background: rgba(15, 23, 42, 0.85);
+    }
+    .rb-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.4rem;
+    }
+    .rb-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .rb-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .rule-box p {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .rule-box strong { color: #f1f5f9; }
+
+    /* Footprint Advantage Breakdown Section */
+    .footprint-help-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .sec-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #38bdf8;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .advantages-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+    .adv-card {
+      background: rgba(10, 15, 29, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+    .adv-header {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .adv-card p {
+      font-size: 0.83rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    /* Print Specific Styling */
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+        padding: 0 !important;
+      }
+      .top-actions, .no-print { display: none !important; }
+      .poster-card, .footprint-help-section {
+        background: #fff !important;
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        color: #000 !important;
+        margin-bottom: 1rem !important;
+      }
+      .poster-title {
+        background: none !important;
+        -webkit-text-fill-color: #000 !important;
+        color: #000 !important;
+      }
+      .rule-box, .adv-card {
+        background: #f8fafc !important;
+        border: 1px solid #ddd !important;
+        color: #000 !important;
+      }
+      .rule-box strong, .rb-title, .adv-header {
+        color: #000 !important;
+      }
+      .rule-box p, .adv-card p, .poster-subtitle {
+        color: #333 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Top Action Buttons -->
+    <div class="top-actions">
+      <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+        <a href="/footprint.html" class="back-btn">🔬 Footprint Terminal</a>
+        <a href="/" class="back-btn">🏠 Main Dashboard</a>
+        <a href="/option-chain.html" class="back-btn">📊 Option Chain</a>
+      </div>
+      <button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+    </div>
+
+    <!-- Main Cheat Sheet Poster Card -->
+    <div class="poster-card">
+      <div class="poster-header">
+        <h1 class="poster-title">🎯 30-SECOND GOLDEN INTRADAY CHECKLIST</h1>
+        <div class="poster-subtitle">ट्रेड लेने से पहले 30 सेकंड में इन 3 सिग्नल्स पर टिक (✔) लगाएं — हाई-प्रोबेबिलिटी ट्रेडिंग फॉर्मूला</div>
+      </div>
+
+      <div class="poster-body">
+        <!-- Infographic Image -->
+        <div class="poster-image-col">
+          <img src="/golden-checklist.jpg" alt="30-Second Golden Checklist Infographic" class="poster-img">
+          <div style="margin-top:0.75rem; font-size:0.75rem; color:var(--text-muted); text-align:center;">
+            👆 राइट क्लिक करके "Save image as..." करके मोबाइल गैलरी में भी सेव कर सकते हैं।
+          </div>
+        </div>
+
+        <!-- Rules Breakdown -->
+        <div class="checklist-col">
+          <!-- Rule 1 -->
+          <div class="rule-box" style="--box-accent: #38bdf8;">
+            <div class="rb-header">
+              <span class="rb-title">1️⃣ Option Chain PCR (Put-Call Ratio)</span>
+              <span class="rb-badge" style="background:rgba(56,189,248,0.2); color:#38bdf8;">BIG PLAYERS</span>
+            </div>
+            <p>
+              • <strong>PCR &gt; 1.15:</strong> पुट राइटर्स मजबूत हैं। नीचे सपोर्ट तगड़ा है, बड़े प्लेयर्स मार्केट को गिरने नहीं देंगे ➔ <strong>CALL (CE) की दिशा</strong>。<br>
+              • <strong>PCR &lt; 0.85:</strong> भारी कॉल राइटिंग है। ऊपर रेजिस्टेंस मजबूत है, मार्केट दबाव में रहेगा ➔ <strong>PUT (PE) की दिशा</strong>。
+            </p>
+          </div>
+
+          <!-- Rule 2 -->
+          <div class="rule-box" style="--box-accent: #f59e0b;">
+            <div class="rb-header">
+              <span class="rb-title">2️⃣ VWAP &amp; EMA Trend Filter</span>
+              <span class="rb-badge" style="background:rgba(245,158,11,0.2); color:#fbbf24;">TREND RULE</span>
+            </div>
+            <p>
+              • <strong>Price &gt; VWAP:</strong> मार्केट में बायर्स का दबदबा है। कभी भी PUT मत खरीदें, <strong>केवल CALL (CE) ढूंढें</strong>。<br>
+              • <strong>Price &lt; VWAP:</strong> मार्केट सेलर्स के हाथ में है। बॉटम फिशिंग मत करें, <strong>केवल PUT (PE) ढूंढें</strong>।
+            </p>
+          </div>
+
+          <!-- Rule 3 -->
+          <div class="rule-box" style="--box-accent: #10b981;">
+            <div class="rb-header">
+              <span class="rb-title">3️⃣ Footprint Order Flow Imbalance</span>
+              <span class="rb-badge" style="background:rgba(16,185,129,0.2); color:#34d399;">ENTRY TRIGGER</span>
+            </div>
+            <p>
+              • <strong>3 Stacked Green Imbalances (Ask &ge; 3x Bid):</strong> ऑपरेटर मार्केट ऑर्डर से बाय कर रहे हैं ➔ कैंडल क्लोज पर <strong>CALL एंट्री</strong>। Stop Loss = उस कैंडल का Low - 15 pts。<br>
+              • <strong>3 Stacked Red Imbalances (Bid &ge; 3x Ask):</strong> ऑपरेटर मार्केट ऑर्डर से बेच रहे हैं ➔ कैंडल क्लोज पर <strong>PUT एंट्री</strong>। Stop Loss = उस कैंडल का High + 15 pts।
+            </p>
+          </div>
+
+          <!-- Pro Tip Box -->
+          <div class="rule-box" style="--box-accent: #a855f7;">
+            <div class="rb-header">
+              <span class="rb-title">💡 प्रो टिप (Triple Timeframe Alignment)</span>
+              <span class="rb-badge" style="background:rgba(168,85,247,0.2); color:#c084fc;">80%+ WIN RATE</span>
+            </div>
+            <p>
+              अगर <strong>1m, 5m और 15m</strong> तीनों टाइमफ्रेम एक ही दिशा में हों और साथ में Footprint पर Stacked Imbalance बन जाए, तो उस ट्रेड के <strong>टारगेट (1:1.5 RR) हिट होने की संभावना 80% से ज्यादा</strong> होती है!
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footprint Help Breakdown Section -->
+    <div class="footprint-help-section">
+      <h2 class="sec-title">🔬 Footprint से ट्रेडिंग में क्या-क्या असली मदद मिलेगी?</h2>
+      <p style="color:var(--text-secondary); font-size:0.88rem; margin-bottom:1.5rem; line-height:1.6;">
+        साधारण कैंडल्स सिर्फ 4 चीजें दिखाती हैं: Open, High, Low, Close। वे यह <strong>छिपा लेती हैं</strong> कि कैंडल के अंदर कौन जीता। 
+        <strong>Footprint आपको कैंडल के अंदर का एक्स-रे (X-Ray) दिखाता है:</strong>
+      </p>
+
+      <div class="advantages-grid">
+        <!-- Adv 1 -->
+        <div class="adv-card">
+          <div class="adv-header" style="color:#ef4444;">
+            <span>🪤 1. Fakeout और ट्रैप से बचाव</span>
+          </div>
+          <p>
+            जब रेजिस्टेंस टूटता है, तो रिटेल ट्रेडर्स तुरंत बाय करते हैं। लेकिन Footprint पर अगर आपको दिखे कि हाई पर भारी बाय हुआ लेकिन कैंडल लाल बंद हो गई (<strong>Trapped Buyers / Absorption</strong>), तो आप ट्रैप होने से बच जाते हैं और तुरंत पुट (PE) का रिवर्सल ट्रेड ले लेते हैं।
+          </p>
+        </div>
+
+        <!-- Adv 2 -->
+        <div class="adv-card">
+          <div class="adv-header" style="color:#fbbf24;">
+            <span>🎯 2. POC (Point of Control) से परफेक्ट स्टॉप लॉस</span>
+          </div>
+          <p>
+            POC वह प्राइस है जहाँ सबसे ज्यादा कॉन्ट्रैक्ट्स का लेन-देन हुआ। जब तक प्राइस उस कैंडल के POC के ऊपर रहता है, आपका ट्रेड सुरक्षित है। आपको अंदाजे से नहीं, बल्कि सबसे मजबूत वॉल्यूम लेवल पर छोटा और सटीक 15-20 पॉइंट का स्टॉप लॉस मिल जाता है।
+          </p>
+        </div>
+
+        <!-- Adv 3 -->
+        <div class="adv-card">
+          <div class="adv-header" style="color:#06b6d4;">
+            <span>📈 3. CVD (Volume Delta) से बड़े प्लेयर्स का सच</span>
+          </div>
+          <p>
+            प्राइस ऊपर जा सकता है अगर सेलर्स पीछे हट जाएं। लेकिन अगर CVD लाइन ऊपर नहीं जा रही, तो वह मूव असली नहीं है। जब <strong>प्राइस और CVD दोनों एक साथ ऊपर भागें</strong>, तो आपको 100% कन्फर्मेशन मिल जाती है कि बड़े इंस्टीट्यूशनल बायर्स मार्केट ऑर्डर डाल रहे हैं।
+          </p>
+        </div>
+
+        <!-- Adv 4 -->
+        <div class="adv-card">
+          <div class="adv-header" style="color:#34d399;">
+            <span>🛡️ 4. Trailing SL से जीते हुए ट्रेड को हार में बदलने से बचाना</span>
+          </div>
+          <p>
+            बैंक निफ्टी में जैसे ही ट्रेड में <strong>+40 पॉइंट्स का प्रॉफिट</strong> आए, अपने Stop Loss को एंट्री प्राइस पर ट्रेल कर लें (Breakeven +5 pts)। अब वह ट्रेड कभी भी लॉस में नहीं जा सकता — या तो पूरा टारगेट मिलेगा या नो-लॉस एग्जिट!
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

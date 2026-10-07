@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sameer AI — Next-Day Opening Predictor & FII Entry Radar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0e17;
+      --bg-card: rgba(20, 27, 45, 0.85);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --color-green: #10b981;
+      --color-red: #ef4444;
+      --color-cyan: #06b6d4;
+      --color-amber: #f59e0b;
+      --color-purple: #8b5cf6;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: var(--bg-primary);
+      background-image: radial-gradient(at 0% 0%, rgba(245, 158, 11, 0.08) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.08) 0px, transparent 50%);
+      color: var(--text-primary);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      padding-bottom: 3rem;
+    }
+
+    /* Header */
+    .pm-header {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+      gap: 1rem; padding: 1rem 1.5rem;
+      background: var(--bg-card); border-bottom: 1px solid var(--border-color);
+      backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 100;
+    }
+    .pm-header-left { display: flex; align-items: center; gap: 0.85rem; }
+    .back-btn {
+      display: flex; align-items: center; gap: 0.4rem;
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border-color);
+      color: var(--text-secondary); padding: 0.4rem 0.85rem; border-radius: 8px;
+      font-size: 0.82rem; cursor: pointer; text-decoration: none; transition: all 0.2s ease;
+      font-weight: 600;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .pm-title { font-size: 1.15rem; font-weight: 700; color: #fbbf24; display: flex; align-items: center; gap: 0.4rem; }
+    .pm-subtitle { font-size: 0.72rem; color: var(--text-muted); }
+    .pm-header-right { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+    
+    .symbol-select {
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border-color);
+      color: var(--text-primary); padding: 0.45rem 0.85rem; border-radius: 8px;
+      font-size: 0.85rem; font-family: 'Outfit', sans-serif; cursor: pointer; font-weight: 600;
+    }
+    .symbol-select:focus { outline: none; border-color: #fbbf24; }
+
+    .refresh-btn {
+      background: linear-gradient(135deg, #f59e0b, #ec4899); border: none;
+      color: #fff; padding: 0.45rem 1rem; border-radius: 8px;
+      font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;
+    }
+    .refresh-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* Main Container */
+    .pm-main {
+      max-width: 1350px; margin: 0 auto; padding: 1.5rem 1.25rem;
+      display: flex; flex-direction: column; gap: 1.5rem;
+    }
+
+    /* Live CMP Hero */
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(139,92,246,0.12));
+      border: 1px solid rgba(245,158,11,0.3); border-radius: 16px; padding: 1.25rem 1.75rem;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    }
+    .hero-symbol { font-size: 1.35rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 0.5rem; }
+    .hero-cmp { font-size: 2.2rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: #fbbf24; }
+    .hero-meta { display: flex; gap: 1.75rem; flex-wrap: wrap; }
+    .meta-item { display: flex; flex-direction: column; align-items: center; }
+    .meta-item small { font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+    .meta-item b { font-size: 1rem; font-family: 'JetBrains Mono', monospace; }
+
+    /* Section Cards */
+    .pm-section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 1.35rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
+    .pm-card-header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.75rem;
+    }
+    .pm-card-title {
+      font-size: 1.05rem; font-weight: 700; color: #f1f5f9; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .pm-card-title small { font-size: 0.72rem; color: var(--text-muted); font-weight: 400; display: block; }
+
+    /* Gap Opening Predictor Grid */
+    .gap-stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.85rem;
+    }
+    .gap-stat-box {
+      background: rgba(0,0,0,0.3); border: 1px solid var(--border-color);
+      border-radius: 10px; padding: 0.85rem 1rem; text-align: center;
+    }
+    .gap-stat-box small { font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 0.25rem; }
+    .gap-stat-box b { font-family: 'JetBrains Mono', monospace; font-size: 1.25rem; color: #f1f5f9; }
+    .gap-dir-badge {
+      font-size: 0.82rem; font-weight: 800; padding: 0.35rem 0.85rem; border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace; text-transform: uppercase;
+    }
+    .gap-dir-badge.green { background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid #10b981; }
+    .gap-dir-badge.red { background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid #ef4444; }
+    .gap-dir-badge.amber { background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid #f59e0b; }
+
+    .cues-row {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0.65rem;
+    }
+    .cue-pill {
+      background: rgba(0,0,0,0.25); border: 1px dashed rgba(255,255,255,0.12);
+      border-radius: 8px; padding: 0.6rem 0.85rem; font-size: 0.8rem; color: #cbd5e1;
+    }
+
+    .gameplan-box {
+      background: rgba(0,0,0,0.35); border-left: 3px solid #fbbf24; border-radius: 0 8px 8px 0;
+      padding: 0.85rem 1.15rem; font-size: 0.88rem; line-height: 1.5; color: #cbd5e1;
+    }
+
+    /* FII Entry Timings Grid */
+    .fii-windows-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 1rem;
+    }
+    .fii-window-card {
+      background: rgba(0,0,0,0.3); border: 1px solid var(--border-color);
+      border-radius: 12px; padding: 1rem 1.15rem; display: flex; flex-direction: column; gap: 0.6rem;
+      position: relative; overflow: hidden;
+    }
+    .fii-window-card.highlight {
+      border-color: rgba(139, 92, 246, 0.5);
+      box-shadow: 0 0 15px rgba(139, 92, 246, 0.15);
+    }
+    .fii-window-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, #38bdf8, #8b5cf6);
+    }
+    .fw-top { display: flex; justify-content: space-between; align-items: center; }
+    .fw-time { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; color: #38bdf8; }
+    .fw-impact { font-size: 0.72rem; padding: 0.15rem 0.5rem; border-radius: 4px; background: rgba(245,158,11,0.2); color: #fbbf24; font-weight: 700; }
+    .fw-title { font-size: 0.92rem; font-weight: 700; color: #fff; }
+    .fw-activity { font-size: 0.78rem; color: #94a3b8; line-height: 1.4; }
+    .fw-rule {
+      background: rgba(255,255,255,0.03); border-left: 2px solid #a855f7;
+      padding: 0.4rem 0.6rem; font-size: 0.75rem; color: #cbd5e1; border-radius: 0 4px 4px 0;
+    }
+
+    /* Post-FII Reactions Table / Cards */
+    .reactions-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem;
+    }
+    .reaction-card {
+      background: rgba(0,0,0,0.3); border: 1px solid var(--border-color);
+      border-radius: 12px; padding: 1.15rem; display: flex; flex-direction: column; gap: 0.65rem;
+    }
+    .reaction-card.buy { border-color: rgba(16,185,129,0.35); }
+    .reaction-card.sell { border-color: rgba(239,68,68,0.35); }
+    .reaction-card.neutral { border-color: rgba(245,158,11,0.35); }
+
+    .rc-header { display: flex; justify-content: space-between; align-items: center; }
+    .rc-title { font-weight: 700; font-size: 0.95rem; color: #fff; }
+    .rc-move { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 1rem; }
+    .rc-move.green { color: #34d399; }
+    .rc-move.red { color: #f87171; }
+    .rc-move.amber { color: #fbbf24; }
+
+    .rc-desc { font-size: 0.8rem; color: #94a3b8; line-height: 1.45; }
+    .rc-advice {
+      background: rgba(255,255,255,0.03); border-radius: 6px; padding: 0.5rem 0.75rem;
+      font-size: 0.78rem; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.06);
+    }
+    .rc-advice strong { color: #38bdf8; }
+
+    .toast {
+      position: fixed; bottom: 20px; right: 20px;
+      background: rgba(15, 23, 42, 0.95); border: 1px solid var(--border-color);
+      color: #fff; padding: 0.75rem 1.25rem; border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5); font-size: 0.85rem;
+      display: none; z-index: 1000;
+    }
+    .toast.show { display: block; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="pm-header">
+    <div class="pm-header-left">
+      <a href="/index.html" class="back-btn">⬅️ Main Dashboard</a>
+      <a href="/footprint.html" class="back-btn" style="background:rgba(168,85,247,0.15);border-color:rgba(168,85,247,0.4);color:#c084fc;">🔬 Footprint</a>
+      <a href="/banknifty-radar.html" class="back-btn" style="background:rgba(16,185,129,0.15);border-color:rgba(16,185,129,0.4);color:#34d399;">🎯 10-11 AM Radar</a>
+      <div>
+        <div class="pm-title">🌅 Next-Day Opening Predictor &amp; FII Entry Radar</div>
+        <div class="pm-subtitle">Pre-Market Gap Estimation, Institutional Flow Windows &amp; Momentum Reaction Engine</div>
+      </div>
+    </div>
+
+    <div class="pm-header-right">
+      <select id="pmSymbolSelect" class="symbol-select">
+        <option value="NIFTY" selected>⭐ NIFTY 50</option>
+        <option value="BANKNIFTY">🏦 BANK NIFTY</option>
+        <option value="TATASTEEL">🏭 TATASTEEL</option>
+        <option value="ONGC">🛢️ ONGC</option>
+        <option value="BEL">⚡ BEL</option>
+        <option value="RELIANCE">👑 RELIANCE</option>
+        <option value="HDFCBANK">🏦 HDFCBANK</option>
+        <option value="SBIN">🏦 SBIN</option>
+        <option value="INFY">💻 INFY</option>
+      </select>
+      <button id="pmRefreshBtn" class="refresh-btn">🔄 Refresh Intel</button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="pm-main">
+
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+      <div>
+        <div class="hero-symbol" id="heroSymbolDisplay">⭐ NIFTY 50</div>
+        <div style="display: flex; align-items: baseline; gap: 0.75rem; margin-top: 0.25rem;">
+          <div class="hero-cmp" id="heroCmpDisplay">₹0.00</div>
+          <span class="gap-dir-badge" id="gapBadgeMain">Scanning...</span>
+        </div>
+      </div>
+
+      <div class="hero-meta">
+        <div class="meta-item">
+          <small>VWAP Benchmark</small>
+          <b id="heroVwapDisplay" style="color: #fbbf24;">₹0.00</b>
+        </div>
+        <div class="meta-item">
+          <small>Net FII Flow Index</small>
+          <b id="heroFiiFlowDisplay" style="color: #38bdf8;">₹0 Cr</b>
+        </div>
+        <div class="meta-item">
+          <small>Option Chain PCR</small>
+          <b id="heroPcrDisplay" style="color: #34d399;">1.00</b>
+        </div>
+        <div class="meta-item">
+          <small>FII Index Longs</small>
+          <b id="heroFiiLongPct" style="color: #c084fc;">52.0%</b>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1. 🌅 NEXT-DAY GAP OPENING PREDICTOR -->
+    <section class="pm-section-card">
+      <div class="pm-card-header">
+        <div>
+          <div class="pm-card-title">🌅 कल कहाँ खुलेगा? (Next-Day Opening Predictor)</div>
+          <small>Closing Momentum, GIFT NIFTY Overnight Bias, US Cues &amp; Option Chain Integration</small>
+        </div>
+        <span id="gapProbabilityPill" style="font-size: 0.75rem; color: #38bdf8; font-family: 'JetBrains Mono', monospace; font-weight: 700;">Probability: --%</span>
+      </div>
+
+      <div class="gap-stats-grid">
+        <div class="gap-stat-box">
+          <small>🎯 Gap Direction Bias</small>
+          <b id="gapDirectionText" style="color: #fbbf24;">--</b>
+        </div>
+        <div class="gap-stat-box">
+          <small>📍 Projected Opening Range</small>
+          <b id="gapOpenRangeText">₹0.00 – ₹0.00</b>
+        </div>
+        <div class="gap-stat-box">
+          <small>⚡ Expected Gap Points</small>
+          <b id="gapExpectedPtsText" style="color: #38bdf8;">-- pts</b>
+        </div>
+        <div class="gap-stat-box">
+          <small>🛡️ Support Floor / 🔴 Ceiling</small>
+          <b id="gapKeyLevelsText" style="font-size: 1rem;">S: ₹-- | R: ₹--</b>
+        </div>
+      </div>
+
+      <!-- Global Cues -->
+      <div class="cues-row">
+        <div class="cue-pill" id="pmCueGiftNifty">🌐 GIFT NIFTY: Scanning...</div>
+        <div class="cue-pill" id="pmCueUsMarkets">🇺🇸 US Markets: Scanning...</div>
+        <div class="cue-pill" id="pmCueFiiFlow">🏦 FIIs Flow: Scanning...</div>
+      </div>
+
+      <!-- Opening Gameplan -->
+      <div class="gameplan-box">
+        <div style="font-weight: 700; color: #fbbf24; margin-bottom: 0.3rem;">💡 Sameer AI — 09:15 AM Opening Action Gameplan:</div>
+        <p id="pmGameplanText">Calculating overnight bias and morning action strategy...</p>
+      </div>
+    </section>
+
+    <!-- 2. ⏱️ FIIs ENTRY TIMINGS MATRIX -->
+    <section class="pm-section-card">
+      <div class="pm-card-header">
+        <div>
+          <div class="pm-card-title">⏱️ FIIs Entry Windows (कब और कहाँ FIIs एंट्री लेते हैं)</div>
+          <small>Key Institutional Liquidity Sessions &amp; Order Clearance Windows</small>
+        </div>
+        <span style="font-size: 0.75rem; color: #a855f7; font-weight: 700;">🏛️ 4 High-Impact Windows</span>
+      </div>
+
+      <div class="fii-windows-grid" id="fiiWindowsGrid">
+        <!-- Dynamic Windows rendered by JS -->
+      </div>
+    </section>
+
+    <!-- 3. 📈 POST-FII ENTRY MARKET REACTION & PRICE ACTION -->
+    <section class="pm-section-card">
+      <div class="pm-card-header">
+        <div>
+          <div class="pm-card-title">📊 Post-FII Entry Market Reaction Tracker (एंट्री के बाद का मूव)</div>
+          <small>How NIFTY &amp; Stocks react after FIIs pump or dump institutional liquidity</small>
+        </div>
+        <span style="font-size: 0.75rem; color: #34d399; font-weight: 700;">⚡ 1:2 R:R Actionable Playbook</span>
+      </div>
+
+      <div class="reactions-grid" id="reactionsGrid">
+        <!-- Dynamic Reaction Cards rendered by JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API_BASE = (window.location.protocol === 'http:' || window.location.protocol === 'https:') ? '' : 'http://localhost:3000';
+    const symbolSelect = document.getElementById('pmSymbolSelect');
+    const refreshBtn = document.getElementById('pmRefreshBtn');
+    const toast = document.getElementById('toast');
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.className = 'toast show';
+      setTimeout(() => { toast.className = 'toast'; }, 3000);
+    }
+
+    async function loadFiiAndPremarketIntel() {
+      const sym = symbolSelect.value;
+      refreshBtn.disabled = true;
+      refreshBtn.textContent = '⏳ Scanning...';
+
+      try {
+        const res = await fetch(`${API_BASE}/api/fii-activity?symbol=${sym}`);
+        const json = await res.json();
+        if (!json.success || !json.data) {
+          showToast('Failed to load intel');
+          return;
+        }
+
+        const d = json.data;
+        renderPremarketDashboard(d);
+        showToast(`✅ Loaded FII & Pre-Market Intel for ${sym}!`);
+      } catch (err) {
+        console.error(err);
+        showToast('Connection error to server');
+      } finally {
+        refreshBtn.disabled = false;
+        refreshBtn.textContent = '🔄 Refresh Intel';
+      }
+    }
+
+    function renderPremarketDashboard(data) {
+      const { symbol, currentPrice, vwap, gapPredictor, fiiMetrics } = data;
+
+      // Hero Banner
+      document.getElementById('heroSymbolDisplay').textContent = symbol === 'NIFTY' ? '⭐ NIFTY 50' : (symbol === 'BANKNIFTY' ? '🏦 BANK NIFTY' : symbol);
+      document.getElementById('heroCmpDisplay').textContent = `₹${currentPrice.toFixed(2)}`;
+      document.getElementById('heroVwapDisplay').textContent = `₹${vwap.toFixed(2)}`;
+
+      const flowVal = fiiMetrics.netFiiFlowCr;
+      const flowColor = flowVal >= 0 ? '#34d399' : '#f87171';
+      document.getElementById('heroFiiFlowDisplay').textContent = `${flowVal >= 0 ? '+' : ''}₹${flowVal} Cr`;
+      document.getElementById('heroFiiFlowDisplay').style.color = flowColor;
+      document.getElementById('heroPcrDisplay').textContent = fiiMetrics.pcr;
+      document.getElementById('heroFiiLongPct').textContent = `${fiiMetrics.fiiIndexLongPct}%`;
+
+      // Gap Predictor
+      const gp = gapPredictor || {};
+      const gapBadge = document.getElementById('gapBadgeMain');
+      gapBadge.textContent = gp.badgeLabel || 'FLAT OPEN';
+      gapBadge.className = `gap-dir-badge ${gp.badgeColor || 'amber'}`;
+
+      document.getElementById('gapProbabilityPill').textContent = `Confidence: ${gp.probability || 65}%`;
+      document.getElementById('gapDirectionText').textContent = gp.badgeLabel || 'Neutral';
+      document.getElementById('gapDirectionText').style.color = gp.badgeColor === 'green' ? '#34d399' : (gp.badgeColor === 'red' ? '#f87171' : '#fbbf24');
+      document.getElementById('gapOpenRangeText').textContent = gp.expectedGapRange ? `₹${gp.minOpen} – ₹${gp.maxOpen}` : '₹0 – ₹0';
+      document.getElementById('gapExpectedPtsText').textContent = gp.expectedGapRange || '-- pts';
+      document.getElementById('gapKeyLevelsText').textContent = `S: ₹${gp.tomorrowSupport || '--'} | R: ₹${gp.tomorrowResistance || '--'}`;
+
+      if (gp.globalCues) {
+        document.getElementById('pmCueGiftNifty').textContent = gp.globalCues.giftNifty || '🌐 GIFT NIFTY: Flat';
+        document.getElementById('pmCueUsMarkets').textContent = gp.globalCues.usMarkets || '🇺🇸 US Markets: Neutral';
+        document.getElementById('pmCueFiiFlow').textContent = gp.globalCues.fiiFlow || '🏦 FIIs Flow: Neutral';
+      }
+
+      document.getElementById('pmGameplanText').innerHTML = gp.gameplanHindi || '09:15 से 09:30 AM तक पहली 15 मिनट कैंडल बनने का इंतज़ार करें।';
+
+      // FII Windows Grid
+      const windowsGrid = document.getElementById('fiiWindowsGrid');
+      windowsGrid.innerHTML = '';
+      (fiiMetrics.fiiWindows || []).forEach((w, idx) => {
+        const isHighlight = idx === 1; // Window 2 (11:10 AM European open)
+        const card = document.createElement('div');
+        card.className = `fii-window-card ${isHighlight ? 'highlight' : ''}`;
+        card.innerHTML = `
+          <div class="fw-top">
+            <span class="fw-time">${w.timeRange}</span>
+            <span class="fw-impact">${w.avgMoveImpact}</span>
+          </div>
+          <div class="fw-title">${w.windowTitle}</div>
+          <div class="fw-activity">📌 ${w.typicalActivity}</div>
+          <div class="fw-rule">💡 <strong>समीर AI रूल:</strong> ${w.sameerRule}</div>
+        `;
+        windowsGrid.appendChild(card);
+      });
+
+      // Post-FII Reactions Grid
+      const reactionsGrid = document.getElementById('reactionsGrid');
+      reactionsGrid.innerHTML = '';
+      (fiiMetrics.postEntryReactions || []).forEach(r => {
+        const isBuy = r.scenario.includes('Inflow') || r.scenario.includes('Buy');
+        const isSell = r.scenario.includes('Selling') || r.scenario.includes('Dump');
+        const cardType = isBuy ? 'buy' : (isSell ? 'sell' : 'neutral');
+        const moveColor = isBuy ? 'green' : (isSell ? 'red' : 'amber');
+
+        const card = document.createElement('div');
+        card.className = `reaction-card ${cardType}`;
+        card.innerHTML = `
+          <div class="rc-header">
+            <span class="rc-title">${r.scenario}</span>
+            <span class="rc-move ${moveColor}">${r.marketMove}</span>
+          </div>
+          <div style="font-size:0.75rem; color:#38bdf8; font-weight:700;">🎯 विन-रेट: ${r.winProbability}% | ${r.reactionTitle}</div>
+          <div class="rc-desc">${r.postMoveBehavior}</div>
+          <div class="rc-advice"><strong>⚡ एक्शन प्लान (1:2 R:R):</strong> ${r.actionAdvice}</div>
+        `;
+        reactionsGrid.appendChild(card);
+      });
+    }
+
+    symbolSelect.addEventListener('change', loadFiiAndPremarketIntel);
+    refreshBtn.addEventListener('click', loadFiiAndPremarketIntel);
+
+    // Initial Load
+    loadFiiAndPremarketIntel();
+    setInterval(loadFiiAndPremarketIntel, 15000);
+  </script>
+</body>
+</html>

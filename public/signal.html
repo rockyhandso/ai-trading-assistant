@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Signal — BUY / SELL / WAIT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #10b981;
+      --red: #ef4444;
+      --amber: #f59e0b;
+      --blue: #38bdf8;
+      --purple: #8b5cf6;
+      --bg: #060a14;
+      --card: #0d1424;
+      --border: rgba(255,255,255,0.07);
+      --text: #e2e8f0;
+      --muted: #64748b;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    /* ── Top Bar ── */
+    .top-bar {
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.2rem;
+    }
+
+    .stock-selector {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .stock-btn {
+      padding: 0.35rem 0.8rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .stock-btn.active {
+      background: rgba(56,189,248,0.15);
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .refresh-info {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── Main Signal Card ── */
+    .signal-card {
+      width: 100%;
+      max-width: 520px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    }
+
+    /* Signal Header — BIG colored block */
+    .signal-header {
+      padding: 2.5rem 2rem 2rem;
+      text-align: center;
+      position: relative;
+      transition: background 0.4s;
+    }
+
+    .signal-header.BUY  { background: linear-gradient(160deg, rgba(16,185,129,0.22), rgba(6,182,212,0.08)); border-bottom: 2px solid rgba(16,185,129,0.4); }
+    .signal-header.SELL { background: linear-gradient(160deg, rgba(239,68,68,0.22), rgba(245,158,11,0.08)); border-bottom: 2px solid rgba(239,68,68,0.4); }
+    .signal-header.WAIT { background: linear-gradient(160deg, rgba(245,158,11,0.15), rgba(100,116,139,0.08)); border-bottom: 2px solid rgba(245,158,11,0.3); }
+
+    .signal-symbol {
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    .signal-price {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 1.2rem;
+    }
+
+    .signal-price .change {
+      font-size: 0.9rem;
+      margin-left: 0.4rem;
+    }
+
+    /* The Big Signal Badge */
+    .signal-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 1rem 2.8rem;
+      border-radius: 16px;
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      transition: all 0.3s;
+    }
+
+    .signal-badge.BUY  { background: rgba(16,185,129,0.2); color: #34d399; border: 2px solid #10b981; box-shadow: 0 0 30px rgba(16,185,129,0.4); }
+    .signal-badge.SELL { background: rgba(239,68,68,0.2);  color: #f87171; border: 2px solid #ef4444; box-shadow: 0 0 30px rgba(239,68,68,0.4); }
+    .signal-badge.WAIT { background: rgba(245,158,11,0.15); color: #fbbf24; border: 2px solid #f59e0b; box-shadow: 0 0 20px rgba(245,158,11,0.3); }
+
+    /* Confidence bar */
+    .confidence-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .confidence-label { font-size: 0.72rem; color: var(--muted); }
+    .confidence-bar-wrap { width: 140px; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
+    .confidence-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+    .confidence-pct { font-size: 0.8rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
+    /* ── Trade Details ── */
+    .trade-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .td-cell {
+      padding: 1rem 0.8rem;
+      text-align: center;
+      border-right: 1px solid var(--border);
+    }
+    .td-cell:last-child { border-right: none; }
+
+    .td-label {
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+    }
+
+    .td-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .td-value.entry { color: var(--blue); }
+    .td-value.target { color: var(--green); }
+    .td-value.sl { color: var(--red); }
+
+    /* ── Reasons ── */
+    .reasons-section {
+      padding: 1rem 1.2rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .reasons-title {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 0.2rem;
+    }
+
+    .reason-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: #cbd5e1;
+    }
+
+    .reason-dot {
+      width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+    }
+    .reason-dot.bull { background: var(--green); }
+    .reason-dot.bear { background: var(--red); }
+    .reason-dot.neut { background: var(--amber); }
+
+    /* ── Time Window ── */
+    .time-window-bar {
+      margin: 0 1.2rem 1.2rem;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.7rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .tw-left { font-size: 0.75rem; color: var(--text); }
+    .tw-left small { color: var(--muted); font-size: 0.65rem; display: block; }
+
+    .tw-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+    }
+
+    .tw-badge.green { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.4); }
+    .tw-badge.amber { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.4); }
+    .tw-badge.red   { background: rgba(239,68,68,0.15);  color: #f87171; border: 1px solid rgba(239,68,68,0.4); }
+
+    /* ── Indicators ── */
+    .indicators-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      padding: 0 1.2rem 1.2rem;
+    }
+
+    .ind-chip {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 0.6rem;
+      font-size: 0.68rem;
+    }
+
+    .ind-chip label { color: var(--muted); display: block; margin-bottom: 0.15rem; }
+    .ind-chip strong { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; }
+
+    /* ── Footer ── */
+    .signal-footer {
+      border-top: 1px solid var(--border);
+      padding: 0.7rem 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-link {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .footer-link:hover { color: var(--blue); }
+
+    .last-updated {
+      font-size: 0.68rem;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Pulse animation for live dot */
+    .live-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      margin-right: 4px;
+      animation: livePulse 1.5s infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes livePulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    /* Loading skeleton */
+    .skeleton { background: rgba(255,255,255,0.06); border-radius: 6px; animation: shimmer 1.5s infinite; }
+    @keyframes shimmer {
+      0%,100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    /* Pivot row */
+    .pivot-mini-row {
+      display: flex;
+      gap: 0.4rem;
+      padding: 0 1.2rem 1rem;
+      flex-wrap: wrap;
+    }
+
+    .pivot-chip {
+      flex: 1;
+      min-width: 0;
+      text-align: center;
+      padding: 0.3rem 0.4rem;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+    }
+    .pivot-chip small { color: var(--muted); display: block; }
+    .pivot-chip.r { color: #f87171; }
+    .pivot-chip.pp { color: var(--blue); }
+    .pivot-chip.s { color: #34d399; }
+  </style>
+</head>
+<body>
+
+  <!-- Stock Selector -->
+  <div class="top-bar">
+    <div class="stock-selector" id="stockSelector">
+      <button class="stock-btn active" data-sym="NIFTY">NIFTY</button>
+      <button class="stock-btn" data-sym="BANKNIFTY">BANKNIFTY</button>
+      <button class="stock-btn" data-sym="RELIANCE">RELIANCE</button>
+      <button class="stock-btn" data-sym="ICICIBANK">ICICIBANK</button>
+      <button class="stock-btn" data-sym="HDFCBANK">HDFC</button>
+      <button class="stock-btn" data-sym="SBIN">SBIN</button>
+      <button class="stock-btn" data-sym="TATAMOTORS">TATA</button>
+    </div>
+    <div class="refresh-info"><span class="live-dot"></span>Auto-refresh: <span id="countdown">10</span>s</div>
+  </div>
+
+  <!-- Main Signal Card -->
+  <div class="signal-card" id="signalCard">
+
+    <!-- Header -->
+    <div class="signal-header WAIT" id="signalHeader">
+      <div class="signal-symbol" id="sigSymbol">NIFTY</div>
+      <div class="signal-price" id="sigPrice">
+        <span class="skeleton" style="display:inline-block;width:140px;height:28px;"></span>
+      </div>
+
+      <div class="signal-badge WAIT" id="sigBadge">⏳ LOADING...</div>
+
+      <div class="confidence-row">
+        <span class="confidence-label">AI Clarity:</span>
+        <div class="confidence-bar-wrap">
+          <div class="confidence-bar-fill" id="confBar" style="width:0%; background:#f59e0b;"></div>
+        </div>
+        <span class="confidence-pct" id="confPct">--%</span>
+      </div>
+    </div>
+
+    <!-- Entry / SL / Target -->
+    <div class="trade-details" id="tradeDetails">
+      <div class="td-cell">
+        <div class="td-label">📍 Entry</div>
+        <div class="td-value entry" id="tdEntry">₹--</div>
+      </div>
+      <div class="td-cell">
+        <div class="td-label">🎯 Target 1 / 2</div>
+        <div class="td-value target" id="tdTarget">₹-- / ₹--</div>
+      </div>
+      <div class="td-cell">
+        <div class="td-label">🛡️ Stop-Loss</div>
+        <div class="td-value sl" id="tdSL">₹--</div>
+      </div>
+    </div>
+
+    <!-- Signal Reasons -->
+    <div class="reasons-section" id="reasonsSection">
+      <div class="reasons-title">📋 AI Signal Reasons (Kyu BUY / SELL / WAIT)</div>
+      <div id="reasonsList">
+        <div class="reason-row"><div class="reason-dot neut"></div><span>Analyzing live market data...</span></div>
+      </div>
+    </div>
+
+    <!-- Time Window -->
+    <div class="time-window-bar" id="twBar">
+      <div class="tw-left">
+        <small>Current Market Session</small>
+        <span id="twName">Scanning...</span>
+      </div>
+      <span class="tw-badge green" id="twBadge">--%</span>
+    </div>
+
+    <!-- Indicators -->
+    <div class="indicators-row">
+      <div class="ind-chip">
+        <label>RSI (14)</label>
+        <strong id="indRsi">--</strong>
+      </div>
+      <div class="ind-chip">
+        <label>VWAP</label>
+        <strong id="indVwap">₹--</strong>
+      </div>
+      <div class="ind-chip">
+        <label>EMA 9/21</label>
+        <strong id="indEma">--/--</strong>
+      </div>
+    </div>
+
+    <!-- Pivot Levels -->
+    <div class="pivot-mini-row" id="pivotRow">
+      <div class="pivot-chip r"><small>R2</small><span id="pR2">--</span></div>
+      <div class="pivot-chip r"><small>R1</small><span id="pR1">--</span></div>
+      <div class="pivot-chip pp"><small>PP</small><span id="pPP">--</span></div>
+      <div class="pivot-chip s"><small>S1</small><span id="pS1">--</span></div>
+      <div class="pivot-chip s"><small>S2</small><span id="pS2">--</span></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="signal-footer">
+      <a href="/" class="footer-link">← Full Dashboard</a>
+      <span class="last-updated" id="lastUpdated">--</span>
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:3000';
+    let currentSym = 'NIFTY';
+    let countdownVal = 10;
+    let timer;
+
+    // ── Fetch & Render Signal ──
+    async function fetchSignal() {
+      try {
+        const res = await fetch(`${API}/api/stock-analysis?symbol=${currentSym}&interval=5m`);
+        const json = await res.json();
+        if (!json.success) return;
+        const d = json.data;
+        renderSignal(d);
+      } catch(e) {
+        console.error(e);
+      }
+    }
+
+    function renderSignal(d) {
+      const dec   = d.decision;
+      const ind   = d.indicators;
+      const tw    = d.timeWindow || {};
+      const sig   = d.signals || [];
+      const sa    = d.selfAwareness || {};
+      const veto  = d.tradeVeto || {};
+      const regime = d.marketRegime || {};
+
+      // Determine final action
+      let action = 'WAIT';
+      if (veto.isVetoed) action = 'WAIT';
+      else if (!tw.isTradeAllowed) action = 'WAIT';
+      else if (dec.actionType === 'BUY')  action = 'BUY';
+      else if (dec.actionType === 'SELL') action = 'SELL';
+
+      // Emoji
+      const emoji = action === 'BUY' ? '📈' : action === 'SELL' ? '📉' : '⏳';
+      const label = action === 'BUY' ? 'BUY' : action === 'SELL' ? 'SELL' : 'WAIT';
+
+      // Price
+      const chg = d.dayChangePct;
+      const chgColor = chg >= 0 ? '#34d399' : '#f87171';
+      document.getElementById('sigSymbol').textContent = currentSym;
+      document.getElementById('sigPrice').innerHTML =
+        `₹${d.currentPrice.toFixed(2)} <span class="change" style="color:${chgColor}">${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%</span>`;
+
+      // Header color
+      const hdr = document.getElementById('signalHeader');
+      hdr.className = `signal-header ${action}`;
+
+      // Badge
+      const badge = document.getElementById('sigBadge');
+      badge.className = `signal-badge ${action}`;
+      badge.textContent = `${emoji} ${label}`;
+
+      // Confidence bar
+      const conf = sa.score || dec.confidence || 0;
+      document.getElementById('confPct').textContent = `${conf}%`;
+      const barColor = action === 'BUY' ? '#10b981' : action === 'SELL' ? '#ef4444' : '#f59e0b';
+      const bar = document.getElementById('confBar');
+      bar.style.width = `${Math.min(conf, 100)}%`;
+      bar.style.background = barColor;
+
+      // Trade details
+      if (action !== 'WAIT' && dec.entryPrice) {
+        document.getElementById('tdEntry').textContent  = `₹${Number(dec.entryPrice).toFixed(2)}`;
+        document.getElementById('tdTarget').textContent = `₹${dec.target1} / ₹${dec.target2}`;
+        document.getElementById('tdSL').textContent     = `₹${dec.stopLoss}`;
+      } else {
+        document.getElementById('tdEntry').textContent  = '₹--';
+        document.getElementById('tdTarget').textContent = '₹-- / ₹--';
+        document.getElementById('tdSL').textContent     = '₹--';
+      }
+
+      // Reasons
+      const reasons = [];
+
+      // VWAP
+      if (d.currentPrice >= ind.vwap)
+        reasons.push({ type:'bull', text:`Price VWAP ke upar (₹${ind.vwap.toFixed(0)}) — Buyers in control` });
+      else
+        reasons.push({ type:'bear', text:`Price VWAP ke neeche (₹${ind.vwap.toFixed(0)}) — Selling pressure` });
+
+      // EMA
+      if (ind.ema9 > ind.ema21)
+        reasons.push({ type:'bull', text:`EMA 9 > EMA 21 — Bullish momentum active` });
+      else
+        reasons.push({ type:'bear', text:`EMA 9 < EMA 21 — Bearish momentum` });
+
+      // RSI
+      if (ind.rsi > 70)
+        reasons.push({ type:'bear', text:`RSI ${ind.rsi} — Overbought zone, reversal possible` });
+      else if (ind.rsi < 30)
+        reasons.push({ type:'bull', text:`RSI ${ind.rsi} — Oversold zone, bounce expected` });
+      else if (ind.rsi > 55)
+        reasons.push({ type:'bull', text:`RSI ${ind.rsi} — Bullish momentum zone` });
+      else
+        reasons.push({ type:'neut', text:`RSI ${ind.rsi} — Neutral, wait for clear direction` });
+
+      // Market Regime
+      reasons.push({ type: regime.type === 'TRENDING' ? 'bull' : 'neut', text:`Market: ${regime.title}` });
+
+      // Veto
+      if (veto.isVetoed)
+        reasons.push({ type:'bear', text:`⚠️ AI Veto: ${veto.vetoExplanation}` });
+
+      // Time window block
+      if (!tw.isTradeAllowed)
+        reasons.push({ type:'bear', text:`🛑 ${tw.windowName} — Is samay trade mat karo (${tw.expectedWinRate}% win rate)` });
+
+      const rl = document.getElementById('reasonsList');
+      rl.innerHTML = reasons.map(r =>
+        `<div class="reason-row"><div class="reason-dot ${r.type}"></div><span>${r.text}</span></div>`
+      ).join('');
+
+      // Time Window bar
+      document.getElementById('twName').textContent = tw.windowName || '--';
+      const twb = document.getElementById('twBadge');
+      twb.textContent = `Win Rate: ${tw.expectedWinRate || '--'}%`;
+      twb.className = `tw-badge ${tw.badgeColor || 'amber'}`;
+
+      // Indicators
+      document.getElementById('indRsi').textContent  = ind.rsi;
+      document.getElementById('indRsi').style.color  = ind.rsi > 70 ? '#f87171' : ind.rsi < 30 ? '#34d399' : '#e2e8f0';
+      document.getElementById('indVwap').textContent = `₹${ind.vwap.toFixed(0)}`;
+      document.getElementById('indEma').textContent  = `${ind.ema9.toFixed(0)}/${ind.ema21.toFixed(0)}`;
+      document.getElementById('indEma').style.color  = ind.ema9 > ind.ema21 ? '#34d399' : '#f87171';
+
+      // Pivots
+      const p = ind.pivots;
+      document.getElementById('pR2').textContent = `₹${p.r2}`;
+      document.getElementById('pR1').textContent = `₹${p.r1}`;
+      document.getElementById('pPP').textContent = `₹${p.pp}`;
+      document.getElementById('pS1').textContent = `₹${p.s1}`;
+      document.getElementById('pS2').textContent = `₹${p.s2}`;
+
+      // Last updated
+      document.getElementById('lastUpdated').textContent =
+        `Updated: ${new Date().toLocaleTimeString()}`;
+    }
+
+    // ── Countdown & Auto Refresh ──
+    function startCountdown() {
+      clearInterval(timer);
+      countdownVal = 10;
+      document.getElementById('countdown').textContent = countdownVal;
+      timer = setInterval(() => {
+        countdownVal--;
+        document.getElementById('countdown').textContent = countdownVal;
+        if (countdownVal <= 0) {
+          countdownVal = 10;
+          fetchSignal();
+        }
+      }, 1000);
+    }
+
+    // ── Stock Selector ──
+    document.querySelectorAll('.stock-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.stock-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentSym = btn.dataset.sym;
+        document.getElementById('sigSymbol').textContent = currentSym;
+        fetchSignal();
+        startCountdown();
+      });
+    });
+
+    // ── Init ──
+    fetchSignal();
+    startCountdown();
+  </script>
+</body>
+</html>

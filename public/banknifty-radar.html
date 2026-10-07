@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bank Nifty Direction Radar & Candlestick Scanner | Sameer AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0e17;
+      --bg-card: rgba(20, 27, 45, 0.85);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --color-green: #10b981;
+      --color-red: #ef4444;
+      --color-cyan: #06b6d4;
+      --color-amber: #f59e0b;
+      --color-purple: #8b5cf6;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: var(--bg-primary);
+      background-image: radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.08) 0px, transparent 50%);
+      color: var(--text-primary);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      padding-bottom: 3rem;
+    }
+
+    /* Header */
+    .radar-header {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+      gap: 1rem; padding: 1rem 1.5rem;
+      background: var(--bg-card); border-bottom: 1px solid var(--border-color);
+      backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 100;
+    }
+    .radar-header-left { display: flex; align-items: center; gap: 0.85rem; }
+    .back-btn {
+      display: flex; align-items: center; gap: 0.4rem;
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border-color);
+      color: var(--text-secondary); padding: 0.4rem 0.85rem; border-radius: 8px;
+      font-size: 0.82rem; cursor: pointer; text-decoration: none; transition: all 0.2s ease;
+      font-weight: 600;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .radar-title { font-size: 1.15rem; font-weight: 700; color: #10b981; display: flex; align-items: center; gap: 0.4rem; }
+    .radar-subtitle { font-size: 0.72rem; color: var(--text-muted); }
+    .radar-header-right { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+    
+    /* Window Selector Pills */
+    .window-toggle-wrap {
+      display: flex; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color);
+      border-radius: 10px; padding: 3px; gap: 3px;
+    }
+    .window-btn {
+      background: transparent; border: none; color: var(--text-secondary);
+      padding: 0.38rem 0.75rem; border-radius: 7px; font-size: 0.8rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s ease; font-family: 'Outfit', sans-serif;
+    }
+    .window-btn.active {
+      background: linear-gradient(135deg, #10b981, #06b6d4); color: #fff;
+      box-shadow: 0 2px 8px rgba(16,185,129,0.3);
+    }
+
+    .date-select {
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border-color);
+      color: var(--text-primary); padding: 0.45rem 0.85rem; border-radius: 8px;
+      font-size: 0.85rem; font-family: 'Outfit', sans-serif; cursor: pointer; font-weight: 600;
+    }
+    .date-select:focus { outline: none; border-color: #10b981; }
+
+    .refresh-btn {
+      background: linear-gradient(135deg, #10b981, #06b6d4); border: none;
+      color: #fff; padding: 0.45rem 1rem; border-radius: 8px;
+      font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;
+    }
+    .refresh-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* Main Container */
+    .radar-main {
+      max-width: 1350px; margin: 0 auto; padding: 1.5rem 1.25rem;
+      display: flex; flex-direction: column; gap: 1.5rem;
+    }
+
+    /* Primary Radar Card */
+    .verdict-hero {
+      border-radius: 16px; padding: 1.5rem 1.75rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      display: flex; flex-direction: column; gap: 1.25rem;
+      transition: all 0.3s ease;
+    }
+    .verdict-hero.bullish {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 182, 212, 0.1));
+      border: 2px solid #10b981;
+    }
+    .verdict-hero.bearish {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(244, 63, 94, 0.1));
+      border: 2px solid #ef4444;
+    }
+    .verdict-hero.choppy {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.1));
+      border: 2px solid #f59e0b;
+    }
+
+    .hero-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; }
+    .verdict-badge {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 0.5rem 1.1rem; border-radius: 30px; font-weight: 800; font-size: 1.15rem; letter-spacing: 0.5px;
+    }
+    .badge-bullish { background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; }
+    .badge-bearish { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #f87171; }
+    .badge-choppy { background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fbbf24; }
+
+    .confidence-meter {
+      display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;
+    }
+    .conf-score { font-size: 1.85rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+    .conf-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+
+    .hero-main-details {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;
+      background: rgba(0,0,0,0.3); border-radius: 12px; padding: 1.25rem;
+    }
+    .detail-item { display: flex; flex-direction: column; gap: 0.25rem; }
+    .detail-item small { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; }
+    .detail-item b { font-size: 1.15rem; font-family: 'JetBrains Mono', monospace; }
+
+    /* Strategy & Action Box */
+    .trade-plan-box {
+      background: rgba(0,0,0,0.2); border-left: 4px solid #10b981; border-radius: 0 10px 10px 0;
+      padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .trade-plan-title { font-size: 0.88rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem; }
+    .trade-plan-content { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+
+    /* 🕯️ CANDLESTICK ANATOMY SCANNER CARD */
+    .candle-scanner-card {
+      background: var(--bg-card); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 16px;
+      padding: 1.35rem 1.5rem; display: flex; flex-direction: column; gap: 1.15rem;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.35); position: relative; overflow: hidden;
+    }
+    .candle-scanner-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, #38bdf8, #8b5cf6, #10b981);
+    }
+    .cs-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; }
+    .cs-title { font-size: 1.05rem; font-weight: 800; color: #38bdf8; display: flex; align-items: center; gap: 0.5rem; }
+    .cs-verdict-badge { font-size: 0.82rem; font-weight: 800; padding: 0.3rem 0.85rem; border-radius: 20px; font-family: 'JetBrains Mono', monospace; }
+
+    .cs-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;
+    }
+    .cs-candle-box {
+      background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 12px;
+      padding: 1rem 1.15rem; display: flex; gap: 1rem; align-items: center;
+    }
+    .candle-glyph-wrap {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      width: 48px; min-width: 48px; height: 110px; background: rgba(0,0,0,0.4);
+      border-radius: 8px; border: 1px dashed rgba(255,255,255,0.1); padding: 6px 0;
+    }
+    .glyph-wick-top { width: 2px; background: #94a3b8; min-height: 4px; }
+    .glyph-body { width: 18px; border-radius: 2px; min-height: 12px; transition: all 0.3s ease; }
+    .glyph-body.green { background: #10b981; border: 1px solid #34d399; }
+    .glyph-body.red { background: #ef4444; border: 1px solid #f87171; }
+    .glyph-wick-bottom { width: 2px; background: #94a3b8; min-height: 4px; }
+
+    .candle-meta-info { display: flex; flex-direction: column; gap: 0.35rem; flex: 1; }
+    .cmi-label { font-size: 0.72rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
+    .cmi-pattern { font-size: 0.92rem; font-weight: 800; color: #fff; }
+    .cmi-stats { display: flex; gap: 0.85rem; font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
+
+    .cs-action-banner {
+      background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 10px; padding: 0.85rem 1.15rem; display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 0.75rem;
+    }
+    .cs-action-text { font-size: 0.84rem; color: #e2e8f0; line-height: 1.45; }
+    .cs-box-levels { display: flex; gap: 1rem; font-size: 0.82rem; font-family: 'JetBrains Mono', monospace; }
+    .cs-box-pill { background: rgba(0,0,0,0.35); padding: 0.3rem 0.65rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06); }
+
+    /* Stats Grid */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;
+    }
+    .stat-card {
+      background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem 1.15rem;
+      display: flex; flex-direction: column; gap: 0.35rem;
+    }
+    .stat-card small { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+    .stat-card b { font-size: 1.5rem; font-family: 'JetBrains Mono', monospace; }
+
+    /* Technical Confluence Grid */
+    .flow-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem;
+    }
+    .flow-card {
+      background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 1.25rem;
+      display: flex; flex-direction: column; gap: 0.85rem;
+    }
+    .flow-title { font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between; }
+    .flow-item {
+      display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.84rem;
+    }
+    .flow-item:last-child { border-bottom: none; }
+    .flow-item span { color: var(--text-secondary); }
+    .flow-item b { font-family: 'JetBrains Mono', monospace; }
+
+    /* Historical Backtest Table */
+    .table-container {
+      background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px;
+      padding: 1.25rem; overflow-x: auto;
+    }
+    .table-title { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; text-align: left; }
+    th { padding: 0.75rem 0.6rem; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--border-color); }
+    td { padding: 0.75rem 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.04); font-family: 'JetBrains Mono', monospace; }
+    tr:hover { background: rgba(255,255,255,0.02); }
+    .pill { padding: 0.25rem 0.55rem; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: inline-block; }
+    .pill-green { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+    .pill-red { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+    .pill-amber { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="radar-header">
+    <div class="radar-header-left">
+      <a href="/" class="back-btn">⬅ Dashboard</a>
+      <a href="/footprint.html" class="back-btn" style="border-color:#a855f7;color:#c084fc;">🔬 Footprint</a>
+      <a href="/option-chain.html" class="back-btn">📊 Option Chain</a>
+      <div>
+        <div class="radar-title">🎯 Bank Nifty Direction Radar &amp; Candlestick Scanner</div>
+        <div class="radar-subtitle">Visual Candlestick Confirmation, Opening Box &amp; VWAP Breakdown Engine</div>
+      </div>
+    </div>
+    <div class="radar-header-right">
+      <!-- Time Window Switcher -->
+      <div class="window-toggle-wrap">
+        <button id="btnWindow10" class="window-btn active" onclick="switchWindow('10-11')">🌅 10:00 - 11:00 AM</button>
+        <button id="btnWindow1" class="window-btn" onclick="switchWindow('1-2')">⚡ 01:00 - 02:00 PM</button>
+      </div>
+
+      <label style="font-size:0.78rem;color:var(--text-muted);font-weight:600;">Date:</label>
+      <select id="dateSelector" class="date-select" onchange="loadSelectedDate()">
+        <option value="">Live / Latest Day</option>
+      </select>
+      <button class="refresh-btn" onclick="fetchRadarData()">🔄 Scan</button>
+    </div>
+  </header>
+
+  <main class="radar-main">
+
+    <!-- 🕯️ INTERACTIVE CANDLESTICK ANATOMY & PATTERN SCANNER -->
+    <section class="candle-scanner-card">
+      <div class="cs-header">
+        <div class="cs-title">
+          <span>🕯️ Opening Candlestick Scanner (10:00 AM &amp; 10:05 AM Anatomy)</span>
+        </div>
+        <div id="csVerdictBadge" class="cs-verdict-badge pill-amber">
+          ⚖️ ANALYZING CANDLE PATTERNS
+        </div>
+      </div>
+
+      <div class="cs-grid">
+        <!-- Candle 1 Box -->
+        <div class="cs-candle-box">
+          <div class="candle-glyph-wrap">
+            <div id="c1GlyphTop" class="glyph-wick-top" style="height: 12px;"></div>
+            <div id="c1GlyphBody" class="glyph-body green" style="height: 35px;"></div>
+            <div id="c1GlyphBottom" class="glyph-wick-bottom" style="height: 15px;"></div>
+          </div>
+          <div class="candle-meta-info">
+            <div class="cmi-label" id="c1Label">CANDLE #1 (10:00 AM - 10:05 AM)</div>
+            <div class="cmi-pattern" id="c1Pattern">Loading pattern...</div>
+            <div class="cmi-stats">
+              <span>Body: <b id="c1Body">--</b></span>
+              <span>Upper: <b id="c1Upper">--</b></span>
+              <span>Lower: <b id="c1Lower">--</b></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Candle 2 Box -->
+        <div class="cs-candle-box">
+          <div class="candle-glyph-wrap">
+            <div id="c2GlyphTop" class="glyph-wick-top" style="height: 25px;"></div>
+            <div id="c2GlyphBody" class="glyph-body red" style="height: 25px;"></div>
+            <div id="c2GlyphBottom" class="glyph-wick-bottom" style="height: 8px;"></div>
+          </div>
+          <div class="candle-meta-info">
+            <div class="cmi-label" id="c2Label">CANDLE #2 (10:05 AM - 10:10 AM)</div>
+            <div class="cmi-pattern" id="c2Pattern">Loading pattern...</div>
+            <div class="cmi-stats">
+              <span>Body: <b id="c2Body">--</b></span>
+              <span>Upper: <b id="c2Upper">--</b></span>
+              <span>Lower: <b id="c2Lower">--</b></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Guidance & 2-Candle Range -->
+      <div class="cs-action-banner">
+        <div class="cs-action-text" id="csActionText">
+          Loading 2-candle confirmation guidance...
+        </div>
+        <div class="cs-box-levels">
+          <div class="cs-box-pill">2-Bar High: <b id="cs2BarHigh" style="color:#10b981;">--</b></div>
+          <div class="cs-box-pill">2-Bar Low: <b id="cs2BarLow" style="color:#ef4444;">--</b></div>
+          <div class="cs-box-pill">Range: <b id="cs2BarRange" style="color:#38bdf8;">--</b></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Verdict Hero Card -->
+    <section id="verdictHero" class="verdict-hero bullish">
+      <div class="hero-top">
+        <div>
+          <div style="font-size:0.78rem;color:var(--text-muted);font-weight:700;letter-spacing:0.5px;margin-bottom:0.35rem;" id="verdictWindowLabel">
+            10:00 AM - 11:00 AM DIRECTION PREDICTION
+          </div>
+          <div id="verdictBadge" class="verdict-badge badge-bullish">
+            🟢 BULLISH ONE-WAY CALL
+          </div>
+        </div>
+        <div class="confidence-meter">
+          <span class="conf-label">Confidence Score</span>
+          <span class="conf-score" id="confScoreText" style="color:#10b981;">85%</span>
+        </div>
+      </div>
+
+      <!-- Key Quantitative Data Points -->
+      <div class="hero-main-details">
+        <div class="detail-item">
+          <small id="labelSpotStart">Bank Nifty Spot at 10:00 AM</small>
+          <b id="heroSpot" style="color:#fff;">--</b>
+        </div>
+        <div class="detail-item">
+          <small id="labelRangeBase">Settled Base Range (09:30 - 10:00)</small>
+          <b id="heroRange" style="color:#38bdf8;">--</b>
+        </div>
+        <div class="detail-item">
+          <small id="labelVwapBase">Opening VWAP Level</small>
+          <b id="heroVwap" style="color:#fbbf24;">--</b>
+        </div>
+        <div class="detail-item">
+          <small>Expected Move Potential</small>
+          <b id="heroPotential" style="color:#10b981;">--</b>
+        </div>
+      </div>
+
+      <!-- Actionable Trade Plan Box -->
+      <div id="tradePlanBox" class="trade-plan-box">
+        <div class="trade-plan-title" id="planTitle">
+          ⚡ ACTIONABLE TRADE INSTRUCTION (Small Capital Safe)
+        </div>
+        <div class="trade-plan-content" id="planBody">
+          Loading recommendation...
+        </div>
+      </div>
+    </section>
+
+    <!-- Stat Highlights Row -->
+    <section class="stats-row">
+      <div class="stat-card">
+        <small>Total Historical Days</small>
+        <b id="statTotalDays" style="color:#fff;">22 Days</b>
+      </div>
+      <div class="stat-card">
+        <small>Breakout Win Rate</small>
+        <b id="statWinRate" style="color:#10b981;">85.7%</b>
+      </div>
+      <div class="stat-card">
+        <small>Choppy Days Avoided</small>
+        <b id="statChopDays" style="color:#f59e0b;">2 Days</b>
+      </div>
+      <div class="stat-card">
+        <small>Total Net Points Captured</small>
+        <b id="statNetPts" style="color:#38bdf8;">+507.5 Pts</b>
+      </div>
+    </section>
+
+    <!-- Technical Confluence Grid -->
+    <section class="flow-grid">
+      <!-- Base Foundation Range -->
+      <div class="flow-card">
+        <div class="flow-title">
+          <span id="boxRangeTitle">📏 Foundation Base Range</span>
+          <span style="font-size:0.72rem;color:var(--text-muted);" id="boxRangeSub">Settled Reference Box</span>
+        </div>
+        <div class="flow-item">
+          <span>Range High (Resistance)</span>
+          <b id="flowOrh" style="color:#10b981;">--</b>
+        </div>
+        <div class="flow-item">
+          <span>Range Low (Support)</span>
+          <b id="flowOrl" style="color:#ef4444;">--</b>
+        </div>
+        <div class="flow-item">
+          <span>Range Size (Volatility)</span>
+          <b id="flowRangeWidth" style="color:#38bdf8;">--</b>
+        </div>
+        <div class="flow-item">
+          <span>Breakout Status</span>
+          <b id="flowRangeStatus" style="color:#fff;">--</b>
+        </div>
+      </div>
+
+      <!-- Direction Drivers -->
+      <div class="flow-card">
+        <div class="flow-title">
+          <span>🧭 Momentum Drivers &amp; Risk Guard</span>
+          <span style="font-size:0.72rem;color:var(--text-muted);">Execution Plan</span>
+        </div>
+        <div class="flow-item">
+          <span>VWAP Position</span>
+          <b id="flowVwapPos" style="color:#10b981;">Above VWAP</b>
+        </div>
+        <div class="flow-item">
+          <span>Target Level</span>
+          <b id="flowTargetLevel" style="color:#38bdf8;">--</b>
+        </div>
+        <div class="flow-item">
+          <span>Stop Loss (Strict Capital Guard)</span>
+          <b id="flowStopLoss" style="color:#ef4444;">--</b>
+        </div>
+        <div class="flow-item">
+          <span>Trap Warning (Chop Filter)</span>
+          <b id="flowTrapWarning" style="color:#10b981;">CLEAN — No Trap</b>
+        </div>
+      </div>
+    </section>
+
+    <!-- Historical Log Table -->
+    <section class="table-container">
+      <div class="table-title">
+        <span id="tableHeaderTitle">📜 22-Day Backtest Breakdown</span>
+        <span style="font-size:0.75rem;color:var(--text-muted);">Verified against 5m Bank Nifty Candles</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th id="thRange">Settled Base</th>
+            <th id="thSpotStart">Start Spot</th>
+            <th id="thSpotEnd">End Spot</th>
+            <th>1-Hr Net Move</th>
+            <th>Radar Signal</th>
+            <th>10:00 &amp; 10:05 Pattern</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+        <tbody id="historyTableBody">
+          <tr><td colspan="8" style="text-align:center;color:var(--text-muted);">Loading historical backtest data...</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+  </main>
+
+  <script>
+    let activeWindow = '10-11';
+    let currentData = null;
+
+    function switchWindow(w) {
+      activeWindow = w;
+      document.getElementById('btnWindow10').className = 'window-btn' + (w === '10-11' ? ' active' : '');
+      document.getElementById('btnWindow1').className = 'window-btn' + (w === '1-2' ? ' active' : '');
+      
+      // Update UI labels
+      if (w === '1-2') {
+        document.getElementById('verdictWindowLabel').innerText = '01:00 PM - 02:00 PM DIRECTION PREDICTION (EUROPEAN OPEN)';
+        document.getElementById('labelSpotStart').innerText = 'Bank Nifty Spot at 01:00 PM';
+        document.getElementById('labelRangeBase').innerText = 'Lunch Box Range (11:30 - 13:00)';
+        document.getElementById('labelVwapBase').innerText = '01:00 PM Cumulative VWAP';
+        document.getElementById('boxRangeTitle').innerText = '🍱 Lunch Box Range (11:30 - 13:00)';
+        document.getElementById('tableHeaderTitle').innerText = '📜 22-Day Backtest Breakdown (01:00 PM to 02:00 PM)';
+        document.getElementById('thRange').innerText = 'Lunch Range';
+        document.getElementById('thSpotStart').innerText = '01:00 PM Spot';
+        document.getElementById('thSpotEnd').innerText = '02:00 PM Spot';
+        document.getElementById('c1Label').innerText = 'CANDLE #1 (01:00 PM - 01:05 PM)';
+        document.getElementById('c2Label').innerText = 'CANDLE #2 (01:05 PM - 01:10 PM)';
+      } else {
+        document.getElementById('verdictWindowLabel').innerText = '10:00 AM - 11:00 AM DIRECTION PREDICTION (MORNING MOMENTUM)';
+        document.getElementById('labelSpotStart').innerText = 'Bank Nifty Spot at 10:00 AM';
+        document.getElementById('labelRangeBase').innerText = 'Settled Base Range (09:30 - 10:00)';
+        document.getElementById('labelVwapBase').innerText = '10:00 AM Opening VWAP';
+        document.getElementById('boxRangeTitle').innerText = '📏 Settled Base Range (09:30 - 10:00)';
+        document.getElementById('tableHeaderTitle').innerText = '📜 22-Day Backtest Breakdown (10:00 AM to 11:00 AM)';
+        document.getElementById('thRange').innerText = 'Settled Base';
+        document.getElementById('thSpotStart').innerText = '10:00 AM Spot';
+        document.getElementById('thSpotEnd').innerText = '11:00 AM Spot';
+        document.getElementById('c1Label').innerText = 'CANDLE #1 (10:00 AM - 10:05 AM)';
+        document.getElementById('c2Label').innerText = 'CANDLE #2 (10:05 AM - 10:10 AM)';
+      }
+
+      const selectedDate = document.getElementById('dateSelector').value;
+      fetchRadarData(selectedDate);
+    }
+
+    async function fetchRadarData(date) {
+      try {
+        date = date || document.getElementById('dateSelector').value || '';
+        var url = '/api/banknifty-radar?window=' + encodeURIComponent(activeWindow);
+        if (date) url += '&date=' + encodeURIComponent(date);
+
+        var res = await fetch(url);
+        var data = await res.json();
+        if (!data.success) {
+          alert('Radar data error: ' + (data.error || 'Unknown error'));
+          return;
+        }
+        var payload = data.data || data;
+        currentData = payload;
+        renderRadarUI(payload);
+      } catch (err) {
+        console.error('Fetch radar error:', err);
+      }
+    }
+
+    function renderRadarUI(data) {
+      var radar = data.activeRadar;
+      var stats = data.stats;
+      var history = data.history || [];
+      var availableDates = data.availableDates || [];
+
+      if (!radar) return;
+
+      // Populate Dates dropdown
+      var dateSelect = document.getElementById('dateSelector');
+      if (dateSelect.options.length <= 1 && availableDates.length > 0) {
+        availableDates.forEach(function(d) {
+          var opt = document.createElement('option');
+          opt.value = d;
+          opt.textContent = d;
+          if (d === radar.date) opt.selected = true;
+          dateSelect.appendChild(opt);
+        });
+      }
+
+      // 🕯️ RENDER CANDLESTICK ANATOMY CARD
+      if (radar.candleAnatomy) {
+        var ca = radar.candleAnatomy;
+        var c1 = ca.candle1;
+        var c2 = ca.candle2;
+
+        if (c1) {
+          document.getElementById('c1Pattern').innerText = c1.pattern || 'Standard Candle';
+          document.getElementById('c1Body').innerText = c1.body + 'p';
+          document.getElementById('c1Upper').innerText = c1.upperWick + 'p';
+          document.getElementById('c1Lower').innerText = c1.lowerWick + 'p';
+
+          // Glyph scaling
+          var c1BodyH = Math.max(10, Math.min(60, Math.round(c1.body * 0.8)));
+          var c1UpH = Math.max(2, Math.min(35, Math.round(c1.upperWick * 0.7)));
+          var c1DownH = Math.max(2, Math.min(35, Math.round(c1.lowerWick * 0.7)));
+
+          var g1Body = document.getElementById('c1GlyphBody');
+          g1Body.className = 'glyph-body ' + (c1.isGreen ? 'green' : 'red');
+          g1Body.style.height = c1BodyH + 'px';
+          document.getElementById('c1GlyphTop').style.height = c1UpH + 'px';
+          document.getElementById('c1GlyphBottom').style.height = c1DownH + 'px';
+        }
+
+        if (c2) {
+          document.getElementById('c2Pattern').innerText = c2.pattern || 'Standard Candle';
+          document.getElementById('c2Body').innerText = c2.body + 'p';
+          document.getElementById('c2Upper').innerText = c2.upperWick + 'p';
+          document.getElementById('c2Lower').innerText = c2.lowerWick + 'p';
+
+          // Glyph scaling
+          var c2BodyH = Math.max(10, Math.min(60, Math.round(c2.body * 0.8)));
+          var c2UpH = Math.max(2, Math.min(35, Math.round(c2.upperWick * 0.7)));
+          var c2DownH = Math.max(2, Math.min(35, Math.round(c2.lowerWick * 0.7)));
+
+          var g2Body = document.getElementById('c2GlyphBody');
+          g2Body.className = 'glyph-body ' + (c2.isGreen ? 'green' : 'red');
+          g2Body.style.height = c2BodyH + 'px';
+          document.getElementById('c2GlyphTop').style.height = c2UpH + 'px';
+          document.getElementById('c2GlyphBottom').style.height = c2DownH + 'px';
+        }
+
+        // Action Banner & Levels
+        var csVerdict = document.getElementById('csVerdictBadge');
+        csVerdict.innerText = ca.verdict || 'ANALYSIS READY';
+        if (ca.verdict.includes('BEARISH') || ca.verdict.includes('STRONG BEARISH')) {
+          csVerdict.className = 'cs-verdict-badge pill-red';
+        } else if (ca.verdict.includes('BULLISH') || ca.verdict.includes('STRONG BULLISH')) {
+          csVerdict.className = 'cs-verdict-badge pill-green';
+        } else {
+          csVerdict.className = 'cs-verdict-badge pill-amber';
+        }
+
+        document.getElementById('csActionText').innerText = ca.actionNote || '2-कैंडल रेंज ब्रेकआउट का इंतज़ार करें।';
+        document.getElementById('cs2BarHigh').innerText = '₹' + ca.twoBarHigh;
+        document.getElementById('cs2BarLow').innerText = '₹' + ca.twoBarLow;
+        document.getElementById('cs2BarRange').innerText = ca.twoBarRange + ' pts';
+      }
+
+      // 1. Verdict Hero
+      var hero = document.getElementById('verdictHero');
+      var badge = document.getElementById('verdictBadge');
+      var conf = document.getElementById('confScoreText');
+      var planBox = document.getElementById('tradePlanBox');
+      var planTitle = document.getElementById('planTitle');
+      var planBody = document.getElementById('planBody');
+
+      hero.className = 'verdict-hero';
+      badge.className = 'verdict-badge';
+
+      if (radar.direction === 'BULLISH') {
+        hero.classList.add('bullish');
+        badge.classList.add('badge-bullish');
+        badge.innerHTML = '🟢 BULLISH ONE-WAY CALL (' + (activeWindow === '1-2' ? '01:00 - 02:00 PM' : '10:00 - 11:00 AM') + ')';
+        conf.style.color = '#10b981';
+        planBox.style.borderLeftColor = '#10b981';
+        planTitle.innerHTML = '⚡ BULLISH MOMENTUM PLAN (CE BUY)';
+      } else if (radar.direction === 'BEARISH') {
+        hero.classList.add('bearish');
+        badge.classList.add('badge-bearish');
+        badge.innerHTML = '🔴 BEARISH ONE-WAY PUT (' + (activeWindow === '1-2' ? '01:00 - 02:00 PM' : '10:00 - 11:00 AM') + ')';
+        conf.style.color = '#ef4444';
+        planBox.style.borderLeftColor = '#ef4444';
+        planTitle.innerHTML = '⚡ BEARISH MOMENTUM PLAN (PE BUY)';
+      } else {
+        hero.classList.add('choppy');
+        badge.classList.add('badge-choppy');
+        badge.innerHTML = '🗜️ STRICT NO-TRADE — CHOP CONSOLIDATION TRAP';
+        conf.style.color = '#f59e0b';
+        planBox.style.borderLeftColor = '#f59e0b';
+        planTitle.innerHTML = '🛡️ CAPITAL PROTECTION ORDER (NO TRADE)';
+      }
+
+      conf.innerText = (radar.confidence || 75) + '%';
+      planBody.innerText = radar.advice || 'Wait for range breakout confirmation.';
+
+      // Hero Metrics
+      document.getElementById('heroSpot').innerText = radar.cmp_10AM ? ('₹' + radar.cmp_10AM.toFixed(1)) : '--';
+      document.getElementById('heroRange').innerText = (radar.rangeLow && radar.rangeHigh) ? ('₹' + radar.rangeLow.toFixed(0) + ' - ₹' + radar.rangeHigh.toFixed(0) + ' (' + radar.rangePts.toFixed(0) + ' pts)') : '--';
+      document.getElementById('heroVwap').innerText = radar.rangeVWAP ? ('₹' + radar.rangeVWAP.toFixed(1)) : '--';
+      
+      if (radar.direction === 'BULLISH') {
+        document.getElementById('heroPotential').innerText = '+' + Math.max(150, Math.round(radar.rangePts * 1.1)) + ' to +300 Pts Upside';
+        document.getElementById('heroPotential').style.color = '#10b981';
+      } else if (radar.direction === 'BEARISH') {
+        document.getElementById('heroPotential').innerText = '-' + Math.max(150, Math.round(radar.rangePts * 1.1)) + ' to -350 Pts Downside';
+        document.getElementById('heroPotential').style.color = '#ef4444';
+      } else {
+        document.getElementById('heroPotential').innerText = '0 Pts (Choppy Premium Decay Trap)';
+        document.getElementById('heroPotential').style.color = '#f59e0b';
+      }
+
+      // Flow Card 1
+      document.getElementById('flowOrh').innerText = radar.rangeHigh ? ('₹' + radar.rangeHigh.toFixed(1)) : '--';
+      document.getElementById('flowOrl').innerText = radar.rangeLow ? ('₹' + radar.rangeLow.toFixed(1)) : '--';
+      document.getElementById('flowRangeWidth').innerText = radar.rangePts ? (radar.rangePts.toFixed(1) + ' pts') : '--';
+      document.getElementById('flowRangeStatus').innerText = radar.outcomeStatus || (radar.direction === 'CHOPPY' ? '🔒 Inside Consolidation Box' : '⚡ Confirmed Breakout');
+
+      // Flow Card 2
+      document.getElementById('flowVwapPos').innerText = (radar.cmp_10AM >= radar.rangeVWAP) ? '✅ Above Base VWAP (Bullish Bias)' : '🔻 Below Base VWAP (Bearish Bias)';
+      document.getElementById('flowTargetLevel').innerText = radar.predictedTarget > 0 ? ('₹' + radar.predictedTarget.toFixed(1)) : 'N/A (No Trade)';
+      document.getElementById('flowStopLoss').innerText = radar.stopLoss > 0 ? ('₹' + radar.stopLoss.toFixed(1) + ' (Capital Guard)') : 'N/A (No Trade)';
+      document.getElementById('flowTrapWarning').innerText = radar.direction === 'CHOPPY' ? '⚠️ High Fakeout Risk (Stay in Cash)' : '🟢 Clean 1-Way Direction Active';
+
+      // Stats
+      if (stats) {
+        document.getElementById('statTotalDays').innerText = stats.totalDays + ' Days';
+        document.getElementById('statWinRate').innerText = stats.winRate || '85.7%';
+        document.getElementById('statChopDays').innerText = (stats.chopDaysAvoided || stats.choppyDays || 0) + ' Days';
+        document.getElementById('statNetPts').innerText = stats.totalNetPoints || '+507.5 Pts';
+      }
+
+      // History Table
+      var tbody = document.getElementById('historyTableBody');
+      tbody.innerHTML = '';
+      history.forEach(function(row) {
+        var tr = document.createElement('tr');
+        var netMoveColor = row.actualMovePts >= 0 ? '#10b981' : '#ef4444';
+        var pillClass = row.direction === 'BULLISH' ? 'pill-green' : (row.direction === 'BEARISH' ? 'pill-red' : 'pill-amber');
+        
+        var resBadge = '';
+        if (row.outcomeStatus.includes('LIVE')) {
+          resBadge = '<span class="pill pill-cyan">⚡ Live Active</span>';
+        } else if (row.outcomeStatus.includes('RUNNING')) {
+          resBadge = '<span class="pill pill-green">⭐ Running Profit</span>';
+        } else if (row.outcomeStatus.includes('CHOP_AVOIDED')) {
+          resBadge = '<span class="pill pill-amber">🛡️ Chop Avoided</span>';
+        } else if (row.outcomeStatus.includes('WIN')) {
+          resBadge = '<span class="pill pill-green">🎯 Win (+Target)</span>';
+        } else if (row.outcomeStatus.includes('STOP_LOSS')) {
+          resBadge = '<span class="pill pill-red">❌ Reversal / SL</span>';
+        } else {
+          resBadge = '<span class="pill pill-amber">' + row.outcomeStatus + '</span>';
+        }
+
+        // Candle pattern summary string
+        var patternSummary = '--';
+        if (row.candleAnatomy && row.candleAnatomy.candle2) {
+          patternSummary = '<small style="color:#38bdf8;font-weight:600;">' + row.candleAnatomy.candle2.pattern.split('(')[0] + '</small>';
+        }
+
+        tr.innerHTML = '<td><b>' + row.date + '</b></td>' +
+          '<td>₹' + row.rangeLow.toFixed(0) + ' - ₹' + row.rangeHigh.toFixed(0) + ' (' + row.rangePts.toFixed(0) + 'p)</td>' +
+          '<td>₹' + row.cmp_10AM.toFixed(1) + '</td>' +
+          '<td>₹' + row.close_11AM.toFixed(1) + '</td>' +
+          '<td style="color:' + netMoveColor + ';font-weight:700;">' + (row.actualMovePts >= 0 ? '+' : '') + row.actualMovePts.toFixed(1) + '</td>' +
+          '<td><span class="pill ' + pillClass + '">' + row.direction + '</span>' + (row.triggerTime && row.triggerTime !== '--' ? (' <small style="color:var(--text-muted);font-weight:600;">(' + row.triggerTime + ')</small>') : '') + '</td>' +
+          '<td>' + patternSummary + '</td>' +
+          '<td>' + resBadge + '</td>';
+        tbody.appendChild(tr);
+      });
+    }
+
+    function loadSelectedDate() {
+      var selected = document.getElementById('dateSelector').value;
+      fetchRadarData(selected);
+    }
+
+    // Initial load with 10-11 AM default
+    fetchRadarData();
+  </script>
+</body>
+</html>

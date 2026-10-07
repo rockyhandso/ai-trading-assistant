@@ -1,0 +1,548 @@
+{
+  "totalTrainingEpochs": 93,
+  "lastTrainedAt": "2026-09-18T03:41:19.206Z",
+  "stockProfiles": {
+    "NIFTY": {
+      "trainedIterations": 39,
+      "weights": {
+        "vwapWeight": 1,
+        "emaWeight": 1,
+        "rsiWeight": 1,
+        "mtfWeight": 1,
+        "volumeTrapPenalty": 2,
+        "pivotProximityPenalty": 2,
+        "rsiOverboughtThreshold": 62,
+        "rsiOversoldThreshold": 30,
+        "slMultiplier": 1.2,
+        "targetMultiplier": 1.5,
+        "trainedIterations": 39
+      },
+      "accuracyHistory": [
+        88.7,
+        88.7,
+        88.7,
+        87.5,
+        87.5,
+        57.8,
+        57.8,
+        57.8,
+        88.7,
+        88.7,
+        88.7,
+        88.7,
+        88.7,
+        73.3,
+        73.3,
+        73.3,
+        96,
+        96.4,
+        97.6,
+        96,
+        95.7,
+        96,
+        87.5,
+        87.5,
+        87.5,
+        87.5,
+        87.5,
+        87.5,
+        96,
+        96,
+        23.3
+      ],
+      "lastTrained": "2026-09-17T11:06:44.422Z",
+      "trainingSummary": [
+        "🎯 Training Dataset: 301 Intraday 5m Candles analyzed across past 5 sessions.",
+        "🧠 Pivot Penalty Recalibrated: 2 ➔ 2 (Protected against support bounce traps).",
+        "🧠 RSI Overbought Threshold: 62 ➔ 62 (Prevented buying fatigue traps).",
+        "🚀 Model Accuracy Improved: 16.7% ➔ 23.3% (+6.6% Boost).",
+        "🚨 Failure Bank: 8 previously recorded mistakes & traps resolved into active safety rules."
+      ]
+    },
+    "BANKNIFTY": {
+      "trainedIterations": 26,
+      "weights": {
+        "vwapWeight": 1,
+        "emaWeight": 1,
+        "rsiWeight": 1,
+        "mtfWeight": 1,
+        "volumeTrapPenalty": 2,
+        "pivotProximityPenalty": 2,
+        "rsiOverboughtThreshold": 62,
+        "rsiOversoldThreshold": 30,
+        "slMultiplier": 1.2,
+        "targetMultiplier": 1.5,
+        "trainedIterations": 26
+      },
+      "accuracyHistory": [
+        73.3,
+        73.3,
+        73.3,
+        88.7,
+        96,
+        96,
+        96,
+        96,
+        97.2,
+        97.9,
+        98.8,
+        70.9,
+        70.9,
+        88.7,
+        88.7,
+        55.4,
+        55.4,
+        39.9
+      ],
+      "lastTrained": "2026-09-18T03:41:19.206Z",
+      "trainingSummary": [
+        "🎯 Training Dataset: 301 Intraday 5m Candles analyzed across past 5 sessions.",
+        "🧠 Pivot Penalty Recalibrated: 2 ➔ 2 (Protected against support bounce traps).",
+        "🧠 RSI Overbought Threshold: 62 ➔ 62 (Prevented buying fatigue traps).",
+        "🚀 Model Accuracy Improved: 33.3% ➔ 39.9% (+6.6% Boost).",
+        "🚨 Failure Bank: 2 previously recorded mistakes & traps resolved into active safety rules."
+      ]
+    },
+    "RELIANCE": {
+      "trainedIterations": 17,
+      "weights": {
+        "vwapWeight": 1,
+        "emaWeight": 1,
+        "rsiWeight": 1,
+        "mtfWeight": 1,
+        "volumeTrapPenalty": 1.62,
+        "pivotProximityPenalty": 1.95,
+        "rsiOverboughtThreshold": 67,
+        "rsiOversoldThreshold": 30,
+        "slMultiplier": 1.2,
+        "targetMultiplier": 1.5,
+        "trainedIterations": 17
+      },
+      "accuracyHistory": [
+        37.5,
+        76,
+        82,
+        83.5,
+        72.1,
+        72.1,
+        72.1,
+        96,
+        73.3
+      ],
+      "lastTrained": "2026-09-17T11:06:44.975Z",
+      "trainingSummary": [
+        "🎯 Training Dataset: 292 Intraday 5m Candles analyzed across past 5 sessions.",
+        "🧠 Pivot Penalty Recalibrated: 1.65 ➔ 1.95 (Protected against support bounce traps).",
+        "🧠 RSI Overbought Threshold: 67.5 ➔ 67 (Prevented buying fatigue traps).",
+        "🚀 Model Accuracy Improved: 66.7% ➔ 73.3% (+6.6% Boost).",
+        "🚨 Failure Bank: 4 previously recorded mistakes & traps resolved into active safety rules."
+      ]
+    },
+    "HDFCBANK": {
+      "trainedIterations": 15,
+      "weights": {
+        "vwapWeight": 1,
+        "emaWeight": 1,
+        "rsiWeight": 1,
+        "mtfWeight": 1,
+        "volumeTrapPenalty": 1.4,
+        "pivotProximityPenalty": 1.8,
+        "rsiOverboughtThreshold": 68,
+        "rsiOversoldThreshold": 30,
+        "slMultiplier": 1.2,
+        "targetMultiplier": 1.5,
+        "trainedIterations": 15
+      },
+      "accuracyHistory": [
+        41.1,
+        76,
+        82,
+        83.2,
+        55.4,
+        87.5,
+        54.2
+      ],
+      "lastTrained": "2026-09-17T11:06:45.602Z",
+      "trainingSummary": [
+        "🎯 Training Dataset: 292 Intraday 5m Candles analyzed across past 5 sessions.",
+        "🧠 Pivot Penalty Recalibrated: 1.7 ➔ 1.8 (Protected against support bounce traps).",
+        "🧠 RSI Overbought Threshold: 68.5 ➔ 68 (Prevented buying fatigue traps).",
+        "🚀 Model Accuracy Improved: 50% ➔ 54.2% (+4.2% Boost).",
+        "🚨 Failure Bank: 7 previously recorded mistakes & traps resolved into active safety rules."
+      ]
+    },
+    "ONGC": {
+      "trainedIterations": 14,
+      "weights": {
+        "vwapWeight": 1,
+        "emaWeight": 1,
+        "rsiWeight": 1,
+        "mtfWeight": 1,
+        "volumeTrapPenalty": 1.8,
+        "pivotProximityPenalty": 2,
+        "rsiOverboughtThreshold": 63.5,
+        "rsiOversoldThreshold": 32,
+        "slMultiplier": 1.2,
+        "targetMultiplier": 1.5,
+        "trainedIterations": 14
+      },
+      "accuracyHistory": [
+        85,
+        85.8,
+        86.8,
+        88.1,
+        87.5,
+        96,
+        73.3
+      ],
+      "lastTrained": "2026-09-17T11:06:48.315Z",
+      "trainingSummary": [
+        "🎯 Training Dataset: 291 Intraday 5m Candles analyzed across past 5 sessions.",
+        "🧠 Pivot Penalty Recalibrated: 2 ➔ 2 (Protected against support bounce traps).",
+        "🧠 RSI Overbought Threshold: 64 ➔ 63.5 (Prevented buying fatigue traps).",
+        "🚀 Model Accuracy Improved: 66.7% ➔ 73.3% (+6.6% Boost).",
+        "🚨 Failure Bank: 1 previously recorded mistakes & traps resolved into active safety rules."
+      ]
+    },
+    "TATASTEEL": {
+      "trainedIterations": 15,
+      "weights": {
+        "vwapWeight": 1,
+        "emaWeight": 1,
+        "rsiWeight": 1,
+        "mtfWeight": 1,
+        "volumeTrapPenalty": 1.9,
+        "pivotProximityPenalty": 2,
+        "rsiOverboughtThreshold": 63,
+        "rsiOversoldThreshold": 32,
+        "slMultiplier": 1.2,
+        "targetMultiplier": 1.5,
+        "trainedIterations": 15
+      },
+      "accuracyHistory": [
+        85,
+        84.9,
+        85,
+        86.7,
+        88.7,
+        88.7,
+        88.7,
+        70.9
+      ],
+      "lastTrained": "2026-09-17T11:06:47.567Z",
+      "trainingSummary": [
+        "🎯 Training Dataset: 292 Intraday 5m Candles analyzed across past 5 sessions.",
+        "🧠 Pivot Penalty Recalibrated: 2 ➔ 2 (Protected against support bounce traps).",
+        "🧠 RSI Overbought Threshold: 63.5 ➔ 63 (Prevented buying fatigue traps).",
+        "🚀 Model Accuracy Improved: 66.7% ➔ 70.9% (+4.2% Boost).",
+        "🚨 Failure Bank: 4 previously recorded mistakes & traps resolved into active safety rules."
+      ]
+    },
+    "BEL": {
+      "trainedIterations": 14,
+      "weights": {
+        "vwapWeight": 1,
+        "emaWeight": 1,
+        "rsiWeight": 1,
+        "mtfWeight": 1,
+        "volumeTrapPenalty": 1.82,
+        "pivotProximityPenalty": 2,
+        "rsiOverboughtThreshold": 62.8,
+        "rsiOversoldThreshold": 32,
+        "slMultiplier": 1.2,
+        "targetMultiplier": 1.5,
+        "trainedIterations": 14
+      },
+      "accuracyHistory": [
+        85,
+        85,
+        86.2,
+        86.7,
+        96,
+        88.7,
+        70.9
+      ],
+      "lastTrained": "2026-09-17T11:06:47.302Z",
+      "trainingSummary": [
+        "🎯 Training Dataset: 292 Intraday 5m Candles analyzed across past 5 sessions.",
+        "🧠 Pivot Penalty Recalibrated: 2 ➔ 2 (Protected against support bounce traps).",
+        "🧠 RSI Overbought Threshold: 64 ➔ 62.8 (Prevented buying fatigue traps).",
+        "🚀 Model Accuracy Improved: 66.7% ➔ 70.9% (+4.2% Boost).",
+        "🚨 Failure Bank: 3 previously recorded mistakes & traps resolved into active safety rules."
+      ]
+    },
+    "ITC": {
+      "trainedIterations": 14,
+      "weights": {
+        "vwapWeight": 1,
+        "emaWeight": 1,
+        "rsiWeight": 1,
+        "mtfWeight": 1,
+        "volumeTrapPenalty": 1.8,
+        "pivotProximityPenalty": 2,
+        "rsiOverboughtThreshold": 63.5,
+        "rsiOversoldThreshold": 32,
+        "slMultiplier": 1.2,
+        "targetMultiplier": 1.5,
+        "trainedIterations": 14
+      },
+      "accuracyHistory": [
+        85,
+        85.2,
+        87.1,
+        88,
+        56.6,
+        96,
+        54.2
+      ],
+      "lastTrained": "2026-09-17T11:06:47.011Z",
+      "trainingSummary": [
+        "🎯 Training Dataset: 291 Intraday 5m Candles analyzed across past 5 sessions.",
+        "🧠 Pivot Penalty Recalibrated: 2 ➔ 2 (Protected against support bounce traps).",
+        "🧠 RSI Overbought Threshold: 64 ➔ 63.5 (Prevented buying fatigue traps).",
+        "🚀 Model Accuracy Improved: 50% ➔ 54.2% (+4.2% Boost).",
+        "🚨 Failure Bank: 1 previously recorded mistakes & traps resolved into active safety rules."
+      ]
+    },
+    "INFY": {
+      "trainedIterations": 14,
+      "weights": {
+        "vwapWeight": 1,
+        "emaWeight": 1,
+        "rsiWeight": 1,
+        "mtfWeight": 1,
+        "volumeTrapPenalty": 1.8,
+        "pivotProximityPenalty": 2,
+        "rsiOverboughtThreshold": 63.5,
+        "rsiOversoldThreshold": 32,
+        "slMultiplier": 1.2,
+        "targetMultiplier": 1.5,
+        "trainedIterations": 14
+      },
+      "accuracyHistory": [
+        85,
+        86.4,
+        88,
+        88.3,
+        96,
+        87.5,
+        73.3
+      ],
+      "lastTrained": "2026-09-17T11:06:46.704Z",
+      "trainingSummary": [
+        "🎯 Training Dataset: 291 Intraday 5m Candles analyzed across past 5 sessions.",
+        "🧠 Pivot Penalty Recalibrated: 2 ➔ 2 (Protected against support bounce traps).",
+        "🧠 RSI Overbought Threshold: 64 ➔ 63.5 (Prevented buying fatigue traps).",
+        "🚀 Model Accuracy Improved: 66.7% ➔ 73.3% (+6.6% Boost)."
+      ]
+    },
+    "NIFTYBEES": {
+      "trainedIterations": 14,
+      "weights": {
+        "vwapWeight": 1,
+        "emaWeight": 1,
+        "rsiWeight": 1,
+        "mtfWeight": 1,
+        "volumeTrapPenalty": 1.82,
+        "pivotProximityPenalty": 2,
+        "rsiOverboughtThreshold": 62.8,
+        "rsiOversoldThreshold": 32,
+        "slMultiplier": 1.2,
+        "targetMultiplier": 1.5,
+        "trainedIterations": 14
+      },
+      "accuracyHistory": [
+        85,
+        85.8,
+        87.2,
+        87.1,
+        73.3,
+        87.5,
+        55.4
+      ],
+      "lastTrained": "2026-09-17T11:06:48.595Z",
+      "trainingSummary": [
+        "🎯 Training Dataset: 301 Intraday 5m Candles analyzed across past 5 sessions.",
+        "🧠 Pivot Penalty Recalibrated: 2 ➔ 2 (Protected against support bounce traps).",
+        "🧠 RSI Overbought Threshold: 64 ➔ 62.8 (Prevented buying fatigue traps).",
+        "🚀 Model Accuracy Improved: 50% ➔ 55.4% (+5.4% Boost).",
+        "🚨 Failure Bank: 2 previously recorded mistakes & traps resolved into active safety rules."
+      ]
+    },
+    "ICICIBANK": {
+      "trainedIterations": 3,
+      "weights": {
+        "vwapWeight": 1,
+        "emaWeight": 1,
+        "rsiWeight": 1,
+        "mtfWeight": 1,
+        "volumeTrapPenalty": 1.3,
+        "pivotProximityPenalty": 1.35,
+        "rsiOverboughtThreshold": 68.5,
+        "rsiOversoldThreshold": 30,
+        "slMultiplier": 1.2,
+        "targetMultiplier": 1.5,
+        "trainedIterations": 3
+      },
+      "accuracyHistory": [
+        55.4,
+        96,
+        87.5
+      ],
+      "lastTrained": "2026-09-17T11:06:45.263Z",
+      "trainingSummary": [
+        "🎯 Training Dataset: 292 Intraday 5m Candles analyzed across past 5 sessions.",
+        "🧠 Pivot Penalty Recalibrated: 1.25 ➔ 1.35 (Protected against support bounce traps).",
+        "🧠 RSI Overbought Threshold: 69 ➔ 68.5 (Prevented buying fatigue traps).",
+        "🚀 Model Accuracy Improved: 83.3% ➔ 87.5% (+4.2% Boost).",
+        "🚨 Failure Bank: 10 previously recorded mistakes & traps resolved into active safety rules."
+      ]
+    },
+    "SBIN": {
+      "trainedIterations": 3,
+      "weights": {
+        "vwapWeight": 1,
+        "emaWeight": 1,
+        "rsiWeight": 1,
+        "mtfWeight": 1,
+        "volumeTrapPenalty": 1.3,
+        "pivotProximityPenalty": 1.45,
+        "rsiOverboughtThreshold": 68.5,
+        "rsiOversoldThreshold": 30,
+        "slMultiplier": 1.2,
+        "targetMultiplier": 1.5,
+        "trainedIterations": 3
+      },
+      "accuracyHistory": [
+        72.1,
+        88.7,
+        55.4
+      ],
+      "lastTrained": "2026-09-17T11:06:45.900Z",
+      "trainingSummary": [
+        "🎯 Training Dataset: 292 Intraday 5m Candles analyzed across past 5 sessions.",
+        "🧠 Pivot Penalty Recalibrated: 1.3 ➔ 1.45 (Protected against support bounce traps).",
+        "🧠 RSI Overbought Threshold: 69 ➔ 68.5 (Prevented buying fatigue traps).",
+        "🚀 Model Accuracy Improved: 50% ➔ 55.4% (+5.4% Boost).",
+        "🚨 Failure Bank: 7 previously recorded mistakes & traps resolved into active safety rules."
+      ]
+    },
+    "TCS": {
+      "trainedIterations": 3,
+      "weights": {
+        "vwapWeight": 1,
+        "emaWeight": 1,
+        "rsiWeight": 1,
+        "mtfWeight": 1,
+        "volumeTrapPenalty": 1.3,
+        "pivotProximityPenalty": 1.5,
+        "rsiOverboughtThreshold": 68.5,
+        "rsiOversoldThreshold": 30,
+        "slMultiplier": 1.2,
+        "targetMultiplier": 1.5,
+        "trainedIterations": 3
+      },
+      "accuracyHistory": [
+        56.6,
+        20.9,
+        70.9
+      ],
+      "lastTrained": "2026-09-17T11:06:46.459Z",
+      "trainingSummary": [
+        "🎯 Training Dataset: 291 Intraday 5m Candles analyzed across past 5 sessions.",
+        "🧠 Pivot Penalty Recalibrated: 1.4 ➔ 1.5 (Protected against support bounce traps).",
+        "🧠 RSI Overbought Threshold: 69 ➔ 68.5 (Prevented buying fatigue traps).",
+        "🚀 Model Accuracy Improved: 66.7% ➔ 70.9% (+4.2% Boost)."
+      ]
+    },
+    "NTPC": {
+      "trainedIterations": 3,
+      "weights": {
+        "vwapWeight": 1,
+        "emaWeight": 1,
+        "rsiWeight": 1,
+        "mtfWeight": 1,
+        "volumeTrapPenalty": 1.3,
+        "pivotProximityPenalty": 1.35,
+        "rsiOverboughtThreshold": 68.5,
+        "rsiOversoldThreshold": 30,
+        "slMultiplier": 1.2,
+        "targetMultiplier": 1.5,
+        "trainedIterations": 3
+      },
+      "accuracyHistory": [
+        54.2,
+        88.7,
+        87.5
+      ],
+      "lastTrained": "2026-09-17T11:06:47.815Z",
+      "trainingSummary": [
+        "🎯 Training Dataset: 292 Intraday 5m Candles analyzed across past 5 sessions.",
+        "🧠 Pivot Penalty Recalibrated: 1.25 ➔ 1.35 (Protected against support bounce traps).",
+        "🧠 RSI Overbought Threshold: 69 ➔ 68.5 (Prevented buying fatigue traps).",
+        "🚀 Model Accuracy Improved: 83.3% ➔ 87.5% (+4.2% Boost)."
+      ]
+    },
+    "COALINDIA": {
+      "trainedIterations": 3,
+      "weights": {
+        "vwapWeight": 1,
+        "emaWeight": 1,
+        "rsiWeight": 1,
+        "mtfWeight": 1,
+        "volumeTrapPenalty": 1.3,
+        "pivotProximityPenalty": 1.5,
+        "rsiOverboughtThreshold": 68.5,
+        "rsiOversoldThreshold": 30,
+        "slMultiplier": 1.2,
+        "targetMultiplier": 1.5,
+        "trainedIterations": 3
+      },
+      "accuracyHistory": [
+        96,
+        96,
+        73.3
+      ],
+      "lastTrained": "2026-09-17T11:06:48.071Z",
+      "trainingSummary": [
+        "🎯 Training Dataset: 292 Intraday 5m Candles analyzed across past 5 sessions.",
+        "🧠 Pivot Penalty Recalibrated: 1.2 ➔ 1.5 (Protected against support bounce traps).",
+        "🧠 RSI Overbought Threshold: 69 ➔ 68.5 (Prevented buying fatigue traps).",
+        "🚀 Model Accuracy Improved: 66.7% ➔ 73.3% (+6.6% Boost).",
+        "🚨 Failure Bank: 2 previously recorded mistakes & traps resolved into active safety rules."
+      ]
+    },
+    "POWERGRID": {
+      "trainedIterations": 3,
+      "weights": {
+        "vwapWeight": 1,
+        "emaWeight": 1,
+        "rsiWeight": 1,
+        "mtfWeight": 1,
+        "volumeTrapPenalty": 1.3,
+        "pivotProximityPenalty": 1.5,
+        "rsiOverboughtThreshold": 68.5,
+        "rsiOversoldThreshold": 30,
+        "slMultiplier": 1.2,
+        "targetMultiplier": 1.5,
+        "trainedIterations": 3
+      },
+      "accuracyHistory": [
+        87.5,
+        87.5,
+        73.3
+      ],
+      "lastTrained": "2026-09-17T11:06:48.858Z",
+      "trainingSummary": [
+        "🎯 Training Dataset: 291 Intraday 5m Candles analyzed across past 5 sessions.",
+        "🧠 Pivot Penalty Recalibrated: 1.2 ➔ 1.5 (Protected against support bounce traps).",
+        "🧠 RSI Overbought Threshold: 69 ➔ 68.5 (Prevented buying fatigue traps).",
+        "🚀 Model Accuracy Improved: 66.7% ➔ 73.3% (+6.6% Boost)."
+      ]
+    }
+  },
+  "globalLearnings": [
+    "⚡ Dynamic SL Multiplier: Calibrated ATR buffer across high-volatility sessions.",
+    "⚡ Institutional Pivot Rejection Penalty: Active on S1/S2 demand zones."
+  ]
+}

@@ -1,0 +1,1656 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unified Volume Footprint Candlestick Terminal | Sameer AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #070a12;
+      --bg-card: rgba(16, 23, 41, 0.95);
+      --bg-card-hover: rgba(23, 33, 58, 0.98);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(56, 189, 248, 0.3);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --color-green: #10b981;
+      --color-green-glow: rgba(16, 185, 129, 0.25);
+      --color-red: #ef4444;
+      --color-red-glow: rgba(239, 68, 68, 0.25);
+      --color-cyan: #06b6d4;
+      --color-amber: #f59e0b;
+      --color-purple: #a855f7;
+      --color-poc: #fbbf24;
+      --color-poc-bg: rgba(251, 191, 36, 0.22);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: var(--bg-primary);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(168, 85, 247, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.08) 0px, transparent 50%);
+      color: var(--text-primary);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      padding-bottom: 3rem;
+      overflow-x: hidden;
+    }
+
+    /* Top Nav */
+    .fp-header {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+      gap: 1rem; padding: 0.85rem 1.5rem;
+      background: var(--bg-card); border-bottom: 1px solid var(--border-color);
+      backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 100;
+    }
+    .fp-header-left { display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap; }
+    .nav-btn {
+      display: flex; align-items: center; gap: 0.4rem;
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border-color);
+      color: var(--text-secondary); padding: 0.4rem 0.85rem; border-radius: 8px;
+      font-size: 0.82rem; cursor: pointer; text-decoration: none; transition: all 0.2s ease;
+      font-weight: 600;
+    }
+    .nav-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .fp-title {
+      font-size: 1.15rem; font-weight: 700;
+      background: linear-gradient(135deg, #ec4899, #8b5cf6, #38bdf8);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .fp-subtitle { font-size: 0.72rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .fp-header-right { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+
+    /* Mode Navigation Tabs */
+    .mode-tab-bar {
+      max-width: 1440px; margin: 1rem auto 0; padding: 0.4rem;
+      background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-color);
+      border-radius: 12px; display: flex; gap: 0.5rem;
+    }
+    .mode-tab {
+      flex: 1; text-align: center; padding: 0.65rem 1rem;
+      border-radius: 8px; font-weight: 700; font-size: 0.9rem;
+      cursor: pointer; transition: all 0.2s ease;
+      border: 1px solid transparent; color: var(--text-secondary);
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .mode-tab:hover { color: #fff; background: rgba(255,255,255,0.04); }
+    .mode-tab.active {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(168, 85, 247, 0.25));
+      border-color: #38bdf8; color: #fff; box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
+    }
+
+    /* Controls Strip */
+    .controls-strip {
+      max-width: 1440px; margin: 0.75rem auto 0; padding: 0.85rem 1.25rem;
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 12px; display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    .control-group { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .control-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .chip-btn {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border-color);
+      color: var(--text-secondary); padding: 0.35rem 0.75rem; border-radius: 8px;
+      font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease;
+    }
+    .chip-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }
+    .chip-btn.active {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(6, 182, 212, 0.3));
+      border-color: #38bdf8; color: #fff; box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+    }
+
+    .select-input {
+      background: #0d1322; border: 1px solid var(--border-color);
+      color: var(--text-primary); padding: 0.4rem 0.85rem; border-radius: 8px;
+      font-size: 0.82rem; font-family: inherit; font-weight: 600; cursor: pointer; outline: none;
+    }
+    .select-input:focus { border-color: #38bdf8; }
+
+    /* Trapped Alert Banner */
+    .trapped-alert-banner {
+      max-width: 1440px; margin: 0.85rem auto 0; padding: 0.85rem 1.25rem;
+      border-radius: 10px; display: none; align-items: center; justify-content: space-between;
+      font-size: 0.85rem; font-weight: 600; animation: pulseGlow 2.5s infinite;
+    }
+    .trapped-alert-banner.bearish {
+      display: flex; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5;
+    }
+    .trapped-alert-banner.bullish {
+      display: flex; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7;
+    }
+
+    /* HUD Stats Grid */
+    .hud-grid {
+      max-width: 1440px; margin: 0.85rem auto 0; display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.85rem;
+    }
+    .hud-card {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 12px; padding: 1rem 1.15rem; position: relative; overflow: hidden;
+    }
+    .hud-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--card-accent, #38bdf8), transparent);
+    }
+    .hud-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+    .hud-value { font-size: 1.35rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; margin: 0.35rem 0 0.15rem; }
+    .hud-desc { font-size: 0.75rem; color: var(--text-secondary); }
+
+    /* ========================================================
+       🌟 UNIFIED FOOTPRINT CANDLESTICK CHART CONTAINER
+       ======================================================== */
+    .unified-chart-wrapper {
+      max-width: 1440px; margin: 1rem auto 0;
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 14px; padding: 1.25rem;
+      position: relative;
+    }
+
+    .chart-top-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.75rem; padding-bottom: 0.65rem; border-bottom: 1px solid var(--border-color);
+      flex-wrap: wrap; gap: 0.75rem;
+    }
+    .chart-top-title {
+      font-size: 1.05rem; font-weight: 700; color: #fff;
+      display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+    }
+    .chart-controls-nav {
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .btn-chart-ctrl {
+      background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-color);
+      color: #fff; padding: 0.3rem 0.65rem; border-radius: 6px; font-size: 0.78rem;
+      font-weight: 700; cursor: pointer; transition: all 0.15s ease;
+    }
+    .btn-chart-ctrl:hover { background: rgba(56, 189, 248, 0.25); border-color: #38bdf8; }
+
+    /* Legend Bar */
+    .chart-live-legend {
+      display: flex; align-items: center; gap: 0.85rem; font-size: 0.78rem;
+      font-family: 'JetBrains Mono', monospace; color: var(--text-secondary);
+      flex-wrap: wrap; margin-bottom: 0.65rem;
+    }
+    .chart-live-legend span b { color: #fff; }
+
+    /* Canvas Stage Container */
+    .canvas-viewport {
+      width: 100%;
+      height: 600px;
+      position: relative;
+      background: #090e1c;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: crosshair;
+    }
+    #footprintCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Floating Hover Tooltip */
+    .chart-hover-tooltip {
+      position: absolute; display: none;
+      background: rgba(15, 23, 42, 0.96); border: 1px solid #38bdf8;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      border-radius: 8px; padding: 0.6rem 0.85rem;
+      font-size: 0.75rem; font-family: 'JetBrains Mono', monospace;
+      color: #fff; pointer-events: none; z-index: 50;
+      white-space: nowrap;
+    }
+
+    /* Synced CVD Area Below */
+    .cvd-sub-container {
+      width: 100%; height: 110px; margin-top: 0.65rem;
+      background: rgba(9, 14, 28, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px; position: relative;
+    }
+    #cvdCanvas {
+      width: 100%; height: 100%; display: block;
+    }
+
+    /* Backtest Audit Table */
+    .audit-card {
+      max-width: 1440px; margin: 1.25rem auto 0;
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 14px; padding: 1.25rem;
+    }
+    .audit-table {
+      width: 100%; border-collapse: collapse; margin-top: 0.75rem;
+      font-size: 0.8rem; font-family: 'JetBrains Mono', monospace;
+    }
+    .audit-table th {
+      text-align: left; padding: 0.6rem 0.75rem;
+      background: rgba(255,255,255,0.03); color: var(--text-muted);
+      font-size: 0.72rem; text-transform: uppercase; font-weight: 700;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .audit-table td {
+      padding: 0.6rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: #e2e8f0;
+    }
+    .audit-table tr:hover { background: rgba(255,255,255,0.02); }
+
+    .badge-signal {
+      padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 0.72rem;
+      display: inline-block;
+    }
+    .badge-ce { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.4); }
+    .badge-pe { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.4); }
+
+    .badge-target { background: rgba(16, 185, 129, 0.2); color: #10b981; font-weight: 700; }
+    .badge-trail { background: rgba(56, 189, 248, 0.2); color: #38bdf8; font-weight: 700; }
+    .badge-sl { background: rgba(239, 68, 68, 0.2); color: #ef4444; font-weight: 700; }
+
+    /* Strategy Cheat Sheet */
+    .strategy-section {
+      max-width: 1440px; margin: 1.5rem auto 0;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem;
+    }
+    .strategy-card {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 12px; padding: 1.15rem;
+    }
+    .sc-header { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.95rem; margin-bottom: 0.5rem; }
+    .sc-header.green { color: #34d399; }
+    .sc-header.red { color: #f87171; }
+    .sc-header.amber { color: #fbbf24; }
+    .strategy-card p { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 0.5rem; }
+    .sc-rule {
+      background: rgba(0,0,0,0.3); border-left: 3px solid #38bdf8;
+      padding: 0.4rem 0.65rem; border-radius: 0 6px 6px 0; font-size: 0.75rem; color: #e2e8f0;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.2); }
+      50% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="fp-header">
+    <div class="fp-header-left">
+      <a href="/" class="nav-btn">🏠 Main Dashboard</a>
+      <a href="/banknifty-radar.html" class="nav-btn">🎯 10-11 AM Radar</a>
+      <a href="/option-chain.html" class="nav-btn">📊 Option Chain</a>
+      <a href="/premarket.html" class="nav-btn">🌅 Pre-Market</a>
+      <a href="/golden-checklist.html" class="nav-btn" style="border-color:rgba(251,191,36,0.5);color:#fbbf24;" target="_blank">📋 30s Checklist (PDF)</a>
+      <a href="/footprint-replay.html" class="nav-btn" style="border-color:rgba(168,85,247,0.6);background:rgba(168,85,247,0.18);color:#c084fc;font-weight:700;">🎮 Bar Replay Simulator</a>
+      <div>
+        <div class="fp-title">🔬 Unified Footprint Candlestick Terminal</div>
+        <div class="fp-subtitle">
+          <span>कैंडल के अंदर ही लाइव फुटप्रिंट (Bid x Ask • POC • Stacked Imbalances) • One Single Chart</span>
+          <span style="background:rgba(6,182,212,0.15); color:#06b6d4; border:1px solid rgba(6,182,212,0.3); padding:1px 6px; border-radius:4px; font-weight:700; font-size:0.68rem;">🇮🇳 Indian Standard Time (IST)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="fp-header-right">
+      <button id="refreshBtn" class="nav-btn" style="background:#0284c7;color:#fff;border:none;">🔄 Refresh</button>
+      <label id="autoRefreshLabel" style="font-size:0.75rem;color:var(--text-secondary);display:flex;align-items:center;gap:0.35rem;cursor:pointer;">
+        <input type="checkbox" id="autoRefreshCheck" checked> Live 10s Auto-Update
+      </label>
+    </div>
+  </header>
+
+  <!-- Mode Switcher Tabs -->
+  <div class="mode-tab-bar">
+    <div class="mode-tab active" id="tabLive" onclick="setMode('live')">
+      <span>⚡ Live Real-Time Order Flow</span>
+    </div>
+    <div class="mode-tab" id="tabBacktest" onclick="setMode('backtest')">
+      <span>📅 Historical Backtest &amp; Date Replay</span>
+    </div>
+  </div>
+
+  <!-- Controls Strip -->
+  <div class="controls-strip">
+    <!-- Symbol Selector -->
+    <div class="control-group">
+      <span class="control-label">Symbol:</span>
+      <button class="chip-btn active" data-symbol="BANKNIFTY">🏦 BANK NIFTY</button>
+      <button class="chip-btn" data-symbol="NIFTY">⭐ NIFTY 50</button>
+      <button class="chip-btn" data-symbol="RELIANCE">RELIANCE</button>
+      <button class="chip-btn" data-symbol="HDFCBANK">HDFCBANK</button>
+      <button class="chip-btn" data-symbol="ICICIBANK">ICICIBANK</button>
+      <button class="chip-btn" data-symbol="TATASTEEL">TATASTEEL</button>
+    </div>
+
+    <!-- Timeframe Selector -->
+    <div class="control-group">
+      <span class="control-label">TF:</span>
+      <button class="chip-btn" data-tf="1m">1m</button>
+      <button class="chip-btn active" data-tf="5m">5m</button>
+      <button class="chip-btn" data-tf="15m">15m</button>
+    </div>
+
+    <!-- Imbalance Ratio -->
+    <div class="control-group">
+      <span class="control-label">Imbalance:</span>
+      <select id="imbalanceSelect" class="select-input">
+        <option value="3.0" selected>300% (3.0x - Standard)</option>
+        <option value="4.0">400% (4.0x - Aggressive)</option>
+        <option value="5.0">500% (5.0x - Strict)</option>
+      </select>
+    </div>
+
+    <!-- Live Mode: Candle limit -->
+    <div class="control-group" id="limitControlGroup">
+      <span class="control-label">Bars:</span>
+      <select id="limitSelect" class="select-input">
+        <option value="10">10 Bars</option>
+        <option value="15" selected>15 Bars</option>
+        <option value="25">25 Bars</option>
+      </select>
+    </div>
+
+    <!-- Backtest Mode: Date Selector -->
+    <div class="control-group" id="dateControlGroup" style="display:none;">
+      <span class="control-label" style="color:#38bdf8;">Select Date:</span>
+      <select id="dateSelect" class="select-input" style="border-color:#38bdf8; font-weight:700;">
+        <option value="">Loading dates...</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Trapped Trader Alert Banner -->
+  <div id="trappedAlertBanner" class="trapped-alert-banner">
+    <div id="trappedAlertText">⚡ Checking for trapped institutional positions...</div>
+  </div>
+
+  <!-- HUD Stats Grid -->
+  <div class="hud-grid" id="hudGrid">
+    <div class="hud-card" style="--card-accent: #38bdf8;">
+      <div class="hud-label" id="hudLabel1">Spot Price & VWAP</div>
+      <div class="hud-value" id="hudVal1">₹--</div>
+      <div class="hud-desc" id="hudDesc1">Loading symbol...</div>
+    </div>
+
+    <div class="hud-card" style="--card-accent: #10b981;">
+      <div class="hud-label" id="hudLabel2">Session CVD (Delta)</div>
+      <div class="hud-value" id="hudVal2">--</div>
+      <div class="hud-desc" id="hudDesc2">Cumulative Volume Delta</div>
+    </div>
+
+    <div class="hud-card" style="--card-accent: #fbbf24;">
+      <div class="hud-label" id="hudLabel3">Latest POC</div>
+      <div class="hud-value" id="hudVal3">₹--</div>
+      <div class="hud-desc" id="hudDesc3">Point of Control</div>
+    </div>
+
+    <div class="hud-card" style="--card-accent: #ec4899;">
+      <div class="hud-label" id="hudLabel5">Put-Call Ratio (PCR)</div>
+      <div class="hud-value" id="hudVal5" style="color:#ec4899;">--</div>
+      <div class="hud-desc" id="hudDesc5">Option Chain Sentiment</div>
+    </div>
+
+    <div class="hud-card" style="--card-accent: #a855f7;">
+      <div class="hud-label" id="hudLabel4">Order Flow Bias</div>
+      <div class="hud-value" id="hudVal4" style="font-size:1.15rem;">--</div>
+      <div class="hud-desc" id="hudDesc4">Institutional Initiative</div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       🌟 ONE UNIFIED CHART: CANDLESTICK WITH EMBEDDED FOOTPRINT
+       ======================================================== -->
+  <div class="unified-chart-wrapper">
+    <div class="chart-top-bar">
+      <div class="chart-top-title">
+        <span>🕯️ Unified Footprint Candlestick Chart (कैंडल + फुटप्रिंट एक ही चार्ट में)</span>
+        <span style="font-size:0.75rem; background:rgba(56,189,248,0.15); color:#38bdf8; padding:2px 8px; border-radius:4px;" id="chartModeBadge">LIVE VIEW</span>
+      </div>
+      <div class="chart-controls-nav">
+        <div style="display:inline-flex; gap:0.25rem; background:rgba(0,0,0,0.4); padding:2px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); margin-right:0.4rem;">
+          <button class="btn-chart-ctrl active" id="btnLayoutSide" style="background:#0284c7; color:#fff; font-weight:700;" title="कैंडल अलग (Left) + फुटप्रिंट बगल में (Right)">🪟 Candle + Footprint (Side-by-Side)</button>
+          <button class="btn-chart-ctrl" id="btnLayoutOverlaid" title="कैंडल के ऊपर फुटप्रिंट">📊 Overlaid</button>
+        </div>
+        <button class="btn-chart-ctrl" id="btnZoomIn" title="Horizontal Zoom In (चौड़ाई बढ़ाएं)">🔍 +</button>
+        <button class="btn-chart-ctrl" id="btnZoomOut" title="Horizontal Zoom Out (चौड़ाई घटाएं)">🔍 -</button>
+        <button class="btn-chart-ctrl" id="btnRowPlus" style="background:rgba(16,185,129,0.22); border-color:#10b981; color:#34d399; font-weight:700;" title="ऊपर-नीचे (610 और 600) का वर्टिकल गैप बढ़ाएं">↕️ Row Gap +</button>
+        <button class="btn-chart-ctrl" id="btnRowMinus" style="background:rgba(239,68,68,0.22); border-color:#ef4444; color:#f87171; font-weight:700;" title="ऊपर-नीचे (610 और 600) का वर्टिकल गैप घटाएं">↕️ Row Gap -</button>
+        <button class="btn-chart-ctrl" id="btnColPlus" style="background:rgba(56,189,248,0.2); border-color:#38bdf8; color:#38bdf8; font-weight:700;" title="बाएं-दाएं (Buyer-Seller) का हॉरिजॉन्टल गैप बढ़ाएं">↔️ Col Gap +</button>
+        <button class="btn-chart-ctrl" id="btnColMinus" style="background:rgba(148,163,184,0.2); border-color:#94a3b8; color:#cbd5e1; font-weight:700;" title="बाएं-दाएं (Buyer-Seller) का हॉरिजॉन्टल गैप घटाएं">↔️ Col Gap -</button>
+        <button class="btn-chart-ctrl active" id="btnToggleVwap" style="background:rgba(245,158,11,0.22); border-color:#f59e0b; color:#fbbf24; font-weight:700;" title="VWAP लाइन ऑन/ऑफ करें">📈 VWAP: ON</button>
+        <button class="btn-chart-ctrl" id="btnResetZoom" title="Fit All Candles">🎯 Fit All</button>
+      </div>
+    </div>
+
+    <!-- Live Candlestick Legend -->
+    <div class="chart-live-legend" id="chartLiveLegend">
+      <span style="color:#38bdf8;">⏰ <b id="legTime">--:-- IST</b></span>
+      <span>O: <b id="legOpen">--</b></span>
+      <span>H: <b id="legHigh">--</b></span>
+      <span>L: <b id="legLow">--</b></span>
+      <span>C: <b id="legClose">--</b></span>
+      <span>Δ: <b id="legDelta">--</b></span>
+      <span style="color:#f59e0b;">📈 VWAP: <b id="legVwap" style="color:#f59e0b;">--</b></span>
+      <span style="color:#ec4899;">⚡ PCR: <b id="legPcr" style="color:#ec4899;">--</b></span>
+      <span>Vol: <b id="legVol">--</b></span>
+      <span>CVD: <b id="legCVD">--</b></span>
+      <span id="legSignal" style="color:#38bdf8;">--</span>
+    </div>
+
+    <!-- Canvas Chart Viewport -->
+    <div class="canvas-viewport" id="canvasViewport">
+      <canvas id="footprintCanvas"></canvas>
+      <div class="chart-hover-tooltip" id="chartHoverTooltip"></div>
+    </div>
+
+    <!-- Cumulative Volume Delta (CVD) Curve Sub-chart -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.6rem;">
+      <span style="font-size:0.75rem; color:#06b6d4; font-weight:700; font-family:'JetBrains Mono',monospace;">📊 Cumulative Volume Delta (CVD Curve)</span>
+      <span style="font-size:0.72rem; color:var(--text-muted);">माउस व्हील से ज़ूम इन/आउट करें | ड्रैग करके आगे-पीछे स्क्रॉल करें</span>
+    </div>
+    <div class="cvd-sub-container">
+      <canvas id="cvdCanvas"></canvas>
+    </div>
+  </div>
+
+  <!-- Historical Backtest Signal Audit Table (Backtest Mode) -->
+  <div class="audit-card" id="auditCard" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.75rem;">
+      <h3 style="font-size:1rem; color:#fff; display:flex; align-items:center; gap:0.4rem;">
+        <span>📋 Order Flow Strategy Trade Audit (1:1.5 RR + Trailing SL)</span>
+      </h3>
+      <span style="font-size:0.75rem; color:var(--text-muted);">SL = Extreme $\pm 15$ pts | Trailing SL triggered at +40 pts profit | Times in IST</span>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th>Time (IST)</th>
+            <th>Signal Pattern</th>
+            <th>Action</th>
+            <th>Entry</th>
+            <th>Initial SL</th>
+            <th>Target</th>
+            <th>Exit</th>
+            <th>PnL (Pts)</th>
+            <th>Outcome</th>
+          </tr>
+        </thead>
+        <tbody id="auditTableBody">
+          <tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:1rem;">Select a date to view backtested trades</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Strategy Cheat Sheet -->
+  <div class="strategy-section">
+    <div class="strategy-card">
+      <div class="sc-header green">⚡ 1. Stacked Buy Imbalance (CE Entry)</div>
+      <p>जब एक कैंडल में लगातार 3 या उससे ज्यादा हरे इम्बैलेंस (Diagonal Buy Spikes) बनते हैं, तो यह कन्फर्म करता है कि बड़े इंस्टीट्यूशनल बायर्स मार्केट ऑर्डर से खरीद रहे हैं।</p>
+      <div class="sc-rule">💡 <strong>नियम:</strong> कैंडल क्लोज पर CALL (CE) बाय करें। Stop Loss = उस कैंडल का Low - 15 pts। +40 pts मूव पर SL को ट्रेल करके Breakeven +5 pts पर लॉक करें।</div>
+    </div>
+
+    <div class="strategy-card">
+      <div class="sc-header red">🔻 2. Stacked Sell Imbalance (PE Entry)</div>
+      <p>जब एक कैंडल में लगातार 3 या उससे ज्यादा लाल इम्बैलेंस (Diagonal Sell Spikes) बनते हैं, तो यह संकेत है कि बड़े ऑपरेटर एग्रेसिव सेलिंग कर रहे हैं।</p>
+      <div class="sc-rule">💡 <strong>नियम:</strong> कैंडल क्लोज पर PUT (PE) बाय करें। Stop Loss = उस कैंडल का High + 15 pts। +40 pts डाउन मूव पर SL को ट्रेल करके Breakeven करें।</div>
+    </div>
+
+    <div class="strategy-card">
+      <div class="sc-header amber">🪤 3. Trapped Traders &amp; Absorption Reversals</div>
+      <p>अगर कैंडल के टॉप पर भारी बाय वॉल्यूम (+Delta) आया लेकिन कैंडल लाल बंद हो गई, तो इसे "Absorption / Trapped Buyers" कहते हैं। सेलर्स ने बायर्स को सोख लिया है।</p>
+      <div class="sc-rule">💡 <strong>नियम:</strong> तुरंत रिवर्सल ट्रेड लें। अगले कैंडल में तुरंत फॉल शुरू होता है।</div>
+    </div>
+  </div>
+
+  <script>
+    var currentMode = 'live'; // 'live' or 'backtest'
+    var activeSymbol = 'BANKNIFTY';
+    var activeTf = '5m';
+    var activeDate = '';
+    var autoRefreshTimer = null;
+    var availableDatesCache = [];
+
+    // Global Footprint Data Store
+    var footprintsData = [];
+    var sessionMeta = {};
+
+    // Canvas & Viewport State
+    var canvas = document.getElementById('footprintCanvas');
+    var ctx = canvas.getContext('2d');
+    var cvdCanvas = document.getElementById('cvdCanvas');
+    var cvdCtx = cvdCanvas.getContext('2d');
+    var viewport = document.getElementById('canvasViewport');
+    var tooltip = document.getElementById('chartHoverTooltip');
+
+    // Pan & Zoom parameters
+    var candleSpacing = 260; // width per candle column (zoomable, default 260 for extra wide spacious view)
+    var scrollOffsetX = 0; // horizontal pan in pixels
+    var scrollOffsetY = 0; // vertical pan in pixels
+    var rungVerticalGap = 10; // EXACTLY 10px empty vertical space between consecutive rungs (e.g. 610 and 600)!
+    var rungHorizontalGap = 5; // EXACTLY 5px empty horizontal space between Sell, Price, and Buy boxes!
+    var rungH = 18; // height of each rung cell box
+    var chartLayout = 'side_by_side'; // 'side_by_side' (Candle on left, Footprint on right) or 'overlaid'
+    var showVwap = true; // Toggle institutional VWAP line
+    var isDragging = false;
+    var dragStartX = 0;
+    var dragStartY = 0;
+    var dragStartScrollOffsetX = 0;
+    var dragStartScrollOffsetY = 0;
+    var hoveredCandleIndex = -1;
+
+    // DOM Elements
+    var tabLive = document.getElementById('tabLive');
+    var tabBacktest = document.getElementById('tabBacktest');
+    var limitControlGroup = document.getElementById('limitControlGroup');
+    var dateControlGroup = document.getElementById('dateControlGroup');
+    var dateSelect = document.getElementById('dateSelect');
+    var autoRefreshLabel = document.getElementById('autoRefreshLabel');
+    var chartModeBadge = document.getElementById('chartModeBadge');
+    var auditCard = document.getElementById('auditCard');
+    var auditTableBody = document.getElementById('auditTableBody');
+
+    var hudVal1 = document.getElementById('hudVal1');
+    var hudDesc1 = document.getElementById('hudDesc1');
+    var hudLabel1 = document.getElementById('hudLabel1');
+    var hudVal2 = document.getElementById('hudVal2');
+    var hudDesc2 = document.getElementById('hudDesc2');
+    var hudLabel2 = document.getElementById('hudLabel2');
+    var hudVal3 = document.getElementById('hudVal3');
+    var hudDesc3 = document.getElementById('hudDesc3');
+    var hudLabel3 = document.getElementById('hudLabel3');
+    var hudVal4 = document.getElementById('hudVal4');
+    var hudDesc4 = document.getElementById('hudDesc4');
+    var hudLabel4 = document.getElementById('hudLabel4');
+    var hudVal5 = document.getElementById('hudVal5');
+    var hudDesc5 = document.getElementById('hudDesc5');
+    var hudLabel5 = document.getElementById('hudLabel5');
+    var btnToggleVwap = document.getElementById('btnToggleVwap');
+
+    var trappedAlertBanner = document.getElementById('trappedAlertBanner');
+    var trappedAlertText = document.getElementById('trappedAlertText');
+    var imbalanceSelect = document.getElementById('imbalanceSelect');
+    var limitSelect = document.getElementById('limitSelect');
+    var refreshBtn = document.getElementById('refreshBtn');
+    var autoRefreshCheck = document.getElementById('autoRefreshCheck');
+
+    // Legend
+    var legTime = document.getElementById('legTime');
+    var legOpen = document.getElementById('legOpen');
+    var legHigh = document.getElementById('legHigh');
+    var legLow = document.getElementById('legLow');
+    var legClose = document.getElementById('legClose');
+    var legDelta = document.getElementById('legDelta');
+    var legVwap = document.getElementById('legVwap');
+    var legPcr = document.getElementById('legPcr');
+    var legVol = document.getElementById('legVol');
+    var legCVD = document.getElementById('legCVD');
+    var legSignal = document.getElementById('legSignal');
+
+    // Zoom Buttons
+    document.getElementById('btnZoomIn').addEventListener('click', function() {
+      zoomChart(1.2);
+    });
+    document.getElementById('btnZoomOut').addEventListener('click', function() {
+      zoomChart(0.8);
+    });
+    document.getElementById('btnResetZoom').addEventListener('click', function() {
+      fitAllCandles();
+    });
+
+    // Row Gap (Up-Down vertical spacing between 610 and 600 - default 10px)
+    var btnRowPlus = document.getElementById('btnRowPlus');
+    var btnRowMinus = document.getElementById('btnRowMinus');
+    if (btnRowPlus) {
+      btnRowPlus.addEventListener('click', function() {
+        rungVerticalGap = Math.min(50, rungVerticalGap + 2);
+        renderUnifiedCanvas();
+      });
+    }
+    if (btnRowMinus) {
+      btnRowMinus.addEventListener('click', function() {
+        rungVerticalGap = Math.max(2, rungVerticalGap - 2);
+        renderUnifiedCanvas();
+      });
+    }
+
+    // Col Gap (Left-Right horizontal spacing between Bid, Price, Ask - default 5px)
+    var btnColPlus = document.getElementById('btnColPlus');
+    var btnColMinus = document.getElementById('btnColMinus');
+    if (btnColPlus) {
+      btnColPlus.addEventListener('click', function() {
+        rungHorizontalGap = Math.min(30, rungHorizontalGap + 2);
+        renderUnifiedCanvas();
+      });
+    }
+    if (btnColMinus) {
+      btnColMinus.addEventListener('click', function() {
+        rungHorizontalGap = Math.max(1, rungHorizontalGap - 2);
+        renderUnifiedCanvas();
+      });
+    }
+
+    if (btnToggleVwap) {
+      btnToggleVwap.addEventListener('click', function() {
+        showVwap = !showVwap;
+        if (showVwap) {
+          btnToggleVwap.textContent = '📈 VWAP: ON';
+          btnToggleVwap.style.background = 'rgba(245,158,11,0.22)';
+          btnToggleVwap.style.color = '#fbbf24';
+          btnToggleVwap.style.borderColor = '#f59e0b';
+        } else {
+          btnToggleVwap.textContent = '📈 VWAP: OFF';
+          btnToggleVwap.style.background = 'rgba(255,255,255,0.06)';
+          btnToggleVwap.style.color = '#94a3b8';
+          btnToggleVwap.style.borderColor = 'rgba(255,255,255,0.1)';
+        }
+        renderUnifiedCanvas();
+      });
+    }
+
+    var btnLayoutSide = document.getElementById('btnLayoutSide');
+    var btnLayoutOverlaid = document.getElementById('btnLayoutOverlaid');
+    if (btnLayoutSide && btnLayoutOverlaid) {
+      btnLayoutSide.addEventListener('click', function() {
+        chartLayout = 'side_by_side';
+        btnLayoutSide.classList.add('active');
+        btnLayoutSide.style.background = '#0284c7';
+        btnLayoutSide.style.color = '#fff';
+        btnLayoutOverlaid.classList.remove('active');
+        btnLayoutOverlaid.style.background = '';
+        btnLayoutOverlaid.style.color = '';
+        candleSpacing = Math.max(candleSpacing, 160);
+        renderUnifiedCanvas();
+      });
+      btnLayoutOverlaid.addEventListener('click', function() {
+        chartLayout = 'overlaid';
+        btnLayoutOverlaid.classList.add('active');
+        btnLayoutOverlaid.style.background = '#0284c7';
+        btnLayoutOverlaid.style.color = '#fff';
+        btnLayoutSide.classList.remove('active');
+        btnLayoutSide.style.background = '';
+        btnLayoutSide.style.color = '';
+        renderUnifiedCanvas();
+      });
+    }
+
+    function zoomChart(factor) {
+      candleSpacing = Math.max(140, Math.min(550, candleSpacing * factor));
+      renderUnifiedCanvas();
+    }
+
+    function fitAllCandles() {
+      if (footprintsData.length > 0) {
+        var availWidth = canvas.width - 90;
+        candleSpacing = currentMode === 'backtest' ? 270 : Math.max(200, Math.min(320, availWidth / footprintsData.length));
+        scrollOffsetX = 0;
+        scrollOffsetY = 0;
+        rungVerticalGap = 10;
+        rungHorizontalGap = 5;
+        renderUnifiedCanvas();
+      }
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      if (mode === 'live') {
+        tabLive.classList.add('active');
+        tabBacktest.classList.remove('active');
+        limitControlGroup.style.display = 'flex';
+        dateControlGroup.style.display = 'none';
+        autoRefreshLabel.style.display = 'flex';
+        chartModeBadge.textContent = 'LIVE VIEW';
+        chartModeBadge.style.background = 'rgba(56,189,248,0.15)';
+        chartModeBadge.style.color = '#38bdf8';
+        auditCard.style.display = 'none';
+        startAutoRefresh();
+      } else {
+        tabLive.classList.remove('active');
+        tabBacktest.classList.add('active');
+        limitControlGroup.style.display = 'none';
+        dateControlGroup.style.display = 'flex';
+        autoRefreshLabel.style.display = 'none';
+        chartModeBadge.textContent = 'BACKTEST VIEW: ' + (activeDate || 'Session');
+        chartModeBadge.style.background = 'rgba(168,85,247,0.2)';
+        chartModeBadge.style.color = '#c084fc';
+        auditCard.style.display = 'block';
+        candleSpacing = 270;
+        scrollOffsetX = 0;
+        stopAutoRefresh();
+      }
+      loadFootprintData();
+    }
+
+    // Bind Controls
+    document.querySelectorAll('.chip-btn[data-symbol]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.chip-btn[data-symbol]').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        activeSymbol = btn.dataset.symbol;
+        loadFootprintData();
+      });
+    });
+
+    document.querySelectorAll('.chip-btn[data-tf]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.chip-btn[data-tf]').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        activeTf = btn.dataset.tf;
+        loadFootprintData();
+      });
+    });
+
+    imbalanceSelect.addEventListener('change', loadFootprintData);
+    limitSelect.addEventListener('change', loadFootprintData);
+    dateSelect.addEventListener('change', function(e) {
+      activeDate = e.target.value;
+      if (currentMode === 'backtest') {
+        chartModeBadge.textContent = 'BACKTEST VIEW: ' + activeDate;
+        loadFootprintData();
+      }
+    });
+    refreshBtn.addEventListener('click', loadFootprintData);
+
+    autoRefreshCheck.addEventListener('change', function() {
+      if (autoRefreshCheck.checked && currentMode === 'live') startAutoRefresh();
+      else stopAutoRefresh();
+    });
+
+    function startAutoRefresh() {
+      stopAutoRefresh();
+      autoRefreshTimer = setInterval(function() {
+        if (currentMode === 'live') loadFootprintData();
+      }, 10000);
+    }
+    function stopAutoRefresh() {
+      if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+    }
+
+    // Fetch API Data
+    async function loadFootprintData() {
+      refreshBtn.disabled = true;
+      refreshBtn.textContent = '⏳ Scanning...';
+
+      var imb = imbalanceSelect.value;
+      var lim = limitSelect.value;
+      var url = '/api/volume-footprint?symbol=' + encodeURIComponent(activeSymbol) +
+        '&timeframe=' + activeTf +
+        '&limit=' + lim +
+        '&imbalanceRatio=' + imb +
+        '&mode=' + currentMode;
+
+      if (currentMode === 'backtest' && activeDate) {
+        url += '&date=' + encodeURIComponent(activeDate);
+      }
+
+      try {
+        var res = await fetch(url);
+        var json = await res.json();
+        if (!json.success || !json.data) {
+          console.error('API Error:', json.error);
+          return;
+        }
+
+        processAndRender(json.data);
+      } catch (err) {
+        console.error('Footprint fetch err:', err);
+      } finally {
+        refreshBtn.disabled = false;
+        refreshBtn.textContent = '🔄 Refresh';
+      }
+    }
+
+    function processAndRender(data) {
+      sessionMeta = data;
+      footprintsData = data.footprints || [];
+
+      // Available dates dropdown
+      if (data.availableDates && data.availableDates.length > 0) {
+        availableDatesCache = data.availableDates;
+        if (!activeDate || !availableDatesCache.includes(activeDate)) {
+          activeDate = data.selectedDate || availableDatesCache[0];
+        }
+        var dateOpts = '';
+        availableDatesCache.forEach(function(d) {
+          var isSel = d === activeDate ? 'selected' : '';
+          dateOpts += '<option value="' + d + '" ' + isSel + '>' + d + '</option>';
+        });
+        dateSelect.innerHTML = dateOpts;
+      }
+
+      // Update HUD Stats
+      try {
+        var curVwap = data.sessionVwap || (data.currentPrice ? Number(data.currentPrice.toFixed(1)) : 0);
+        if (currentMode === 'live') {
+          hudLabel1.textContent = 'Spot Price & VWAP';
+          hudVal1.textContent = '₹' + data.currentPrice.toFixed(1);
+          var vwapDiff = data.currentPrice - curVwap;
+          var vwapSign = vwapDiff >= 0 ? '+' : '';
+          hudDesc1.innerHTML = 'VWAP: <b>₹' + curVwap.toFixed(1) + '</b> (' + vwapSign + vwapDiff.toFixed(1) + ')';
+
+          var isCvdPos = data.sessionCvd >= 0;
+          hudLabel2.textContent = 'Session CVD (Delta)';
+          hudVal2.textContent = (isCvdPos ? '+' : '') + data.sessionCvd.toLocaleString();
+          hudVal2.style.color = isCvdPos ? 'var(--color-green)' : 'var(--color-red)';
+          hudDesc2.textContent = (data.sessionTrend || 'NEUTRAL').replace(/_/g, ' ');
+
+          hudLabel3.textContent = 'Latest Candle POC';
+          hudVal3.textContent = '₹' + data.latestPoc.toFixed(1);
+          hudDesc3.textContent = 'Point of Control Level';
+
+          var latestFp = footprintsData[footprintsData.length - 1];
+          hudLabel4.textContent = 'Order Flow Bias';
+          if (latestFp) {
+            hudVal4.textContent = latestFp.bias;
+            hudVal4.style.color = latestFp.bias === 'BULLISH' ? 'var(--color-green)' : (latestFp.bias === 'BEARISH' ? 'var(--color-red)' : 'var(--color-amber)');
+            hudDesc4.textContent = latestFp.pattern ? latestFp.pattern.split('(')[0] : '--';
+          }
+        } else {
+          var stats = data.backtestStats || {};
+          hudLabel1.textContent = 'Session Date & VWAP';
+          hudVal1.textContent = data.selectedDate || activeDate;
+          hudDesc1.innerHTML = 'VWAP: <b>₹' + curVwap.toFixed(1) + '</b> | ' + footprintsData.length + ' bars';
+
+          hudLabel2.textContent = 'Win Rate (1:1.5 RR)';
+          hudVal2.textContent = stats.winRate || '0.0%';
+          hudVal2.style.color = 'var(--color-green)';
+          hudDesc2.textContent = 'Wins: ' + (stats.totalWins || 0) + ' | Losses: ' + (stats.totalLosses || 0);
+
+          hudLabel3.textContent = 'Net PnL Points';
+          var netPts = parseFloat(stats.totalNetPoints) || 0;
+          hudVal3.textContent = stats.totalNetPoints || '+0.0 pts';
+          hudVal3.style.color = netPts >= 0 ? 'var(--color-green)' : 'var(--color-red)';
+          hudDesc3.textContent = 'Trailing SL + Extreme Rule';
+
+          hudLabel4.textContent = 'Total Valid Signals';
+          hudVal4.textContent = stats.totalSignals || 0;
+          hudVal4.style.color = '#38bdf8';
+          hudDesc4.textContent = 'Stacked Imbalance + Trapped Traders';
+        }
+
+        // Card 5: Put-Call Ratio (PCR)
+        if (data.pcr && hudVal5) {
+          hudLabel5.textContent = 'Put-Call Ratio (PCR)';
+          hudVal5.textContent = Number(data.pcr.ratio).toFixed(2);
+          hudVal5.style.color = data.pcr.sentiment === 'BULLISH' ? 'var(--color-green)' : (data.pcr.sentiment === 'BEARISH' ? 'var(--color-red)' : 'var(--color-amber)');
+          hudDesc5.textContent = data.pcr.description || (data.pcr.sentiment + ' Sentiment');
+        }
+
+        // Trapped Alert Banner
+        if (data.trappedAlert) {
+          trappedAlertBanner.style.display = 'flex';
+          trappedAlertBanner.className = 'trapped-alert-banner ' + (data.trappedAlert.type === 'BEARISH_TRAP' ? 'bearish' : 'bullish');
+          trappedAlertText.innerHTML = '<strong>' + data.trappedAlert.title + ':</strong> ' + data.trappedAlert.desc;
+        } else {
+          trappedAlertBanner.style.display = 'none';
+        }
+      } catch (e) {}
+
+      // Update Legend with last candle
+      updateLegend(footprintsData.length - 1);
+
+      // Render the Unified Chart Canvas
+      fitCanvasSize();
+      renderUnifiedCanvas();
+
+      // Backtest Audit Table
+      if (currentMode === 'backtest' && data.signalAudits) {
+        renderAuditTable(data.signalAudits);
+      }
+    }
+
+    function updateLegend(index) {
+      var fp = footprintsData[index];
+      if (!fp) return;
+      var d = new Date(fp.timestamp * 1000);
+      legTime.textContent = d.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false }) + ' IST';
+      legOpen.textContent = '₹' + fp.open.toFixed(1);
+      legHigh.textContent = '₹' + fp.high.toFixed(1);
+      legLow.textContent = '₹' + fp.low.toFixed(1);
+      legClose.textContent = '₹' + fp.close.toFixed(1);
+      if (legVwap) legVwap.textContent = '₹' + (fp.vwap ? fp.vwap.toFixed(1) : ((fp.high + fp.low + fp.close) / 3).toFixed(1));
+      if (legPcr) {
+        var pcrVal = (sessionMeta && sessionMeta.pcr) ? sessionMeta.pcr.ratio.toFixed(2) : '--';
+        legPcr.textContent = pcrVal;
+        legPcr.style.color = (sessionMeta && sessionMeta.pcr && sessionMeta.pcr.sentiment === 'BULLISH') ? 'var(--color-green)' : ((sessionMeta && sessionMeta.pcr && sessionMeta.pcr.sentiment === 'BEARISH') ? 'var(--color-red)' : 'var(--color-amber)');
+      }
+      legDelta.textContent = (fp.candleDelta >= 0 ? '+' : '') + fp.candleDelta.toLocaleString();
+      legDelta.style.color = fp.candleDelta >= 0 ? 'var(--color-green)' : 'var(--color-red)';
+      legVol.textContent = (fp.totalVol/1000).toFixed(1) + 'k';
+      legCVD.textContent = (fp.cvd >= 0 ? '+' : '') + (fp.cvd/1000).toFixed(1) + 'k';
+      legCVD.style.color = fp.cvd >= 0 ? 'var(--color-cyan)' : 'var(--color-red)';
+      legSignal.textContent = fp.pattern ? '● ' + fp.pattern.split('(')[0] : '';
+      legSignal.style.color = fp.bias === 'BULLISH' ? 'var(--color-green)' : (fp.bias === 'BEARISH' ? 'var(--color-red)' : 'var(--color-amber)');
+    }
+
+    function renderAuditTable(audits) {
+      if (!audits || audits.length === 0) {
+        auditTableBody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:1rem;">No order flow signals triggered on this session.</td></tr>';
+        return;
+      }
+      var rowsHtml = '';
+      audits.forEach(function(sig) {
+        var isBuyCE = sig.action === 'BUY_CE';
+        var actionBadge = isBuyCE
+          ? '<span class="badge-signal badge-ce">🟢 CALL (CE)</span>'
+          : '<span class="badge-signal badge-pe">🔴 PUT (PE)</span>';
+
+        var outcomeBadge = sig.outcome;
+        if (sig.outcome.indexOf('TARGET') !== -1) {
+          outcomeBadge = '<span class="badge-signal badge-target">⭐ TARGET HIT</span>';
+        } else if (sig.outcome.indexOf('TRAIL') !== -1) {
+          outcomeBadge = '<span class="badge-signal badge-trail">🛡️ TRAIL SL WIN</span>';
+        } else if (sig.outcome.indexOf('STOP_LOSS') !== -1) {
+          outcomeBadge = '<span class="badge-signal badge-sl">🛑 SL HIT</span>';
+        }
+
+        var pnlColor = sig.pnlPoints >= 0 ? 'var(--color-green)' : 'var(--color-red)';
+        var pnlSign = sig.pnlPoints >= 0 ? '+' : '';
+
+        rowsHtml += '<tr>' +
+          '<td><b>' + sig.time + ' IST</b></td>' +
+          '<td style="color:#f1f5f9;">' + sig.pattern + '</td>' +
+          '<td>' + actionBadge + '</td>' +
+          '<td>₹' + sig.entryPrice.toFixed(1) + '</td>' +
+          '<td style="color:#f87171;">₹' + sig.sl.toFixed(1) + '</td>' +
+          '<td style="color:#34d399;">₹' + sig.target.toFixed(1) + '</td>' +
+          '<td>₹' + sig.exitPrice.toFixed(1) + '</td>' +
+          '<td style="color:' + pnlColor + '; font-weight:700;">' + pnlSign + sig.pnlPoints.toFixed(1) + ' pts</td>' +
+          '<td>' + outcomeBadge + '</td>' +
+          '</tr>';
+      });
+      auditTableBody.innerHTML = rowsHtml;
+    }
+
+    // ========================================================
+    // 🎨 CANVAS RENDERING: THE TRUE UNIFIED FOOTPRINT CANDLE
+    // ========================================================
+    function fitCanvasSize() {
+      var dpr = window.devicePixelRatio || 1;
+      var w = viewport.clientWidth;
+      var h = viewport.clientHeight;
+      if (w > 0 && h > 0) {
+        var targetW = Math.round(w * dpr);
+        var targetH = Math.round(h * dpr);
+        if (canvas.width !== targetW || canvas.height !== targetH) {
+          canvas.width = targetW;
+          canvas.height = targetH;
+        }
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.imageSmoothingEnabled = true;
+      }
+
+      var cvdWrap = cvdCanvas.parentElement;
+      if (cvdWrap) {
+        var cvdW = cvdWrap.clientWidth;
+        var cvdH = cvdWrap.clientHeight;
+        if (cvdW > 0 && cvdH > 0) {
+          var targetCvdW = Math.round(cvdW * dpr);
+          var targetCvdH = Math.round(cvdH * dpr);
+          if (cvdCanvas.width !== targetCvdW || cvdCanvas.height !== targetCvdH) {
+            cvdCanvas.width = targetCvdW;
+            cvdCanvas.height = targetCvdH;
+          }
+          cvdCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          cvdCtx.imageSmoothingEnabled = true;
+        }
+      }
+    }
+
+    function renderUnifiedCanvas() {
+      var width = viewport.clientWidth;
+      var height = viewport.clientHeight;
+      if (!ctx || width <= 0 || height <= 0 || footprintsData.length === 0) return;
+
+      ctx.clearRect(0, 0, width, height);
+
+      var rightAxisWidth = 85;
+      var bottomAxisHeight = 45;
+      var chartW = width - rightAxisWidth;
+      var chartH = height - bottomAxisHeight;
+
+      // 1. Calculate Visible Candles & Price Bounds
+      var totalCandles = footprintsData.length;
+      var totalContentWidth = totalCandles * candleSpacing;
+      var startBaseX = chartW - totalContentWidth - 30 + scrollOffsetX;
+
+      var minPrice = Infinity;
+      var maxPrice = -Infinity;
+      var visCount = 0;
+
+      footprintsData.forEach(function(fp, idx) {
+        var candleCenterX = startBaseX + idx * candleSpacing + candleSpacing / 2;
+        if (candleCenterX >= -candleSpacing && candleCenterX <= chartW + candleSpacing) {
+          if (fp.high > maxPrice) maxPrice = fp.high;
+          if (fp.low < minPrice) minPrice = fp.low;
+          visCount++;
+        }
+      });
+
+      if (visCount === 0 || minPrice === Infinity) {
+        footprintsData.forEach(function(fp) {
+          if (fp.high > maxPrice) maxPrice = fp.high;
+          if (fp.low < minPrice) minPrice = fp.low;
+        });
+      }
+
+      // Exact mathematical pitch between consecutive price rungs (e.g. 610 and 600)
+      // rungH = 18px (box height), rungVerticalGap = 10px (empty vertical gap) -> pitch = 28px
+      var midPrice = (maxPrice + minPrice) / 2;
+      var defaultPriceStep = 10;
+      for (var k = 0; k < footprintsData.length; k++) {
+        if (footprintsData[k].rungs && footprintsData[k].rungs.length > 1) {
+          defaultPriceStep = Math.abs(footprintsData[k].rungs[1].price - footprintsData[k].rungs[0].price) || 10;
+          break;
+        }
+      }
+
+      var rungPitch = rungH + rungVerticalGap; // 18 + 10 = 28px center-to-center
+      var pixelsPerPoint = rungPitch / defaultPriceStep;
+      var chartCenterY = (chartH / 2) + scrollOffsetY;
+
+      function priceToY(p) {
+        return chartCenterY - (p - midPrice) * pixelsPerPoint;
+      }
+
+      function yToPrice(y) {
+        return midPrice - (y - chartCenterY) / pixelsPerPoint;
+      }
+
+      // 2. Draw Horizontal Grid Lines & Right Price Scale
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px "JetBrains Mono", monospace';
+      ctx.textAlign = 'left';
+
+      var axisPriceStep = defaultPriceStep;
+      if (rungPitch < 20) axisPriceStep = defaultPriceStep * 2;
+      var minVisP = Math.min(yToPrice(chartH), yToPrice(0));
+      var maxVisP = Math.max(yToPrice(chartH), yToPrice(0));
+      var startP = Math.floor(minVisP / axisPriceStep) * axisPriceStep;
+      for (var p = startP; p <= maxVisP + axisPriceStep; p += axisPriceStep) {
+        var py = priceToY(p);
+        if (py >= 10 && py <= chartH - 5) {
+          ctx.beginPath();
+          ctx.moveTo(0, py);
+          ctx.lineTo(chartW, py);
+          ctx.stroke();
+
+          ctx.fillText('₹' + Math.round(p), chartW + 8, py + 3);
+        }
+      }
+
+      // Axis dividing lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.beginPath();
+      ctx.moveTo(chartW, 0);
+      ctx.lineTo(chartW, height);
+      ctx.moveTo(0, chartH);
+      ctx.lineTo(width, chartH);
+      ctx.stroke();
+
+      // 3. Render Each Footprint Candle
+      var totalCandles = footprintsData.length;
+      var totalContentWidth = totalCandles * candleSpacing;
+      // Start X with pan offset (align to right by default)
+      var startBaseX = chartW - totalContentWidth - 30 + scrollOffsetX;
+
+      footprintsData.forEach(function(fp, idx) {
+        var candleCenterX = startBaseX + idx * candleSpacing + candleSpacing / 2;
+
+        // Skip if outside viewport
+        if (candleCenterX < -candleSpacing || candleCenterX > chartW + candleSpacing) return;
+
+        var isGreen = fp.isGreen;
+        var barColor = isGreen ? '#10b981' : '#ef4444';
+        var barColorBg = isGreen ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)';
+
+        var yHigh = priceToY(fp.high);
+        var yLow = priceToY(fp.low);
+        var yOpen = priceToY(fp.open);
+        var yClose = priceToY(fp.close);
+        var yBodyTop = Math.min(yOpen, yClose);
+        var yBodyBottom = Math.max(yOpen, yClose);
+        var bodyHeight = Math.max(4, yBodyBottom - yBodyTop);
+
+        if (chartLayout === 'side_by_side') {
+          // ================================================================
+          // 🪟 SIDE-BY-SIDE: CANDLESTICK ON LEFT, FOOTPRINT LADDER ON RIGHT
+          // ================================================================
+          var slotLeft = candleCenterX - candleSpacing / 2 + 8;
+          var slotRight = candleCenterX + candleSpacing / 2 - 8;
+
+          // 1. Separate Candlestick on Left (14px wide solid & crisp)
+          var candleW = Math.min(18, Math.max(12, candleSpacing * 0.08));
+          var candleX = slotLeft + candleW / 2 + 6;
+
+          // Upper Wick
+          ctx.strokeStyle = isGreen ? '#10b981' : '#ef4444';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(candleX, yHigh);
+          ctx.lineTo(candleX, yBodyTop);
+          ctx.stroke();
+
+          // Candlestick Body (Solid crisp TradingView style)
+          ctx.fillStyle = isGreen ? '#10b981' : '#ef4444';
+          ctx.fillRect(candleX - candleW / 2, yBodyTop, candleW, bodyHeight);
+          ctx.strokeStyle = isGreen ? '#34d399' : '#f87171';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(candleX - candleW / 2, yBodyTop, candleW, bodyHeight);
+
+          // Lower Wick
+          ctx.beginPath();
+          ctx.moveTo(candleX, yBodyBottom);
+          ctx.lineTo(candleX, yLow);
+          ctx.stroke();
+
+          // High & Low labels
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = '8px "JetBrains Mono", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText('₹' + Math.round(fp.high), candleX, yHigh - 6);
+          ctx.fillText('₹' + Math.round(fp.low), candleX, yLow + 12);
+
+          // 2. Order Flow Footprint Ladder right beside the Candle
+          var ladderLeft = candleX + candleW / 2 + 10;
+          var ladderW = Math.max(90, slotRight - ladderLeft);
+          var ladderMidX = ladderLeft + ladderW / 2;
+
+          // Ladder Header
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = 'bold 8.5px "JetBrains Mono", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText('SELL (BID)      •      PRICE      •      BUY (ASK)', ladderMidX, yHigh - 7);
+
+          if (fp.rungs && fp.rungs.length > 0) {
+            var priceColW = 56; // 56px wide central pillar
+            var colGap = rungHorizontalGap; // EXACTLY 5px physical gap on both sides of price
+            var colBidW = Math.max(46, Math.floor((ladderW - priceColW - colGap * 2) / 2));
+            var colAskW = colBidW;
+            var priceColLeft = ladderLeft + colBidW + colGap;
+            var askColLeft = priceColLeft + priceColW + colGap;
+
+            fp.rungs.forEach(function(r) {
+              var ry = priceToY(r.price);
+
+              // Left Cell Box: Bid Volume (Sellers)
+              if (r.isSellImbalance) {
+                ctx.fillStyle = 'rgba(239, 68, 68, 0.6)';
+                ctx.fillRect(ladderLeft, ry - rungH/2, colBidW, rungH);
+                ctx.strokeStyle = '#ef4444';
+                ctx.lineWidth = 1.2;
+                ctx.strokeRect(ladderLeft, ry - rungH/2, colBidW, rungH);
+              } else {
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+                ctx.fillRect(ladderLeft, ry - rungH/2, colBidW, rungH);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+                ctx.lineWidth = 0.8;
+                ctx.strokeRect(ladderLeft, ry - rungH/2, colBidW, rungH);
+              }
+              ctx.fillStyle = r.isSellImbalance ? '#ffffff' : '#fca5a5';
+              ctx.font = (r.isSellImbalance ? 'bold ' : '') + '9.5px "JetBrains Mono", monospace';
+              ctx.textAlign = 'right';
+              ctx.fillText(r.bidVol + (r.isSellImbalance ? ' ⚡' : ''), ladderLeft + colBidW - 5, ry + 3.5);
+
+              // Center Cell Box: Dedicated Price Pill (The wide barrier separating buyers and sellers)
+              if (r.isPoc) {
+                ctx.fillStyle = 'rgba(251, 191, 36, 0.3)';
+                ctx.fillRect(priceColLeft, ry - rungH/2, priceColW, rungH);
+                ctx.strokeStyle = '#fbbf24';
+                ctx.lineWidth = 1.4;
+                ctx.strokeRect(priceColLeft, ry - rungH/2, priceColW, rungH);
+                ctx.fillStyle = '#fbbf24';
+                ctx.font = 'bold 9px "JetBrains Mono", monospace';
+              } else {
+                ctx.fillStyle = 'rgba(30, 41, 59, 0.9)';
+                ctx.fillRect(priceColLeft, ry - rungH/2, priceColW, rungH);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+                ctx.lineWidth = 0.8;
+                ctx.strokeRect(priceColLeft, ry - rungH/2, priceColW, rungH);
+                ctx.fillStyle = '#cbd5e1';
+                ctx.font = '8.5px "JetBrains Mono", monospace';
+              }
+              ctx.textAlign = 'center';
+              ctx.fillText(Math.round(r.price).toString().slice(-3), priceColLeft + priceColW/2, ry + 3.5);
+
+              // Right Cell Box: Ask Volume (Buyers)
+              if (r.isBuyImbalance) {
+                ctx.fillStyle = 'rgba(16, 185, 129, 0.6)';
+                ctx.fillRect(askColLeft, ry - rungH/2, colAskW, rungH);
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 1.2;
+                ctx.strokeRect(askColLeft, ry - rungH/2, colAskW, rungH);
+              } else {
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+                ctx.fillRect(askColLeft, ry - rungH/2, colAskW, rungH);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+                ctx.lineWidth = 0.8;
+                ctx.strokeRect(askColLeft, ry - rungH/2, colAskW, rungH);
+              }
+              ctx.fillStyle = r.isBuyImbalance ? '#ffffff' : '#6ee7b7';
+              ctx.font = (r.isBuyImbalance ? 'bold ' : '') + '9.5px "JetBrains Mono", monospace';
+              ctx.textAlign = 'left';
+              ctx.fillText((r.isBuyImbalance ? '⚡ ' : '') + r.askVol, askColLeft + 5, ry + 3.5);
+            });
+          }
+
+          // Combined Bar Footer: Center of slot
+          var barMidX = (candleX + ladderMidX) / 2;
+
+          // Time Label (IST)
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 9px "JetBrains Mono", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(fp.timeLabel + ' IST', barMidX, chartH + 15);
+
+          // Delta Pill
+          var isDeltaPos = fp.candleDelta >= 0;
+          ctx.fillStyle = isDeltaPos ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.25)';
+          ctx.fillRect(barMidX - 35, chartH + 22, 70, 15);
+          ctx.strokeStyle = isDeltaPos ? '#10b981' : '#ef4444';
+          ctx.strokeRect(barMidX - 35, chartH + 22, 70, 15);
+
+          ctx.fillStyle = isDeltaPos ? '#34d399' : '#f87171';
+          ctx.font = 'bold 8.5px "JetBrains Mono", monospace';
+          ctx.fillText('Δ ' + (isDeltaPos ? '+' : '') + fp.candleDelta, barMidX, chartH + 33);
+
+          // Signal Markers
+          if (fp.patternCode === 'STACKED_BUY') {
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.moveTo(candleX, yLow + 8);
+            ctx.lineTo(candleX - 5, yLow + 16);
+            ctx.lineTo(candleX + 5, yLow + 16);
+            ctx.fill();
+            ctx.font = 'bold 8px "JetBrains Mono", monospace';
+            ctx.fillText('3x BUY', candleX, yLow + 25);
+          } else if (fp.patternCode === 'STACKED_SELL') {
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.moveTo(candleX, yHigh - 8);
+            ctx.lineTo(candleX - 5, yHigh - 16);
+            ctx.lineTo(candleX + 5, yHigh - 16);
+            ctx.fill();
+            ctx.font = 'bold 8px "JetBrains Mono", monospace';
+            ctx.fillText('3x SELL', candleX, yHigh - 18);
+          } else if (fp.patternCode === 'TRAPPED_BUYERS') {
+            ctx.fillStyle = '#fbbf24';
+            ctx.font = 'bold 9px sans-serif';
+            ctx.fillText('🪤 BUY TRAP', barMidX, yHigh - 14);
+          } else if (fp.patternCode === 'TRAPPED_SELLERS') {
+            ctx.fillStyle = '#06b6d4';
+            ctx.font = 'bold 9px sans-serif';
+            ctx.fillText('🛡️ SELL TRAP', barMidX, yLow + 22);
+          }
+
+        } else {
+          // ================================================================
+          // 📊 OVERLAID: EMBEDDED INSIDE CANDLE BODY
+          // ================================================================
+          var colWidth = Math.min(130, candleSpacing - 12);
+          var halfCol = colWidth / 2;
+
+          // A. Candlestick Wick (Upper & Lower)
+          ctx.strokeStyle = isGreen ? 'rgba(16, 185, 129, 0.6)' : 'rgba(239, 68, 68, 0.6)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(candleCenterX, yHigh);
+          ctx.lineTo(candleCenterX, yBodyTop);
+          ctx.moveTo(candleCenterX, yBodyBottom);
+          ctx.lineTo(candleCenterX, yLow);
+          ctx.stroke();
+
+          // B. Candlestick Body Box (Open to Close Border)
+          ctx.fillStyle = barColorBg;
+          ctx.fillRect(candleCenterX - halfCol, yBodyTop, colWidth, bodyHeight);
+          ctx.strokeStyle = barColor;
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(candleCenterX - halfCol, yBodyTop, colWidth, bodyHeight);
+
+          // C. Embedded Order Flow Ladder Rungs inside/beside the Candle
+          if (fp.rungs && fp.rungs.length > 0) {
+            fp.rungs.forEach(function(r) {
+              var ry = priceToY(r.price);
+
+              // POC Golden Amber Highlight
+              if (r.isPoc) {
+                ctx.fillStyle = 'rgba(251, 191, 36, 0.28)';
+                ctx.fillRect(candleCenterX - halfCol + 1, ry - rungH/2, colWidth - 2, rungH);
+                ctx.strokeStyle = '#fbbf24';
+                ctx.lineWidth = 1.2;
+                ctx.strokeRect(candleCenterX - halfCol + 1, ry - rungH/2, colWidth - 2, rungH);
+              }
+
+              // Left Box: Bid Volume (Sellers)
+              if (r.isSellImbalance) {
+                ctx.fillStyle = 'rgba(239, 68, 68, 0.45)';
+                ctx.fillRect(candleCenterX - halfCol + 2, ry - rungH/2 + 1, halfCol - 14, rungH - 2);
+              }
+              ctx.fillStyle = r.isSellImbalance ? '#ffffff' : '#fca5a5';
+              ctx.font = (r.isSellImbalance ? 'bold ' : '') + '9px "JetBrains Mono", monospace';
+              ctx.textAlign = 'right';
+              ctx.fillText(r.bidVol, candleCenterX - 14, ry + 3);
+
+              // Center Price Label (if wide enough)
+              if (candleSpacing > 100) {
+                ctx.fillStyle = r.isPoc ? '#fbbf24' : '#64748b';
+                ctx.font = (r.isPoc ? 'bold ' : '') + '8px "JetBrains Mono", monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText(Math.round(r.price).toString().slice(-3), candleCenterX, ry + 3);
+              }
+
+              // Right Box: Ask Volume (Buyers)
+              if (r.isBuyImbalance) {
+                ctx.fillStyle = 'rgba(16, 185, 129, 0.45)';
+                ctx.fillRect(candleCenterX + 12, ry - rungH/2 + 1, halfCol - 14, rungH - 2);
+              }
+              ctx.fillStyle = r.isBuyImbalance ? '#ffffff' : '#6ee7b7';
+              ctx.font = (r.isBuyImbalance ? 'bold ' : '') + '9px "JetBrains Mono", monospace';
+              ctx.textAlign = 'left';
+              ctx.fillText(r.askVol, candleCenterX + 14, ry + 3);
+            });
+          }
+
+          // D. Top Wick Header: High Price
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = '8px "JetBrains Mono", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText('₹' + fp.high.toFixed(0), candleCenterX, yHigh - 5);
+
+          // E. Bottom Wick Footer: Time, Delta, CVD
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 9px "JetBrains Mono", monospace';
+          ctx.fillText(fp.timeLabel + ' IST', candleCenterX, chartH + 15);
+
+          // Delta Pill
+          var isDeltaPos = fp.candleDelta >= 0;
+          ctx.fillStyle = isDeltaPos ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.25)';
+          ctx.fillRect(candleCenterX - 35, chartH + 22, 70, 15);
+          ctx.strokeStyle = isDeltaPos ? '#10b981' : '#ef4444';
+          ctx.strokeRect(candleCenterX - 35, chartH + 22, 70, 15);
+
+          ctx.fillStyle = isDeltaPos ? '#34d399' : '#f87171';
+          ctx.font = 'bold 8.5px "JetBrains Mono", monospace';
+          ctx.fillText('Δ ' + (isDeltaPos ? '+' : '') + fp.candleDelta, candleCenterX, chartH + 33);
+
+          // F. Stacked Imbalance / Trapped Signals Markers Above/Below
+          if (fp.patternCode === 'STACKED_BUY') {
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.moveTo(candleCenterX, yLow + 8);
+            ctx.lineTo(candleCenterX - 5, yLow + 16);
+            ctx.lineTo(candleCenterX + 5, yLow + 16);
+            ctx.fill();
+          } else if (fp.patternCode === 'STACKED_SELL') {
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.moveTo(candleCenterX, yHigh - 8);
+            ctx.lineTo(candleCenterX - 5, yHigh - 16);
+            ctx.lineTo(candleCenterX + 5, yHigh - 16);
+            ctx.fill();
+          } else if (fp.patternCode === 'TRAPPED_BUYERS') {
+            ctx.fillStyle = '#fbbf24';
+            ctx.font = '11px sans-serif';
+            ctx.fillText('🪤 TRAP', candleCenterX, yHigh - 14);
+          } else if (fp.patternCode === 'TRAPPED_SELLERS') {
+            ctx.fillStyle = '#06b6d4';
+            ctx.font = '11px sans-serif';
+            ctx.fillText('🛡️ TRAP', candleCenterX, yLow + 20);
+          }
+        }
+      });
+
+      // 3.5. Render Institutional VWAP Line Across All Visible Candles
+      if (showVwap && footprintsData.length > 0) {
+        ctx.save();
+        var vwapPoints = [];
+
+        footprintsData.forEach(function(fp, idx) {
+          var candleCenterX = startBaseX + idx * candleSpacing + candleSpacing / 2;
+          var slotRight = startBaseX + (idx + 1) * candleSpacing - 10;
+          var candleW = 14;
+          var candleX = candleCenterX;
+
+          if (chartLayout === 'side_by_side') {
+            var ladderLeft = candleCenterX + candleW / 2 + 8;
+            var ladderW = Math.max(90, slotRight - ladderLeft);
+            candleX = candleCenterX - ladderW / 2 + 10;
+          }
+
+          var v = fp.vwap || ((fp.high + fp.low + fp.close) / 3);
+          var vy = priceToY(v);
+          vwapPoints.push({ x: candleX, y: vy, vwap: v, timeLabel: fp.timeLabel });
+        });
+
+        if (vwapPoints.length > 0) {
+          // A. Glowing ambient under-shadow
+          ctx.strokeStyle = 'rgba(245, 158, 11, 0.22)';
+          ctx.lineWidth = 6;
+          ctx.lineJoin = 'round';
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          vwapPoints.forEach(function(pt, i) {
+            if (i === 0) ctx.moveTo(pt.x, pt.y);
+            else ctx.lineTo(pt.x, pt.y);
+          });
+          ctx.stroke();
+
+          // B. Crisp dashed golden VWAP curve
+          ctx.strokeStyle = '#f59e0b';
+          ctx.lineWidth = 2.4;
+          ctx.setLineDash([7, 4]);
+          ctx.beginPath();
+          vwapPoints.forEach(function(pt, i) {
+            if (i === 0) ctx.moveTo(pt.x, pt.y);
+            else ctx.lineTo(pt.x, pt.y);
+          });
+          ctx.stroke();
+          ctx.setLineDash([]); // reset dash
+
+          // C. Data nodes at candle intersections
+          vwapPoints.forEach(function(pt) {
+            if (pt.x >= 0 && pt.x <= chartW) {
+              ctx.fillStyle = '#f59e0b';
+              ctx.beginPath();
+              ctx.arc(pt.x, pt.y, 3.5, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.fillStyle = '#090e1c';
+              ctx.beginPath();
+              ctx.arc(pt.x, pt.y, 1.5, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          });
+
+          // D. Right Axis VWAP Pill Badge
+          var lastPt = vwapPoints[vwapPoints.length - 1];
+          if (lastPt && lastPt.y >= 10 && lastPt.y <= chartH - 10) {
+            // Horizontal dotted reference projection to scale
+            ctx.strokeStyle = 'rgba(245, 158, 11, 0.5)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(Math.min(chartW, lastPt.x), lastPt.y);
+            ctx.lineTo(chartW, lastPt.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Right Scale Badge
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillRect(chartW + 2, lastPt.y - 9, rightAxisWidth - 6, 18);
+
+            ctx.fillStyle = '#000000';
+            ctx.font = 'bold 9px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('VWAP ₹' + Math.round(lastPt.vwap), chartW + (rightAxisWidth - 6) / 2 + 2, lastPt.y + 3.5);
+          }
+        }
+        ctx.restore();
+      }
+
+      // 4. Render Synced CVD Curve
+      renderCvdCurve(chartW, startBaseX);
+    }
+
+    function renderCvdCurve(chartW, startBaseX) {
+      var w = cvdCanvas.parentElement.clientWidth;
+      var h = cvdCanvas.parentElement.clientHeight;
+      if (!cvdCtx || w <= 0 || h <= 0 || footprintsData.length === 0) return;
+
+      cvdCtx.clearRect(0, 0, w, h);
+
+      var minCvd = Infinity, maxCvd = -Infinity;
+      footprintsData.forEach(function(f) {
+        if (f.cvd > maxCvd) maxCvd = f.cvd;
+        if (f.cvd < minCvd) minCvd = f.cvd;
+      });
+      var cvdPad = Math.abs(maxCvd - minCvd) * 0.15 || 500;
+      maxCvd += cvdPad;
+      minCvd -= cvdPad;
+      var cvdRange = maxCvd - minCvd;
+
+      function cvdToY(v) {
+        return 15 + ((maxCvd - v) / cvdRange) * (h - 30);
+      }
+
+      // Zero baseline
+      var yZero = cvdToY(0);
+      if (yZero >= 0 && yZero <= h) {
+        cvdCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        cvdCtx.setLineDash([3, 3]);
+        cvdCtx.beginPath();
+        cvdCtx.moveTo(0, yZero);
+        cvdCtx.lineTo(chartW, yZero);
+        cvdCtx.stroke();
+        cvdCtx.setLineDash([]);
+      }
+
+      // Draw CVD Curve Area
+      cvdCtx.beginPath();
+      var firstX = 0;
+      footprintsData.forEach(function(fp, idx) {
+        var cx = startBaseX + idx * candleSpacing + candleSpacing / 2;
+        var cy = cvdToY(fp.cvd);
+        if (idx === 0) {
+          firstX = cx;
+          cvdCtx.moveTo(cx, cy);
+        } else {
+          cvdCtx.lineTo(cx, cy);
+        }
+      });
+
+      cvdCtx.strokeStyle = '#06b6d4';
+      cvdCtx.lineWidth = 2;
+      cvdCtx.stroke();
+    }
+
+    // ========================================================
+    // 🖱️ MOUSE PAN, ZOOM & HOVER INTERACTION
+    // ========================================================
+    viewport.addEventListener('wheel', function(e) {
+      e.preventDefault();
+      if (e.shiftKey) {
+        // Shift + Wheel: Adjust Vertical Row Gap (Up-down distance between 610 and 600)
+        var delta = e.deltaY < 0 ? 2 : -2;
+        rungVerticalGap = Math.max(4, Math.min(60, rungVerticalGap + delta));
+        renderUnifiedCanvas();
+      } else {
+        // Normal Wheel: Horizontal Zoom
+        var zoom = e.deltaY < 0 ? 1.1 : 0.9;
+        zoomChart(zoom);
+      }
+    }, { passive: false });
+
+    viewport.addEventListener('mousedown', function(e) {
+      isDragging = true;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      dragStartScrollOffsetX = scrollOffsetX;
+      dragStartScrollOffsetY = scrollOffsetY;
+      viewport.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('mousemove', function(e) {
+      if (isDragging) {
+        var dx = e.clientX - dragStartX;
+        var dy = e.clientY - dragStartY;
+        scrollOffsetX = dragStartScrollOffsetX + dx;
+        scrollOffsetY = dragStartScrollOffsetY + dy;
+        renderUnifiedCanvas();
+        return;
+      }
+
+      // Hover Detection
+      var rect = canvas.getBoundingClientRect();
+      var mouseX = e.clientX - rect.left;
+      var mouseY = e.clientY - rect.top;
+
+      if (mouseX >= 0 && mouseX <= canvas.width && mouseY >= 0 && mouseY <= canvas.height) {
+        var width = viewport.clientWidth;
+        var rightAxisWidth = 85;
+        var chartW = width - rightAxisWidth;
+        var totalContentWidth = footprintsData.length * candleSpacing;
+        var startBaseX = chartW - totalContentWidth - 30 + scrollOffsetX;
+
+        var foundIdx = -1;
+        footprintsData.forEach(function(fp, idx) {
+          var cx = startBaseX + idx * candleSpacing + candleSpacing / 2;
+          if (Math.abs(mouseX - cx) < candleSpacing / 2) {
+            foundIdx = idx;
+          }
+        });
+
+        if (foundIdx !== -1 && foundIdx !== hoveredCandleIndex) {
+          hoveredCandleIndex = foundIdx;
+          updateLegend(foundIdx);
+
+          var fp = footprintsData[foundIdx];
+          var vwapVal = fp.vwap ? '₹' + fp.vwap.toFixed(1) : '--';
+          var pcrText = (sessionMeta && sessionMeta.pcr) ? sessionMeta.pcr.ratio.toFixed(2) + ' (' + sessionMeta.pcr.sentiment + ')' : '--';
+
+          tooltip.style.display = 'block';
+          tooltip.style.left = (mouseX + 15) + 'px';
+          tooltip.style.top = (mouseY - 20) + 'px';
+          tooltip.innerHTML = '<strong>' + fp.timeLabel + ' IST</strong> | ' + (fp.isGreen ? '🟢 Bullish' : '🔴 Bearish') + '<br>' +
+            'Close: ₹' + fp.close.toFixed(1) + ' | <span style="color:#f59e0b;">VWAP: ' + vwapVal + '</span><br>' +
+            'POC: ₹' + fp.candlePocPrice + '<br>' +
+            'Δ Delta: ' + (fp.candleDelta >= 0 ? '+' : '') + fp.candleDelta + '<br>' +
+            'Vol: ' + (fp.totalVol/1000).toFixed(1) + 'k | CVD: ' + (fp.cvd/1000).toFixed(1) + 'k<br>' +
+            '<span style="color:#ec4899;">⚡ PCR: ' + pcrText + '</span><br>' +
+            '<span style="color:#38bdf8;">' + (fp.pattern || '') + '</span>';
+        }
+      } else {
+        tooltip.style.display = 'none';
+      }
+    });
+
+    window.addEventListener('mouseup', function() {
+      if (isDragging) {
+        isDragging = false;
+        viewport.style.cursor = 'crosshair';
+      }
+    });
+
+    window.addEventListener('resize', function() {
+      fitCanvasSize();
+      renderUnifiedCanvas();
+    });
+
+    // Init on DOM ready
+    window.addEventListener('DOMContentLoaded', function() {
+      fitCanvasSize();
+      loadFootprintData();
+      startAutoRefresh();
+    });
+  </script>
+</body>
+</html>

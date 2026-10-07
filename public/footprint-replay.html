@@ -1,0 +1,2144 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎮 Footprint Replay & Trading Simulator | Sameer AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #070a12;
+      --bg-card: rgba(16, 23, 41, 0.95);
+      --bg-card-hover: rgba(23, 33, 58, 0.98);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(56, 189, 248, 0.3);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --color-green: #10b981;
+      --color-green-glow: rgba(16, 185, 129, 0.25);
+      --color-red: #ef4444;
+      --color-red-glow: rgba(239, 68, 68, 0.25);
+      --color-cyan: #06b6d4;
+      --color-amber: #f59e0b;
+      --color-purple: #a855f7;
+      --color-poc: #fbbf24;
+      --color-poc-bg: rgba(251, 191, 36, 0.22);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: var(--bg-primary);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(168, 85, 247, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.08) 0px, transparent 50%);
+      color: var(--text-primary);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      padding-bottom: 3rem;
+      overflow-x: hidden;
+    }
+
+    /* Top Nav */
+    .fp-header {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+      gap: 1rem; padding: 0.85rem 1.5rem;
+      background: var(--bg-card); border-bottom: 1px solid var(--border-color);
+      backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 100;
+    }
+    .fp-header-left { display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap; }
+    .nav-btn {
+      display: flex; align-items: center; gap: 0.4rem;
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border-color);
+      color: var(--text-secondary); padding: 0.4rem 0.85rem; border-radius: 8px;
+      font-size: 0.82rem; cursor: pointer; text-decoration: none; transition: all 0.2s ease;
+      font-weight: 600;
+    }
+    .nav-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .fp-title {
+      font-size: 1.15rem; font-weight: 700;
+      background: linear-gradient(135deg, #a855f7, #38bdf8, #10b981);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .fp-subtitle { font-size: 0.72rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .badge-sim {
+      background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7;
+      color: #c084fc; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.72rem; font-weight: 700;
+    }
+
+    /* Main Side-by-Side Workspace Layout */
+    .replay-workspace {
+      max-width: 1720px;
+      margin: 0.85rem auto 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 370px;
+      gap: 1rem;
+      align-items: start;
+    }
+    @media (max-width: 1200px) {
+      .replay-workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 768px) {
+      .fp-header {
+        padding: 0.6rem 0.85rem;
+      }
+      .canvas-viewport {
+        height: 420px !important;
+      }
+      .cvd-viewport {
+        height: 90px !important;
+      }
+      .unified-chart-wrapper {
+        padding: 0.75rem;
+      }
+      .hud-sidebar-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .modal-box {
+        width: 95% !important;
+        padding: 1.25rem !important;
+      }
+    }
+
+    .sidebar-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .card-deck {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    .deck-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Replay Controls */
+    .replay-ctrl-row {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.35rem; margin-bottom: 0.75rem;
+    }
+    .btn-replay {
+      background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-color);
+      color: #fff; padding: 0.45rem 0.3rem; border-radius: 8px; font-size: 0.76rem;
+      font-weight: 700; cursor: pointer; transition: all 0.15s ease;
+      display: flex; align-items: center; gap: 0.25rem; justify-content: center;
+      white-space: nowrap;
+    }
+    .btn-replay:hover { background: rgba(56, 189, 248, 0.25); border-color: #38bdf8; }
+    .btn-replay.primary {
+      background: #0284c7; border-color: #38bdf8; color: #fff;
+    }
+    .btn-replay.primary:hover { background: #0369a1; }
+    .btn-replay:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .progress-bar-wrap {
+      background: rgba(0, 0, 0, 0.5); border: 1px solid var(--border-color);
+      height: 10px; border-radius: 6px; overflow: hidden; margin-bottom: 0.4rem;
+    }
+    .progress-bar-fill {
+      height: 100%; background: linear-gradient(90deg, #38bdf8, #10b981);
+      width: 0%; transition: width 0.2s ease;
+    }
+    .progress-label {
+      display: flex; justify-content: space-between; font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace; color: var(--text-muted);
+    }
+
+    /* Trading Execution Deck */
+    .trade-deck-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 0.75rem;
+    }
+    .order-input-group {
+      display: flex; flex-direction: column; gap: 0.25rem;
+    }
+    .order-input-label { font-size: 0.68rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+    .order-input {
+      background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border-color);
+      color: #fff; padding: 0.4rem 0.55rem; border-radius: 6px; font-size: 0.82rem;
+      font-family: 'JetBrains Mono', monospace; font-weight: 700; outline: none; width: 100%; box-sizing: border-box;
+    }
+    .order-input:focus { border-color: #38bdf8; }
+
+    .btn-order-buy {
+      background: linear-gradient(135deg, rgba(16,185,129,0.3), rgba(16,185,129,0.5));
+      border: 1px solid #10b981; color: #fff; font-weight: 800; font-size: 0.9rem;
+      padding: 0.6rem 0.9rem; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+    }
+    .btn-order-buy:hover { background: #10b981; box-shadow: 0 0 15px rgba(16,185,129,0.4); }
+
+    .btn-order-sell {
+      background: linear-gradient(135deg, rgba(239,68,68,0.3), rgba(239,68,68,0.5));
+      border: 1px solid #ef4444; color: #fff; font-weight: 800; font-size: 0.9rem;
+      padding: 0.6rem 0.9rem; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+    }
+    .btn-order-sell:hover { background: #ef4444; box-shadow: 0 0 15px rgba(239,68,68,0.4); }
+
+    .btn-order-exit {
+      background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-color);
+      color: #fca5a5; font-weight: 700; font-size: 0.82rem;
+      padding: 0.45rem 0.85rem; border-radius: 8px; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-order-exit:hover { background: rgba(239, 68, 68, 0.3); border-color: #ef4444; color: #fff; }
+
+    /* Active Position Card */
+    .active-pos-card {
+      background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border-color);
+      border-radius: 8px; padding: 0.65rem 0.85rem; display: flex; flex-direction: column;
+      gap: 0.4rem; margin-top: 0.6rem;
+    }
+    .active-pos-tag {
+      padding: 0.2rem 0.5rem; border-radius: 5px; font-weight: 800; font-size: 0.75rem;
+    }
+    .tag-ce { background: rgba(16, 185, 129, 0.25); color: #34d399; border: 1px solid #10b981; }
+    .tag-pe { background: rgba(239, 68, 68, 0.25); color: #f87171; border: 1px solid #ef4444; }
+
+    /* Scorecard HUD in Sidebar */
+    .hud-sidebar-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.6rem;
+    }
+    .hud-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 0.65rem 0.85rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hud-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--card-accent, #38bdf8), transparent);
+    }
+    .hud-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.4px; }
+    .hud-value { font-size: 1.1rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; margin: 0.2rem 0 0.05rem; }
+    .hud-desc { font-size: 0.68rem; color: var(--text-secondary); }
+
+    /* Unified Chart Stage (Left Side) */
+    .unified-chart-wrapper {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 1.15rem;
+      position: relative;
+      box-sizing: border-box;
+    }
+
+    .chart-top-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.75rem; padding-bottom: 0.65rem; border-bottom: 1px solid var(--border-color);
+      flex-wrap: wrap; gap: 0.75rem;
+    }
+    .chart-top-title {
+      font-size: 1rem; font-weight: 700; color: #fff;
+      display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+    }
+    .chart-controls-nav {
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .btn-chart-ctrl {
+      background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-color);
+      color: #fff; padding: 0.3rem 0.65rem; border-radius: 6px; font-size: 0.78rem;
+      font-weight: 700; cursor: pointer; transition: all 0.15s ease;
+    }
+    .btn-chart-ctrl:hover { background: rgba(56, 189, 248, 0.25); border-color: #38bdf8; }
+
+    .chart-live-legend {
+      display: flex; align-items: center; gap: 0.85rem; font-size: 0.78rem;
+      font-family: 'JetBrains Mono', monospace; color: var(--text-secondary);
+      flex-wrap: wrap; margin-bottom: 0.65rem;
+    }
+    .chart-live-legend span b { color: #fff; }
+
+    .canvas-viewport {
+      width: 100%;
+      height: 600px;
+      position: relative;
+      background: #090e1c;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      cursor: crosshair;
+      overflow: hidden;
+      user-select: none;
+      touch-action: none;
+    }
+    #footprintCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Floating Hover Tooltip */
+    .chart-hover-tooltip {
+      position: absolute; display: none;
+      background: rgba(15, 23, 42, 0.96); border: 1px solid #38bdf8;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      border-radius: 8px; padding: 0.6rem 0.85rem;
+      font-size: 0.75rem; font-family: 'JetBrains Mono', monospace;
+      color: #fff; pointer-events: none; z-index: 50;
+      white-space: nowrap;
+    }
+
+    /* Synced CVD Area Below */
+    .cvd-viewport {
+      width: 100%;
+      height: 110px;
+      margin-top: 0.65rem;
+      background: rgba(9, 14, 28, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    #cvdCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .cvd-title {
+      position: absolute; top: 5px; left: 10px;
+      font-size: 0.68rem; font-weight: 700; color: #64748b;
+      font-family: 'JetBrains Mono', monospace; z-index: 2;
+    }
+
+    /* Trade Log Journal */
+    .journal-card {
+      max-width: 1440px; margin: 1.25rem auto 0;
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 14px; padding: 1.25rem;
+    }
+    .journal-title {
+      font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 0.85rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .trade-table-wrap { overflow-x: auto; }
+    .trade-table {
+      width: 100%; border-collapse: collapse; font-size: 0.82rem; font-family: 'JetBrains Mono', monospace;
+    }
+    .trade-table th {
+      text-align: left; padding: 0.65rem 0.85rem; background: rgba(0, 0, 0, 0.4);
+      color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase; border-bottom: 1px solid var(--border-color);
+    }
+    .trade-table td {
+      padding: 0.65rem 0.85rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .trade-table tr:hover { background: rgba(255, 255, 255, 0.03); }
+
+    .badge-outcome {
+      display: inline-block; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.75rem;
+    }
+    .badge-win { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid #10b981; }
+    .badge-loss { background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid #ef4444; }
+
+    /* Alert Toast */
+    .toast-notify {
+      position: fixed; top: 20px; right: 20px; z-index: 999;
+      background: #0f172a; border: 1px solid #38bdf8; color: #fff;
+      padding: 0.85rem 1.25rem; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      font-size: 0.85rem; font-weight: 600; display: none; align-items: center; gap: 0.6rem;
+      animation: slideIn 0.3s ease;
+    }
+    /* Custom Capital Modal & Interactive Card */
+    .hud-card-clickable {
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .hud-card-clickable:hover {
+      border-color: #38bdf8;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.25);
+    }
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal-box {
+      background: #0f172a;
+      border: 1px solid #38bdf8;
+      border-radius: 14px;
+      width: 100%; max-width: 440px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(56, 189, 248, 0.25);
+      overflow: hidden;
+      animation: popIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes popIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-box-header {
+      padding: 1rem 1.25rem;
+      background: rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid var(--border-color);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-box-title {
+      font-size: 1rem; font-weight: 700; color: #fff;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .btn-modal-close {
+      background: transparent; border: none; color: var(--text-muted);
+      font-size: 1.3rem; cursor: pointer; line-height: 1; padding: 0.2rem;
+      transition: color 0.15s ease;
+    }
+    .btn-modal-close:hover { color: #fff; }
+    .modal-box-body {
+      padding: 1.25rem;
+    }
+    .btn-preset-capital {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-color);
+      color: #cbd5e1;
+      padding: 0.5rem 0.4rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+    }
+    .btn-preset-capital:hover {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: #38bdf8;
+      color: #fff;
+    }
+    .btn-preset-capital.active {
+      background: #0284c7;
+      border-color: #38bdf8;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Toast Notification -->
+  <div id="toastNotify" class="toast-notify">
+    <span id="toastIcon">⭐</span>
+    <span id="toastMsg">Target Hit: +60 Points Profit!</span>
+  </div>
+
+  <!-- Header -->
+  <header class="fp-header">
+    <div class="fp-header-left">
+      <a href="/footprint.html" class="nav-btn">← 📊 Live Footprint Terminal</a>
+      <a href="/index.html" class="nav-btn">🏠 Home Radar</a>
+      <div class="fp-title">
+        <span>🎮 Footprint Replay & Trading Simulator</span>
+        <span class="badge-sim">PRACTICE ARENA</span>
+      </div>
+      <div class="fp-subtitle">
+        <span>Bar-by-Bar Replay</span> • <span>Interactive Buy & Sell (CE/PE)</span> • <span>Real-time PnL & Order Flow Testing</span>
+      </div>
+    </div>
+    <div class="fp-header-right">
+      <button id="btnOpenCapitalModal" class="btn-replay" style="background:rgba(56,189,248,0.15); border-color:#38bdf8; color:#38bdf8; font-size:0.78rem; padding:0.35rem 0.65rem;" title="Set Custom Starting Capital">💰 <span id="hdrCapitalLabel">₹1,00,000</span> ✏️</button>
+      <select id="selSymbol" class="order-input" style="font-size:0.8rem; padding:0.35rem 0.6rem;">
+        <option value="BANKNIFTY" selected>BANK NIFTY</option>
+        <option value="NIFTY">NIFTY 50</option>
+      </select>
+      <select id="selDate" class="order-input" style="font-size:0.8rem; padding:0.35rem 0.6rem; border-color:#38bdf8;">
+        <option value="">Loading dates...</option>
+      </select>
+      <button id="btnLoadSession" class="btn-replay primary" style="padding:0.4rem 0.85rem;">🔄 Load Session</button>
+    </div>
+  </header>
+
+  <!-- Side-by-Side Main Replay Terminal Workspace -->
+  <div class="replay-workspace">
+    <!-- Left Column: Unified Chart Stage -->
+    <div class="unified-chart-wrapper">
+      <div class="chart-top-bar">
+        <div class="chart-top-title">
+          <span>🕯️ Replay Footprint Chart (CVD + VWAP + Live Positions Overlay)</span>
+          <span style="font-size:0.75rem; background:rgba(168,85,247,0.2); color:#c084fc; padding:2px 8px; border-radius:4px;" id="replayDateBadge">SELECT SESSION</span>
+        </div>
+        <div class="chart-controls-nav">
+          <div style="display:inline-flex; gap:0.25rem; background:rgba(0,0,0,0.4); padding:2px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); margin-right:0.4rem;">
+            <button class="btn-chart-ctrl active" id="btnLayoutSide" style="background:#0284c7; color:#fff; font-weight:700;">🪟 Side-by-Side</button>
+            <button class="btn-chart-ctrl" id="btnLayoutOverlaid">📊 Overlaid</button>
+          </div>
+          <button class="btn-chart-ctrl" id="btnZoomIn" title="Zoom In">🔍 +</button>
+          <button class="btn-chart-ctrl" id="btnZoomOut" title="Zoom Out">🔍 -</button>
+          <button class="btn-chart-ctrl" id="btnRowPlus" style="background:rgba(16,185,129,0.22); border-color:#10b981; color:#34d399; font-weight:700;">↕️ Row Gap +</button>
+          <button class="btn-chart-ctrl" id="btnRowMinus" style="background:rgba(239,68,68,0.22); border-color:#ef4444; color:#f87171; font-weight:700;">↕️ Row Gap -</button>
+          <button class="btn-chart-ctrl" id="btnColPlus" style="background:rgba(56,189,248,0.2); border-color:#38bdf8; color:#38bdf8; font-weight:700;">↔️ Col Gap +</button>
+          <button class="btn-chart-ctrl" id="btnColMinus" style="background:rgba(148,163,184,0.2); border-color:#94a3b8; color:#cbd5e1; font-weight:700;">↔️ Col Gap -</button>
+          <button class="btn-chart-ctrl active" id="btnToggleVwap" style="background:rgba(245,158,11,0.22); border-color:#f59e0b; color:#fbbf24; font-weight:700;">📈 VWAP: ON</button>
+          <button class="btn-chart-ctrl" id="btnResetZoom" style="background:#0284c7; color:#fff; font-weight:700;">🎯 Fit All</button>
+        </div>
+      </div>
+
+      <!-- Live Candlestick Legend -->
+      <div class="chart-live-legend" id="chartLiveLegend">
+        <span style="color:#38bdf8;">⏰ <b id="legTime">--:-- IST</b></span>
+        <span>O: <b id="legOpen">--</b></span>
+        <span>H: <b id="legHigh">--</b></span>
+        <span>L: <b id="legLow">--</b></span>
+        <span>C: <b id="legClose">--</b></span>
+        <span>Δ: <b id="legDelta">--</b></span>
+        <span style="color:#f59e0b;">📈 VWAP: <b id="legVwap" style="color:#f59e0b;">--</b></span>
+        <span style="color:#ec4899;">⚡ PCR: <b id="legPcr" style="color:#ec4899;">--</b></span>
+        <span>Vol: <b id="legVol">--</b></span>
+        <span>CVD: <b id="legCVD">--</b></span>
+        <span id="legSignal" style="color:#38bdf8;">--</span>
+      </div>
+
+      <!-- Canvas Chart Viewport -->
+      <div class="canvas-viewport" id="canvasViewport">
+        <canvas id="footprintCanvas"></canvas>
+        <div class="chart-hover-tooltip" id="chartHoverTooltip"></div>
+      </div>
+
+      <!-- Synced CVD Viewport -->
+      <div class="cvd-viewport">
+        <div class="cvd-title">CVD (CUMULATIVE VOLUME DELTA)</div>
+        <canvas id="cvdCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Right Column: Replay Controls, Order Desk & Scorecard HUD -->
+    <div class="sidebar-controls">
+      <!-- 1. Performance Scorecard HUD -->
+      <div class="hud-sidebar-grid">
+        <div class="hud-card hud-card-clickable" id="hudCapitalCard" style="--card-accent: #38bdf8;" title="Click to customize starting capital">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div class="hud-label">Capital</div>
+            <span style="font-size:0.65rem; color:#38bdf8; font-weight:700; background:rgba(56,189,248,0.18); padding:1px 5px; border-radius:4px;">✏️ Custom</span>
+          </div>
+          <div class="hud-value" id="hudCapital" style="color:#38bdf8;">₹1,00,000</div>
+          <div class="hud-desc" id="hudCapitalDesc">Virtual Wallet (Click to edit)</div>
+        </div>
+        <div class="hud-card" style="--card-accent: #10b981;">
+          <div class="hud-label">Realized PnL</div>
+          <div class="hud-value" id="hudPnL" style="color:#10b981;">₹0.0</div>
+          <div class="hud-desc" id="hudPnLPts">0.0 pts</div>
+        </div>
+        <div class="hud-card" style="--card-accent: #f59e0b;">
+          <div class="hud-label">Win Rate</div>
+          <div class="hud-value" id="hudWinRate" style="color:#f59e0b;">0.0%</div>
+          <div class="hud-desc" id="hudWinsLosses">0W | 0L</div>
+        </div>
+        <div class="hud-card" style="--card-accent: #ec4899;">
+          <div class="hud-label">PCR Ratio</div>
+          <div class="hud-value" id="hudPCR" style="color:#ec4899;">--</div>
+          <div class="hud-desc" id="hudPCRDesc">Sentiment</div>
+        </div>
+      </div>
+
+      <!-- 2. Bar-by-Bar Replay Controls -->
+      <div class="card-deck">
+        <div class="deck-title">
+          <span>⏱️ Replay Controls</span>
+          <span id="replayStatusBadge" style="color:#38bdf8; font-size:0.75rem;">PAUSED</span>
+        </div>
+
+        <div class="replay-ctrl-row">
+          <button id="btnRestart" class="btn-replay" title="शुरू से प्ले करें (09:15 AM)">⏮️ Reset</button>
+          <button id="btnPrevBar" class="btn-replay" title="पिछली एक कैंडल पीछे जाएं (-5m)">◀️ Back</button>
+          <button id="btnPlayPause" class="btn-replay primary" title="प्ले / पॉज करें">▶️ Play</button>
+          <button id="btnNextBar" class="btn-replay" title="अगली एक कैंडल आगे बढ़ें (+5m)">▶️ Next</button>
+        </div>
+
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem; background:rgba(0,0,0,0.3); padding:0.4rem 0.6rem; border-radius:6px; border:1px solid var(--border-color);">
+          <span style="font-size:0.72rem; color:var(--text-muted); font-weight:700;">SPEED:</span>
+          <div style="display:flex; gap:0.3rem;">
+            <button class="btn-chart-ctrl" data-speed="2000">2s</button>
+            <button class="btn-chart-ctrl active" data-speed="1000" style="background:#0284c7; color:#fff;">1s</button>
+            <button class="btn-chart-ctrl" data-speed="500">0.5s</button>
+          </div>
+        </div>
+
+        <div class="progress-bar-wrap">
+          <div id="progressFill" class="progress-bar-fill"></div>
+        </div>
+        <div class="progress-label">
+          <span id="lblProgress">Candle: 0 / 0</span>
+          <span id="lblCurTime">Time: --:-- IST</span>
+        </div>
+      </div>
+
+      <!-- 3. Interactive Order Desk -->
+      <div class="card-deck">
+        <div class="deck-title">
+          <span>⚡ Order Desk</span>
+          <span style="color:#10b981; font-size:0.75rem;">READY</span>
+        </div>
+
+        <div class="trade-deck-grid">
+          <div class="order-input-group">
+            <label class="order-input-label">Qty (Lots)</label>
+            <input type="number" id="inpQty" class="order-input" value="15" step="15" min="15">
+          </div>
+          <div class="order-input-group">
+            <label class="order-input-label">SL (pts)</label>
+            <input type="number" id="inpSL" class="order-input" value="30" step="5" min="10">
+          </div>
+          <div class="order-input-group">
+            <label class="order-input-label">Target (pts)</label>
+            <input type="number" id="inpTP" class="order-input" value="60" step="10" min="20">
+          </div>
+        </div>
+
+        <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+          <button id="btnBuyCE" class="btn-order-buy" style="flex:1;">
+            <span>🟢 BUY CE</span>
+          </button>
+          <button id="btnBuyPE" class="btn-order-sell" style="flex:1;">
+            <span>🔴 BUY PE</span>
+          </button>
+          <button id="btnExitPos" class="btn-order-exit" style="display:none; width:100%;">
+            <span>⏹️ SQUARE OFF (EXIT)</span>
+          </button>
+        </div>
+
+        <!-- Active Position Widget -->
+        <div id="activePosWidget" class="active-pos-card" style="display:none;">
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span id="posTypeBadge" class="active-pos-tag tag-ce">BUY CALL</span>
+            <span style="font-size:0.78rem; color:#cbd5e1;">Qty: <b id="posQty">15</b> @ ₹<b id="posEntryPrice">--</b></span>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; width:100%; margin-top:0.3rem;">
+            <span style="font-size:0.75rem; color:#94a3b8;">SL: ₹<b id="posSL">--</b> | TP: ₹<b id="posTP">--</b></span>
+            <span style="font-size:0.95rem; font-weight:800; font-family:'JetBrains Mono',monospace;" id="posLivePnL">+₹0.0 (+0 pts)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Replay Trade Journal & History -->
+  <div class="journal-card">
+    <div class="journal-title">
+      <span>📖 Replay Simulator Trade History (सेल्फ-टेस्टिंग डायरी)</span>
+      <button id="btnResetJournal" class="btn-chart-ctrl" style="font-size:0.75rem;">🗑️ Clear History</button>
+    </div>
+    <div class="trade-table-wrap">
+      <table class="trade-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Entry Time</th>
+            <th>Type</th>
+            <th>Entry Price</th>
+            <th>Exit Price</th>
+            <th>Points</th>
+            <th>PnL (₹)</th>
+            <th>Outcome</th>
+            <th>Order Flow Reason / AI Note</th>
+          </tr>
+        </thead>
+        <tbody id="tradeJournalBody">
+          <tr>
+            <td colspan="9" style="text-align:center; color:var(--text-muted); padding:1.25rem;">
+              अभी तक कोई ट्रेड नहीं लिया गया है। ऊपर 🟢 BUY CE या 🔴 BUY PE दबाकर ट्रेड टेस्ट करें!
+            </td>
+          </tr>
+        </tbody>
+      </table>
+  <!-- Custom Capital Modal Dialog -->
+  <div id="modalCapital" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <div class="modal-box-header">
+        <div class="modal-box-title">
+          <span>💰 Custom Starting Money (प्रैक्टिस मनी)</span>
+        </div>
+        <button id="btnCloseCapitalModal" class="btn-modal-close" title="Close">✕</button>
+      </div>
+      <div class="modal-box-body">
+        <p style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:0.85rem; line-height:1.4;">
+          अपने मनपसंद स्टार्टिंग बैलेंस (Initial Capital) से पेपर ट्रेडिंग और रिस्क मैनेजमेंट टेस्ट करें:
+        </p>
+        
+        <label style="font-size:0.7rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Custom Starting Capital (₹)</label>
+        <div style="position:relative; margin-top:0.35rem;">
+          <span style="position:absolute; left:0.75rem; top:50%; transform:translateY(-50%); font-size:1.1rem; font-weight:700; color:#38bdf8;">₹</span>
+          <input type="number" id="inpCustomCapital" class="order-input" style="font-size:1.15rem; padding:0.55rem 0.75rem 0.55rem 2rem; width:100%; box-sizing:border-box; border-color:#38bdf8; color:#fff;" value="100000" min="1000" step="5000">
+        </div>
+
+        <div style="margin-top:1rem;">
+          <span style="font-size:0.7rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">QUICK 1-CLICK PRESETS:</span>
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.45rem; margin-top:0.4rem;">
+            <button class="btn-preset-capital" data-amt="25000">₹25,000</button>
+            <button class="btn-preset-capital" data-amt="50000">₹50,000</button>
+            <button class="btn-preset-capital" data-amt="100000">₹1,00,000</button>
+            <button class="btn-preset-capital" data-amt="200000">₹2,00,000</button>
+            <button class="btn-preset-capital" data-amt="500000">₹5,00,000</button>
+            <button class="btn-preset-capital" data-amt="1000000">₹10,00,000</button>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:0.6rem; margin-top:1.25rem;">
+          <button id="btnSaveCapital" class="btn-order-buy" style="flex:1; padding:0.6rem; font-size:0.85rem;">
+            <span>💾 Apply Capital</span>
+          </button>
+          <button id="btnResetCapitalDefault" class="btn-chart-ctrl" style="padding:0.6rem; font-size:0.82rem;" title="Reset to default 1 Lakh">
+            <span>🔄 Reset (1L)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========================================================
+    // STATE VARIABLES
+    // ========================================================
+    var allSessionCandles = []; // full historical day footprints
+    var revealedCandles = [];   // candles revealed so far in replay
+    var currentReplayIndex = 0; // index in allSessionCandles
+    var isReplayPlaying = false;
+    var replayTimer = null;
+    var replaySpeedMs = 1000;
+
+    // Pan & Zoom parameters (100% identical to footprint.html golden standard)
+    var candleSpacing = 260; // width per candle column (zoomable, default 260 for extra wide spacious view)
+    var scrollOffsetX = 0; // horizontal pan in pixels
+    var scrollOffsetY = 0; // vertical pan in pixels
+    var rungVerticalGap = 10; // EXACTLY 10px empty vertical space between consecutive rungs (e.g. 610 and 600)!
+    var rungHorizontalGap = 5; // EXACTLY 5px empty horizontal space between Sell, Price, and Buy boxes!
+    var rungH = 18; // height of each rung cell box
+    var chartLayout = 'side_by_side'; // 'side_by_side' (Candle on left, Footprint on right) or 'overlaid'
+    var showVwap = true; // Toggle institutional VWAP line
+    var isDragging = false;
+    var dragStartX = 0;
+    var dragStartY = 0;
+    var dragStartScrollOffsetX = 0;
+    var dragStartScrollOffsetY = 0;
+    var hoveredCandleIndex = -1;
+
+    // Simulated Account State (Custom Starting Capital)
+    var initialCapital = parseFloat(localStorage.getItem('replay_initial_capital')) || 100000;
+    var virtualCapital = initialCapital;
+    var totalRealizedPnL = 0;
+    var totalRealizedPts = 0;
+    var winsCount = 0;
+    var lossesCount = 0;
+    var tradeHistory = [];
+
+    // Active Position State
+    var activeTrade = null; // { type: 'BUY_CE'|'BUY_PE', entryPrice, entryIndex, entryTime, qty, sl, tp, slPrice, tpPrice }
+
+    // DOM Elements
+    var selSymbol = document.getElementById('selSymbol');
+    var selDate = document.getElementById('selDate');
+    var btnLoadSession = document.getElementById('btnLoadSession');
+    var btnPlayPause = document.getElementById('btnPlayPause');
+    var btnPrevBar = document.getElementById('btnPrevBar');
+    var btnNextBar = document.getElementById('btnNextBar');
+    var btnRestart = document.getElementById('btnRestart');
+    var replayStatusBadge = document.getElementById('replayStatusBadge');
+    var progressFill = document.getElementById('progressFill');
+    var lblProgress = document.getElementById('lblProgress');
+    var lblCurTime = document.getElementById('lblCurTime');
+    var replayDateBadge = document.getElementById('replayDateBadge');
+
+    // Custom Capital Modal DOM
+    var btnOpenCapitalModal = document.getElementById('btnOpenCapitalModal');
+    var hudCapitalCard = document.getElementById('hudCapitalCard');
+    var modalCapital = document.getElementById('modalCapital');
+    var btnCloseCapitalModal = document.getElementById('btnCloseCapitalModal');
+    var inpCustomCapital = document.getElementById('inpCustomCapital');
+    var btnSaveCapital = document.getElementById('btnSaveCapital');
+    var btnResetCapitalDefault = document.getElementById('btnResetCapitalDefault');
+    var hdrCapitalLabel = document.getElementById('hdrCapitalLabel');
+    var hudCapitalDesc = document.getElementById('hudCapitalDesc');
+
+    // Trading DOM
+    var inpQty = document.getElementById('inpQty');
+    var inpSL = document.getElementById('inpSL');
+    var inpTP = document.getElementById('inpTP');
+    var btnBuyCE = document.getElementById('btnBuyCE');
+    var btnBuyPE = document.getElementById('btnBuyPE');
+    var btnExitPos = document.getElementById('btnExitPos');
+    var activePosWidget = document.getElementById('activePosWidget');
+    var posTypeBadge = document.getElementById('posTypeBadge');
+    var posQty = document.getElementById('posQty');
+    var posEntryPrice = document.getElementById('posEntryPrice');
+    var posSL = document.getElementById('posSL');
+    var posTP = document.getElementById('posTP');
+    var posLivePnL = document.getElementById('posLivePnL');
+
+    // Scorecard DOM
+    var hudCapital = document.getElementById('hudCapital');
+    var hudPnL = document.getElementById('hudPnL');
+    var hudPnLPts = document.getElementById('hudPnLPts');
+    var hudWinRate = document.getElementById('hudWinRate');
+    var hudWinsLosses = document.getElementById('hudWinsLosses');
+    var hudPCR = document.getElementById('hudPCR');
+    var hudPCRDesc = document.getElementById('hudPCRDesc');
+
+    // Legend DOM
+    var legTime = document.getElementById('legTime');
+    var legOpen = document.getElementById('legOpen');
+    var legHigh = document.getElementById('legHigh');
+    var legLow = document.getElementById('legLow');
+    var legClose = document.getElementById('legClose');
+    var legDelta = document.getElementById('legDelta');
+    var legVwap = document.getElementById('legVwap');
+    var legPcr = document.getElementById('legPcr');
+    var legVol = document.getElementById('legVol');
+    var legCVD = document.getElementById('legCVD');
+    var legSignal = document.getElementById('legSignal');
+
+    // Canvas
+    var viewport = document.getElementById('canvasViewport');
+    var canvas = document.getElementById('footprintCanvas');
+    var ctx = canvas.getContext('2d');
+    var cvdCanvas = document.getElementById('cvdCanvas');
+    var cvdCtx = cvdCanvas.getContext('2d');
+    var tooltip = document.getElementById('chartHoverTooltip');
+
+    var tradeJournalBody = document.getElementById('tradeJournalBody');
+    var toastNotify = document.getElementById('toastNotify');
+    var toastIcon = document.getElementById('toastIcon');
+    var toastMsg = document.getElementById('toastMsg');
+
+    // ========================================================
+    // INITIALIZATION & API FETCH
+    // ========================================================
+    async function initReplayPage() {
+      fitCanvasSize();
+      await fetchAvailableDates();
+      loadSessionData();
+    }
+
+    async function fetchAvailableDates() {
+      try {
+        var symbol = selSymbol.value;
+        var res = await fetch('/api/volume-footprint?symbol=' + encodeURIComponent(symbol) + '&mode=backtest');
+        var json = await res.json();
+        if (json.success && json.data.availableDates) {
+          var opts = '';
+          json.data.availableDates.forEach(function(d) {
+            opts += '<option value="' + d + '">' + d + '</option>';
+          });
+          selDate.innerHTML = opts;
+        }
+      } catch (err) {
+        console.error('Fetch dates err:', err);
+      }
+    }
+
+    async function loadSessionData() {
+      pauseReplay();
+      btnLoadSession.disabled = true;
+      btnLoadSession.textContent = '⏳ Loading...';
+
+      var symbol = selSymbol.value;
+      var date = selDate.value;
+      var url = '/api/volume-footprint?symbol=' + encodeURIComponent(symbol) +
+        '&mode=backtest&date=' + encodeURIComponent(date) + '&limit=75';
+
+      try {
+        var res = await fetch(url);
+        var json = await res.json();
+        if (!json.success || !json.data || !json.data.footprints) {
+          showToast('❌', 'Session data not available');
+          return;
+        }
+
+        allSessionCandles = json.data.footprints;
+        replayDateBadge.textContent = symbol + ' • ' + (json.data.selectedDate || date);
+        
+        if (json.data.pcr) {
+          hudPCR.textContent = json.data.pcr.ratio.toFixed(2);
+          hudPCR.style.color = json.data.pcr.sentiment === 'BULLISH' ? 'var(--color-green)' : (json.data.pcr.sentiment === 'BEARISH' ? 'var(--color-red)' : 'var(--color-amber)');
+          hudPCRDesc.textContent = json.data.pcr.description;
+        }
+
+        // Start replay with the first 3 candles visible as context
+        restartReplay();
+        showToast('🎯', 'Session Loaded: ' + allSessionCandles.length + ' candles ready to replay!');
+      } catch (e) {
+        console.error('Session load err:', e);
+      } finally {
+        btnLoadSession.disabled = false;
+        btnLoadSession.textContent = '🔄 Load Session';
+      }
+    }
+
+    function restartReplay() {
+      pauseReplay();
+      currentReplayIndex = Math.min(2, allSessionCandles.length - 1);
+      revealedCandles = allSessionCandles.slice(0, currentReplayIndex + 1);
+      candleSpacing = 260;
+      rungVerticalGap = 10;
+      rungHorizontalGap = 5;
+      rungH = 18;
+      scrollOffsetX = 0;
+      scrollOffsetY = 0;
+      updateReplayProgress();
+      renderAll();
+    }
+
+    // ========================================================
+    // REPLAY PLAYBACK CONTROLLER
+    // ========================================================
+    function stepPrevBar() {
+      if (currentReplayIndex <= 0) {
+        pauseReplay();
+        showToast('⏮️', 'You are already at the first candle!');
+        return;
+      }
+
+      pauseReplay();
+      currentReplayIndex--;
+      revealedCandles = allSessionCandles.slice(0, currentReplayIndex + 1);
+
+      // If active position was taken after this stepped-back bar, revert position safely
+      if (activeTrade) {
+        if (activeTrade.entryIndex > currentReplayIndex) {
+          activeTrade = null;
+          activePosWidget.style.display = 'none';
+          btnExitPos.style.display = 'none';
+          btnBuyCE.style.display = 'inline-flex';
+          btnBuyPE.style.display = 'inline-flex';
+          showToast('ℹ️', 'Active position reverted (stepped before entry point).');
+        } else {
+          checkActiveTradeOnBar(revealedCandles[revealedCandles.length - 1]);
+        }
+      }
+
+      updateReplayProgress();
+      renderAll();
+    }
+
+    function stepNextBar() {
+      if (currentReplayIndex >= allSessionCandles.length - 1) {
+        pauseReplay();
+        showToast('🏁', 'Session Completed! Check your trading scorecard.');
+        return;
+      }
+
+      currentReplayIndex++;
+      revealedCandles = allSessionCandles.slice(0, currentReplayIndex + 1);
+
+      // Check Active Position against this new bar
+      checkActiveTradeOnBar(revealedCandles[revealedCandles.length - 1]);
+
+      updateReplayProgress();
+      renderAll();
+    }
+
+    function togglePlayPause() {
+      if (isReplayPlaying) {
+        pauseReplay();
+      } else {
+        startPlay();
+      }
+    }
+
+    function startPlay() {
+      if (currentReplayIndex >= allSessionCandles.length - 1) {
+        restartReplay();
+      }
+      isReplayPlaying = true;
+      btnPlayPause.innerHTML = '⏸️ Pause';
+      btnPlayPause.classList.remove('primary');
+      btnPlayPause.style.background = '#ea580c';
+      replayStatusBadge.textContent = 'PLAYING ▶️ (' + (replaySpeedMs/1000) + 's/bar)';
+      replayStatusBadge.style.color = '#34d399';
+
+      clearInterval(replayTimer);
+      replayTimer = setInterval(function() {
+        stepNextBar();
+        if (currentReplayIndex >= allSessionCandles.length - 1) {
+          pauseReplay();
+        }
+      }, replaySpeedMs);
+    }
+
+    function pauseReplay() {
+      isReplayPlaying = false;
+      clearInterval(replayTimer);
+      btnPlayPause.innerHTML = '▶️ Play';
+      btnPlayPause.classList.add('primary');
+      btnPlayPause.style.background = '';
+      replayStatusBadge.textContent = 'PAUSED ⏸️';
+      replayStatusBadge.style.color = '#f59e0b';
+    }
+
+    function updateReplayProgress() {
+      var total = allSessionCandles.length;
+      var cur = currentReplayIndex + 1;
+      var pct = total > 0 ? (cur / total) * 100 : 0;
+      progressFill.style.width = pct + '%';
+      lblProgress.textContent = 'Candle: ' + cur + ' / ' + total;
+
+      var latestBar = revealedCandles[revealedCandles.length - 1];
+      if (latestBar) {
+        lblCurTime.textContent = 'Current Time: ' + latestBar.timeLabel + ' IST';
+        updateLegend(revealedCandles.length - 1);
+      }
+    }
+
+    // Speed Selector Buttons
+    document.querySelectorAll('.btn-chart-ctrl[data-speed]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.btn-chart-ctrl[data-speed]').forEach(function(b) {
+          b.classList.remove('active');
+          b.style.background = '';
+          b.style.color = '';
+        });
+        btn.classList.add('active');
+        btn.style.background = '#0284c7';
+        btn.style.color = '#fff';
+        replaySpeedMs = parseInt(btn.dataset.speed);
+        if (isReplayPlaying) {
+          startPlay(); // restart interval with new speed
+        }
+      });
+    });
+
+    btnPlayPause.addEventListener('click', togglePlayPause);
+    btnPrevBar.addEventListener('click', function() {
+      pauseReplay();
+      stepPrevBar();
+    });
+    btnNextBar.addEventListener('click', function() {
+      pauseReplay();
+      stepNextBar();
+    });
+    btnRestart.addEventListener('click', restartReplay);
+    btnLoadSession.addEventListener('click', loadSessionData);
+    selSymbol.addEventListener('change', async function() {
+      await fetchAvailableDates();
+      loadSessionData();
+    });
+    selDate.addEventListener('change', loadSessionData);
+
+    // ========================================================
+    // ⚡ PAPER TRADING SIMULATION ENGINE
+    // ========================================================
+    btnBuyCE.addEventListener('click', function() { executeOrder('BUY_CE'); });
+    btnBuyPE.addEventListener('click', function() { executeOrder('BUY_PE'); });
+    btnExitPos.addEventListener('click', function() { closeActiveTrade('MANUAL_EXIT', 'Manual Square Off at Market'); });
+
+    function executeOrder(type) {
+      if (revealedCandles.length === 0) return;
+      if (activeTrade) {
+        showToast('⚠️', 'Already in active position! Square off first.');
+        return;
+      }
+
+      var curBar = revealedCandles[revealedCandles.length - 1];
+      var entryPrice = curBar.close;
+      var qty = parseInt(inpQty.value) || 15;
+      var slPts = parseFloat(inpSL.value) || 30;
+      var tpPts = parseFloat(inpTP.value) || 60;
+
+      var slPrice = type === 'BUY_CE' ? (entryPrice - slPts) : (entryPrice + slPts);
+      var tpPrice = type === 'BUY_CE' ? (entryPrice + tpPts) : (entryPrice - tpPts);
+
+      activeTrade = {
+        id: 'TR-' + Date.now(),
+        type: type,
+        entryPrice: entryPrice,
+        entryIndex: currentReplayIndex,
+        entryTime: curBar.timeLabel,
+        qty: qty,
+        slPts: slPts,
+        tpPts: tpPts,
+        slPrice: Number(slPrice.toFixed(1)),
+        tpPrice: Number(tpPrice.toFixed(1)),
+        patternAtEntry: curBar.pattern ? curBar.pattern.split('(')[0] : 'Footprint Momentum'
+      };
+
+      // Update UI
+      btnBuyCE.style.display = 'none';
+      btnBuyPE.style.display = 'none';
+      btnExitPos.style.display = 'inline-block';
+      activePosWidget.style.display = 'flex';
+
+      posTypeBadge.textContent = type === 'BUY_CE' ? '🟢 BUY CALL (CE)' : '🔴 BUY PUT (PE)';
+      posTypeBadge.className = 'active-pos-tag ' + (type === 'BUY_CE' ? 'tag-ce' : 'tag-pe');
+      posQty.textContent = qty;
+      posEntryPrice.textContent = entryPrice.toFixed(1);
+      posSL.textContent = activeTrade.slPrice.toFixed(1);
+      posTP.textContent = activeTrade.tpPrice.toFixed(1);
+
+      showToast(type === 'BUY_CE' ? '🟢' : '🔴', 'Order Filled: ' + type + ' @ ₹' + entryPrice.toFixed(1) + ' (SL: ₹' + activeTrade.slPrice + ' | TP: ₹' + activeTrade.tpPrice + ')');
+      renderAll();
+    }
+
+    function checkActiveTradeOnBar(bar) {
+      if (!activeTrade) return;
+
+      var isLong = activeTrade.type === 'BUY_CE';
+      var curPrice = bar.close;
+      var points = isLong ? (curPrice - activeTrade.entryPrice) : (activeTrade.entryPrice - curPrice);
+      var pnlRupees = points * activeTrade.qty;
+
+      // Update live widget
+      var sign = points >= 0 ? '+' : '';
+      posLivePnL.textContent = sign + '₹' + pnlRupees.toFixed(0) + ' (' + sign + points.toFixed(1) + ' pts)';
+      posLivePnL.style.color = points >= 0 ? 'var(--color-green)' : 'var(--color-red)';
+
+      // Check Target Hit
+      if (isLong && bar.high >= activeTrade.tpPrice) {
+        closeActiveTrade('TARGET_HIT', 'Target Reached! Institutional momentum hit + ' + activeTrade.tpPts + ' pts', activeTrade.tpPrice);
+        return;
+      }
+      if (!isLong && bar.low <= activeTrade.tpPrice) {
+        closeActiveTrade('TARGET_HIT', 'Target Reached! Downside momentum hit + ' + activeTrade.tpPts + ' pts', activeTrade.tpPrice);
+        return;
+      }
+
+      // Check Stop-Loss Hit
+      if (isLong && bar.low <= activeTrade.slPrice) {
+        closeActiveTrade('STOP_LOSS', 'Stop Loss Hit: Price slipped below SL floor', activeTrade.slPrice);
+        return;
+      }
+      if (!isLong && bar.high >= activeTrade.slPrice) {
+        closeActiveTrade('STOP_LOSS', 'Stop Loss Hit: Upside squeeze hit SL ceiling', activeTrade.slPrice);
+        return;
+      }
+    }
+
+    function closeActiveTrade(outcome, reason, executionPrice) {
+      if (!activeTrade) return;
+
+      var curBar = revealedCandles[revealedCandles.length - 1];
+      var exitPrice = executionPrice !== undefined ? executionPrice : curBar.close;
+      var isLong = activeTrade.type === 'BUY_CE';
+      var pts = isLong ? (exitPrice - activeTrade.entryPrice) : (activeTrade.entryPrice - exitPrice);
+      var pnlRs = pts * activeTrade.qty;
+
+      virtualCapital += pnlRs;
+      totalRealizedPnL += pnlRs;
+      totalRealizedPts += pts;
+
+      if (pts > 0) winsCount++;
+      else lossesCount++;
+
+      var completed = {
+        id: activeTrade.id,
+        time: activeTrade.entryTime,
+        exitTime: curBar.timeLabel,
+        type: activeTrade.type,
+        entryPrice: activeTrade.entryPrice,
+        exitPrice: Number(exitPrice.toFixed(1)),
+        points: Number(pts.toFixed(1)),
+        pnlRupees: Math.round(pnlRs),
+        outcome: outcome,
+        reason: reason + ' (' + activeTrade.patternAtEntry + ')'
+      };
+
+      tradeHistory.unshift(completed);
+      activeTrade = null;
+
+      // Reset Buttons
+      btnBuyCE.style.display = 'flex';
+      btnBuyPE.style.display = 'flex';
+      btnExitPos.style.display = 'none';
+      activePosWidget.style.display = 'none';
+
+      updateScorecard();
+      renderTradeJournal();
+
+      if (outcome === 'TARGET_HIT') {
+        showToast('⭐', 'TARGET HIT! +' + pts.toFixed(1) + ' pts (+₹' + Math.round(pnlRs) + ') 🎉');
+      } else if (outcome === 'STOP_LOSS') {
+        showToast('🛑', 'SL HIT: ' + pts.toFixed(1) + ' pts (-₹' + Math.abs(Math.round(pnlRs)) + ')');
+      } else {
+        showToast('⏹️', 'Trade Closed: ' + (pts >= 0 ? '+' : '') + pts.toFixed(1) + ' pts');
+      }
+
+      renderAll();
+    }
+
+    function updateScorecard() {
+      var total = winsCount + lossesCount;
+      var winRate = total > 0 ? ((winsCount / total) * 100).toFixed(1) : '0.0';
+
+      virtualCapital = initialCapital + totalRealizedPnL;
+      var capFormatted = '₹' + Math.round(virtualCapital).toLocaleString();
+      hudCapital.textContent = capFormatted;
+      if (hdrCapitalLabel) hdrCapitalLabel.textContent = capFormatted;
+      
+      var pnlSign = totalRealizedPnL >= 0 ? '+' : '';
+      hudPnL.textContent = pnlSign + '₹' + Math.round(totalRealizedPnL).toLocaleString();
+      hudPnL.style.color = totalRealizedPnL >= 0 ? 'var(--color-green)' : 'var(--color-red)';
+
+      var ptSign = totalRealizedPts >= 0 ? '+' : '';
+      hudPnLPts.textContent = ptSign + totalRealizedPts.toFixed(1) + ' Net Points';
+
+      hudWinRate.textContent = winRate + '%';
+      hudWinsLosses.textContent = winsCount + ' Wins | ' + lossesCount + ' Losses';
+    }
+
+    function renderTradeJournal() {
+      if (tradeHistory.length === 0) {
+        tradeJournalBody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:1.25rem;">अभी तक कोई ट्रेड नहीं लिया गया है।</td></tr>';
+        return;
+      }
+
+      var html = '';
+      tradeHistory.forEach(function(t, idx) {
+        var isWin = t.points > 0;
+        var badgeClass = isWin ? 'badge-win' : 'badge-loss';
+        var badgeText = t.outcome === 'TARGET_HIT' ? '⭐ TARGET HIT' : (t.outcome === 'STOP_LOSS' ? '🛑 SL HIT' : '⏹️ EXIT');
+        var pnlColor = isWin ? 'var(--color-green)' : 'var(--color-red)';
+        var ptSign = t.points >= 0 ? '+' : '';
+
+        html += '<tr>' +
+          '<td><b>#' + (tradeHistory.length - idx) + '</b></td>' +
+          '<td>' + t.time + ' - ' + t.exitTime + ' IST</td>' +
+          '<td><span class="active-pos-tag ' + (t.type === 'BUY_CE' ? 'tag-ce' : 'tag-pe') + '">' + (t.type === 'BUY_CE' ? 'CALL (CE)' : 'PUT (PE)') + '</span></td>' +
+          '<td>₹' + t.entryPrice.toFixed(1) + '</td>' +
+          '<td>₹' + t.exitPrice.toFixed(1) + '</td>' +
+          '<td style="color:' + pnlColor + '; font-weight:700;">' + ptSign + t.points.toFixed(1) + '</td>' +
+          '<td style="color:' + pnlColor + '; font-weight:700;">' + ptSign + '₹' + Math.round(t.pnlRupees).toLocaleString() + '</td>' +
+          '<td><span class="badge-outcome ' + badgeClass + '">' + badgeText + '</span></td>' +
+          '<td style="color:#cbd5e1; font-size:0.75rem;">' + t.reason + '</td>' +
+          '</tr>';
+      });
+      tradeJournalBody.innerHTML = html;
+    }
+
+    document.getElementById('btnResetJournal').addEventListener('click', function() {
+      tradeHistory = [];
+      winsCount = 0;
+      lossesCount = 0;
+      totalRealizedPnL = 0;
+      totalRealizedPts = 0;
+      virtualCapital = initialCapital;
+      updateScorecard();
+      renderTradeJournal();
+      showToast('🗑️', 'Trading Journal Reset (Capital: ₹' + initialCapital.toLocaleString() + ')');
+    });
+
+    // ========================================================
+    // 💰 CUSTOM CAPITAL LOGIC & MODAL CONTROLLER
+    // ========================================================
+    function openCapitalModal() {
+      inpCustomCapital.value = initialCapital;
+      updatePresetChipsActive(initialCapital);
+      modalCapital.style.display = 'flex';
+      inpCustomCapital.focus();
+    }
+
+    function closeCapitalModal() {
+      modalCapital.style.display = 'none';
+    }
+
+    function setCustomCapital(amount) {
+      if (isNaN(amount) || amount <= 0) {
+        showToast('⚠️', 'कृपया मान्य कैपिटल राशि दर्ज करें (कम से कम ₹1,000)!');
+        return;
+      }
+      initialCapital = Math.round(amount);
+      try {
+        localStorage.setItem('replay_initial_capital', initialCapital);
+      } catch (e) {}
+      virtualCapital = initialCapital + totalRealizedPnL;
+      updateScorecard();
+      closeCapitalModal();
+      showToast('💰', 'Starting Capital set to ₹' + initialCapital.toLocaleString() + '!');
+    }
+
+    function updatePresetChipsActive(amt) {
+      document.querySelectorAll('.btn-preset-capital').forEach(function(btn) {
+        var a = parseInt(btn.dataset.amt);
+        if (a === amt) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
+    }
+
+    if (btnOpenCapitalModal) btnOpenCapitalModal.addEventListener('click', openCapitalModal);
+    if (hudCapitalCard) hudCapitalCard.addEventListener('click', openCapitalModal);
+    if (btnCloseCapitalModal) btnCloseCapitalModal.addEventListener('click', closeCapitalModal);
+
+    modalCapital.addEventListener('click', function(e) {
+      if (e.target === modalCapital) closeCapitalModal();
+    });
+
+    document.querySelectorAll('.btn-preset-capital').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var amt = parseInt(this.dataset.amt);
+        inpCustomCapital.value = amt;
+        updatePresetChipsActive(amt);
+      });
+    });
+
+    inpCustomCapital.addEventListener('input', function() {
+      var curVal = parseInt(this.value);
+      updatePresetChipsActive(curVal);
+    });
+
+    btnSaveCapital.addEventListener('click', function() {
+      var val = parseFloat(inpCustomCapital.value);
+      setCustomCapital(val);
+    });
+
+    btnResetCapitalDefault.addEventListener('click', function() {
+      setCustomCapital(100000);
+    });
+
+    // ========================================================
+    // 🎨 CANVAS RENDERING: UNIFIED FOOTPRINT ENGINE
+    // ========================================================
+    // ========================================================
+    // 🎨 CANVAS RENDERING: UNIFIED FOOTPRINT ENGINE
+    // ========================================================
+    function fitCanvasSize() {
+      var dpr = window.devicePixelRatio || 1;
+      var w = viewport.clientWidth;
+      var h = viewport.clientHeight;
+      if (w > 0 && h > 0) {
+        var targetW = Math.round(w * dpr);
+        var targetH = Math.round(h * dpr);
+        if (canvas.width !== targetW || canvas.height !== targetH) {
+          canvas.width = targetW;
+          canvas.height = targetH;
+        }
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.imageSmoothingEnabled = true;
+      }
+
+      var cvdWrap = cvdCanvas.parentElement;
+      if (cvdWrap) {
+        var cvdW = cvdWrap.clientWidth;
+        var cvdH = cvdWrap.clientHeight;
+        if (cvdW > 0 && cvdH > 0) {
+          var targetCvdW = Math.round(cvdW * dpr);
+          var targetCvdH = Math.round(cvdH * dpr);
+          if (cvdCanvas.width !== targetCvdW || cvdCanvas.height !== targetCvdH) {
+            cvdCanvas.width = targetCvdW;
+            cvdCanvas.height = targetCvdH;
+          }
+          cvdCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          cvdCtx.imageSmoothingEnabled = true;
+        }
+      }
+    }
+
+    function renderAll() {
+      fitCanvasSize();
+      renderUnifiedCanvas();
+    }
+
+    function renderUnifiedCanvas() {
+      fitCanvasSize();
+      var width = viewport.clientWidth;
+      var height = viewport.clientHeight;
+      if (!ctx || width <= 0 || height <= 0 || revealedCandles.length === 0) return;
+
+      ctx.clearRect(0, 0, width, height);
+
+      var rightAxisWidth = 85;
+      var bottomAxisHeight = 45;
+      var chartW = width - rightAxisWidth;
+      var chartH = height - bottomAxisHeight;
+
+      // 1. Calculate Visible Candles & Price Bounds
+      var totalCandles = revealedCandles.length;
+      var totalContentWidth = totalCandles * candleSpacing;
+      var startBaseX = chartW - totalContentWidth - 30 + scrollOffsetX;
+
+      var minPrice = Infinity;
+      var maxPrice = -Infinity;
+      var visCount = 0;
+
+      revealedCandles.forEach(function(fp, idx) {
+        var candleCenterX = startBaseX + idx * candleSpacing + candleSpacing / 2;
+        if (candleCenterX >= -candleSpacing && candleCenterX <= chartW + candleSpacing) {
+          if (fp.high > maxPrice) maxPrice = fp.high;
+          if (fp.low < minPrice) minPrice = fp.low;
+          visCount++;
+        }
+      });
+
+      if (visCount === 0 || minPrice === Infinity) {
+        revealedCandles.forEach(function(fp) {
+          if (fp.high > maxPrice) maxPrice = fp.high;
+          if (fp.low < minPrice) minPrice = fp.low;
+        });
+      }
+
+      var midPrice = (maxPrice + minPrice) / 2;
+      var defaultPriceStep = 10;
+      for (var k = 0; k < revealedCandles.length; k++) {
+        if (revealedCandles[k].rungs && revealedCandles[k].rungs.length > 1) {
+          defaultPriceStep = Math.abs(revealedCandles[k].rungs[1].price - revealedCandles[k].rungs[0].price) || 10;
+          break;
+        }
+      }
+
+      var rungPitch = rungH + rungVerticalGap; // e.g. 18 + 10 = 28px
+      var pixelsPerPoint = rungPitch / defaultPriceStep;
+      var chartCenterY = (chartH / 2) + scrollOffsetY;
+
+      function priceToY(p) {
+        return chartCenterY - (p - midPrice) * pixelsPerPoint;
+      }
+
+      function yToPrice(y) {
+        return midPrice - (y - chartCenterY) / pixelsPerPoint;
+      }
+
+      // 2. Draw Horizontal Grid Lines & Right Price Scale
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px "JetBrains Mono", monospace';
+      ctx.textAlign = 'left';
+
+      var axisPriceStep = defaultPriceStep;
+      if (rungPitch < 20) axisPriceStep = defaultPriceStep * 2;
+      var minVisP = Math.min(yToPrice(chartH), yToPrice(0));
+      var maxVisP = Math.max(yToPrice(chartH), yToPrice(0));
+      var startP = Math.floor(minVisP / axisPriceStep) * axisPriceStep;
+      for (var p = startP; p <= maxVisP + axisPriceStep; p += axisPriceStep) {
+        var py = priceToY(p);
+        if (py >= 10 && py <= chartH - 5) {
+          ctx.beginPath();
+          ctx.moveTo(0, py);
+          ctx.lineTo(chartW, py);
+          ctx.stroke();
+
+          ctx.fillText('₹' + Math.round(p), chartW + 8, py + 3);
+        }
+      }
+
+      // Axis dividing lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.beginPath();
+      ctx.moveTo(chartW, 0);
+      ctx.lineTo(chartW, height);
+      ctx.moveTo(0, chartH);
+      ctx.lineTo(width, chartH);
+      ctx.stroke();
+
+      // 3. Render Each Footprint Candle
+      revealedCandles.forEach(function(fp, idx) {
+        var candleCenterX = startBaseX + idx * candleSpacing + candleSpacing / 2;
+
+        // Skip if outside viewport
+        if (candleCenterX < -candleSpacing || candleCenterX > chartW + candleSpacing) return;
+
+        var isGreen = fp.isGreen;
+        var barColor = isGreen ? '#10b981' : '#ef4444';
+        var barColorBg = isGreen ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)';
+
+        var yHigh = priceToY(fp.high);
+        var yLow = priceToY(fp.low);
+        var yOpen = priceToY(fp.open);
+        var yClose = priceToY(fp.close);
+        var yBodyTop = Math.min(yOpen, yClose);
+        var yBodyBottom = Math.max(yOpen, yClose);
+        var bodyHeight = Math.max(4, yBodyBottom - yBodyTop);
+
+        if (chartLayout === 'side_by_side') {
+          // ================================================================
+          // 🪟 SIDE-BY-SIDE: CANDLESTICK ON LEFT, FOOTPRINT LADDER ON RIGHT
+          // ================================================================
+          var slotLeft = candleCenterX - candleSpacing / 2 + 10;
+          var slotRight = candleCenterX + candleSpacing / 2 - 10;
+
+          // 1. Candlestick on Left
+          var candleW = Math.min(16, Math.max(10, Math.floor(candleSpacing * 0.06)));
+          var candleX = slotLeft + candleW / 2 + 4;
+
+          // Upper Wick
+          ctx.strokeStyle = isGreen ? '#10b981' : '#ef4444';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(candleX, yHigh);
+          ctx.lineTo(candleX, yBodyTop);
+          ctx.stroke();
+
+          // Candlestick Body (Crisp TradingView style)
+          ctx.fillStyle = isGreen ? '#10b981' : '#ef4444';
+          ctx.fillRect(candleX - candleW / 2, yBodyTop, candleW, bodyHeight);
+          ctx.strokeStyle = isGreen ? '#34d399' : '#f87171';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(candleX - candleW / 2, yBodyTop, candleW, bodyHeight);
+
+          // Lower Wick
+          ctx.beginPath();
+          ctx.moveTo(candleX, yBodyBottom);
+          ctx.lineTo(candleX, yLow);
+          ctx.stroke();
+
+          // High & Low labels
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = '8px "JetBrains Mono", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText('₹' + Math.round(fp.high), candleX, yHigh - 6);
+          ctx.fillText('₹' + Math.round(fp.low), candleX, yLow + 12);
+
+          // 2. Order Flow Footprint Ladder right beside the Candle (Bounded to never overlap)
+          var ladderLeft = candleX + candleW / 2 + 10;
+          var availLadderW = Math.max(70, slotRight - ladderLeft - 4);
+          var colGap = Math.min(5, Math.max(3, rungHorizontalGap));
+          var priceColW = Math.min(52, Math.max(38, Math.floor(availLadderW * 0.28)));
+          var colBidW = Math.max(26, Math.floor((availLadderW - priceColW - colGap * 2) / 2));
+          var colAskW = colBidW;
+          var priceColLeft = ladderLeft + colBidW + colGap;
+          var askColLeft = priceColLeft + priceColW + colGap;
+          var ladderMidX = priceColLeft + priceColW / 2;
+
+          // Ladder Header
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = 'bold 8.5px "JetBrains Mono", monospace';
+          ctx.textAlign = 'center';
+          var headerText = candleSpacing >= 240 ? 'SELL (BID)   •   PRICE   •   BUY (ASK)' : 'BID • PRICE • ASK';
+          ctx.fillText(headerText, ladderMidX, yHigh - 7);
+
+          if (fp.rungs && fp.rungs.length > 0) {
+            var valFontSize = colBidW < 44 ? '8.5px' : '9.5px';
+
+            fp.rungs.forEach(function(r) {
+              var ry = priceToY(r.price);
+
+              // Left Cell Box: Bid Volume (Sellers)
+              if (r.isSellImbalance) {
+                ctx.fillStyle = 'rgba(239, 68, 68, 0.65)';
+                ctx.fillRect(ladderLeft, ry - rungH/2, colBidW, rungH);
+                ctx.strokeStyle = '#ef4444';
+                ctx.lineWidth = 1.2;
+                ctx.strokeRect(ladderLeft, ry - rungH/2, colBidW, rungH);
+              } else {
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+                ctx.fillRect(ladderLeft, ry - rungH/2, colBidW, rungH);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+                ctx.lineWidth = 0.8;
+                ctx.strokeRect(ladderLeft, ry - rungH/2, colBidW, rungH);
+              }
+              ctx.fillStyle = r.isSellImbalance ? '#ffffff' : '#fca5a5';
+              ctx.font = (r.isSellImbalance ? 'bold ' : '') + valFontSize + ' "JetBrains Mono", monospace';
+              ctx.textAlign = 'right';
+              ctx.fillText(r.bidVol + (r.isSellImbalance ? ' ⚡' : ''), priceColLeft - colGap - 4, ry + 3.5);
+
+              // Center Cell Box: Dedicated Price Pill
+              if (r.isPoc) {
+                ctx.fillStyle = 'rgba(251, 191, 36, 0.35)';
+                ctx.fillRect(priceColLeft, ry - rungH/2, priceColW, rungH);
+                ctx.strokeStyle = '#fbbf24';
+                ctx.lineWidth = 1.4;
+                ctx.strokeRect(priceColLeft, ry - rungH/2, priceColW, rungH);
+                ctx.fillStyle = '#fbbf24';
+                ctx.font = 'bold 9px "JetBrains Mono", monospace';
+              } else {
+                ctx.fillStyle = 'rgba(30, 41, 59, 0.9)';
+                ctx.fillRect(priceColLeft, ry - rungH/2, priceColW, rungH);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+                ctx.lineWidth = 0.8;
+                ctx.strokeRect(priceColLeft, ry - rungH/2, priceColW, rungH);
+                ctx.fillStyle = '#cbd5e1';
+                ctx.font = '8.5px "JetBrains Mono", monospace';
+              }
+              ctx.textAlign = 'center';
+              ctx.fillText(Math.round(r.price).toString().slice(-3), priceColLeft + priceColW/2, ry + 3.5);
+
+              // Right Cell Box: Ask Volume (Buyers)
+              if (r.isBuyImbalance) {
+                ctx.fillStyle = 'rgba(16, 185, 129, 0.65)';
+                ctx.fillRect(askColLeft, ry - rungH/2, colAskW, rungH);
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 1.2;
+                ctx.strokeRect(askColLeft, ry - rungH/2, colAskW, rungH);
+              } else {
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+                ctx.fillRect(askColLeft, ry - rungH/2, colAskW, rungH);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+                ctx.lineWidth = 0.8;
+                ctx.strokeRect(askColLeft, ry - rungH/2, colAskW, rungH);
+              }
+              ctx.fillStyle = r.isBuyImbalance ? '#ffffff' : '#6ee7b7';
+              ctx.font = (r.isBuyImbalance ? 'bold ' : '') + valFontSize + ' "JetBrains Mono", monospace';
+              ctx.textAlign = 'left';
+              ctx.fillText((r.isBuyImbalance ? '⚡ ' : '') + r.askVol, askColLeft + 4, ry + 3.5);
+            });
+          }
+
+          // Combined Bar Footer: Center of slot
+          var barMidX = (candleX + ladderMidX) / 2;
+
+          // Time Label (IST)
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 9px "JetBrains Mono", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(fp.timeLabel + ' IST', barMidX, chartH + 15);
+
+          // Delta Pill
+          var isDeltaPos = fp.candleDelta >= 0;
+          ctx.fillStyle = isDeltaPos ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.25)';
+          ctx.fillRect(barMidX - 35, chartH + 22, 70, 15);
+          ctx.strokeStyle = isDeltaPos ? '#10b981' : '#ef4444';
+          ctx.strokeRect(barMidX - 35, chartH + 22, 70, 15);
+
+          ctx.fillStyle = isDeltaPos ? '#34d399' : '#f87171';
+          ctx.font = 'bold 8.5px "JetBrains Mono", monospace';
+          ctx.fillText('Δ ' + (isDeltaPos ? '+' : '') + fp.candleDelta, barMidX, chartH + 33);
+
+          // Signal Markers
+          if (fp.patternCode === 'STACKED_BUY') {
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.moveTo(candleX, yLow + 8);
+            ctx.lineTo(candleX - 5, yLow + 16);
+            ctx.lineTo(candleX + 5, yLow + 16);
+            ctx.fill();
+            ctx.font = 'bold 8px "JetBrains Mono", monospace';
+            ctx.fillText('3x BUY', candleX, yLow + 25);
+          } else if (fp.patternCode === 'STACKED_SELL') {
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.moveTo(candleX, yHigh - 8);
+            ctx.lineTo(candleX - 5, yHigh - 16);
+            ctx.lineTo(candleX + 5, yHigh - 16);
+            ctx.fill();
+            ctx.font = 'bold 8px "JetBrains Mono", monospace';
+            ctx.fillText('3x SELL', candleX, yHigh - 18);
+          } else if (fp.patternCode === 'TRAPPED_BUYERS') {
+            ctx.fillStyle = '#fbbf24';
+            ctx.font = 'bold 9px sans-serif';
+            ctx.fillText('🪤 BUY TRAP', barMidX, yHigh - 14);
+          } else if (fp.patternCode === 'TRAPPED_SELLERS') {
+            ctx.fillStyle = '#06b6d4';
+            ctx.font = 'bold 9px sans-serif';
+            ctx.fillText('🛡️ SELL TRAP', barMidX, yLow + 22);
+          }
+
+        } else {
+          // ================================================================
+          // 📊 OVERLAID: EMBEDDED INSIDE CANDLE BODY
+          // ================================================================
+          var colWidth = Math.min(130, candleSpacing - 12);
+          var halfCol = colWidth / 2;
+
+          // A. Candlestick Wick
+          ctx.strokeStyle = isGreen ? 'rgba(16, 185, 129, 0.6)' : 'rgba(239, 68, 68, 0.6)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(candleCenterX, yHigh);
+          ctx.lineTo(candleCenterX, yBodyTop);
+          ctx.moveTo(candleCenterX, yBodyBottom);
+          ctx.lineTo(candleCenterX, yLow);
+          ctx.stroke();
+
+          // B. Candlestick Body Box
+          ctx.fillStyle = barColorBg;
+          ctx.fillRect(candleCenterX - halfCol, yBodyTop, colWidth, bodyHeight);
+          ctx.strokeStyle = barColor;
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(candleCenterX - halfCol, yBodyTop, colWidth, bodyHeight);
+
+          // C. Embedded Order Flow Ladder Rungs
+          if (fp.rungs && fp.rungs.length > 0) {
+            fp.rungs.forEach(function(r) {
+              var ry = priceToY(r.price);
+
+              if (r.isPoc) {
+                ctx.fillStyle = 'rgba(251, 191, 36, 0.28)';
+                ctx.fillRect(candleCenterX - halfCol + 1, ry - rungH/2, colWidth - 2, rungH);
+                ctx.strokeStyle = '#fbbf24';
+                ctx.lineWidth = 1.2;
+                ctx.strokeRect(candleCenterX - halfCol + 1, ry - rungH/2, colWidth - 2, rungH);
+              }
+
+              if (r.isSellImbalance) {
+                ctx.fillStyle = 'rgba(239, 68, 68, 0.45)';
+                ctx.fillRect(candleCenterX - halfCol + 2, ry - rungH/2 + 1, halfCol - 14, rungH - 2);
+              }
+              ctx.fillStyle = r.isSellImbalance ? '#ffffff' : '#fca5a5';
+              ctx.font = (r.isSellImbalance ? 'bold ' : '') + '9px "JetBrains Mono", monospace';
+              ctx.textAlign = 'right';
+              ctx.fillText(r.bidVol, candleCenterX - 14, ry + 3);
+
+              if (candleSpacing > 100) {
+                ctx.fillStyle = r.isPoc ? '#fbbf24' : '#64748b';
+                ctx.font = (r.isPoc ? 'bold ' : '') + '8px "JetBrains Mono", monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText(Math.round(r.price).toString().slice(-3), candleCenterX, ry + 3);
+              }
+
+              if (r.isBuyImbalance) {
+                ctx.fillStyle = 'rgba(16, 185, 129, 0.45)';
+                ctx.fillRect(candleCenterX + 12, ry - rungH/2 + 1, halfCol - 14, rungH - 2);
+              }
+              ctx.fillStyle = r.isBuyImbalance ? '#ffffff' : '#6ee7b7';
+              ctx.font = (r.isBuyImbalance ? 'bold ' : '') + '9px "JetBrains Mono", monospace';
+              ctx.textAlign = 'left';
+              ctx.fillText(r.askVol, candleCenterX + 14, ry + 3);
+            });
+          }
+
+          // D. Top Wick Header: High Price
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = '8px "JetBrains Mono", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText('₹' + fp.high.toFixed(0), candleCenterX, yHigh - 5);
+
+          // E. Bottom Wick Footer: Time, Delta
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 9px "JetBrains Mono", monospace';
+          ctx.fillText(fp.timeLabel + ' IST', candleCenterX, chartH + 15);
+
+          var isDeltaPos = fp.candleDelta >= 0;
+          ctx.fillStyle = isDeltaPos ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.25)';
+          ctx.fillRect(candleCenterX - 35, chartH + 22, 70, 15);
+          ctx.strokeStyle = isDeltaPos ? '#10b981' : '#ef4444';
+          ctx.strokeRect(candleCenterX - 35, chartH + 22, 70, 15);
+
+          ctx.fillStyle = isDeltaPos ? '#34d399' : '#f87171';
+          ctx.font = 'bold 8.5px "JetBrains Mono", monospace';
+          ctx.fillText('Δ ' + (isDeltaPos ? '+' : '') + fp.candleDelta, candleCenterX, chartH + 33);
+
+          if (fp.patternCode === 'STACKED_BUY') {
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.moveTo(candleCenterX, yLow + 8);
+            ctx.lineTo(candleCenterX - 5, yLow + 16);
+            ctx.lineTo(candleCenterX + 5, yLow + 16);
+            ctx.fill();
+          } else if (fp.patternCode === 'STACKED_SELL') {
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.moveTo(candleCenterX, yHigh - 8);
+            ctx.lineTo(candleCenterX - 5, yHigh - 16);
+            ctx.lineTo(candleCenterX + 5, yHigh - 16);
+            ctx.fill();
+          } else if (fp.patternCode === 'TRAPPED_BUYERS') {
+            ctx.fillStyle = '#fbbf24';
+            ctx.font = '11px sans-serif';
+            ctx.fillText('🪤 TRAP', candleCenterX, yHigh - 14);
+          } else if (fp.patternCode === 'TRAPPED_SELLERS') {
+            ctx.fillStyle = '#06b6d4';
+            ctx.font = '11px sans-serif';
+            ctx.fillText('🛡️ TRAP', candleCenterX, yLow + 20);
+          }
+        }
+      });
+
+      // 3.5. Render Institutional VWAP Line Across All Visible Candles
+      if (showVwap && revealedCandles.length > 0) {
+        ctx.save();
+        var vwapPoints = [];
+
+        revealedCandles.forEach(function(fp, idx) {
+          var candleCenterX = startBaseX + idx * candleSpacing + candleSpacing / 2;
+          var slotRight = startBaseX + (idx + 1) * candleSpacing - 10;
+          var candleW = 14;
+          var candleX = candleCenterX;
+
+          if (chartLayout === 'side_by_side') {
+            var ladderLeft = candleCenterX + candleW / 2 + 8;
+            var ladderW = Math.max(90, slotRight - ladderLeft);
+            candleX = candleCenterX - ladderW / 2 + 10;
+          }
+
+          var v = fp.vwap || ((fp.high + fp.low + fp.close) / 3);
+          var vy = priceToY(v);
+          vwapPoints.push({ x: candleX, y: vy, vwap: v, timeLabel: fp.timeLabel });
+        });
+
+        if (vwapPoints.length > 0) {
+          // A. Glowing ambient under-shadow
+          ctx.strokeStyle = 'rgba(245, 158, 11, 0.22)';
+          ctx.lineWidth = 6;
+          ctx.lineJoin = 'round';
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          vwapPoints.forEach(function(pt, i) {
+            if (i === 0) ctx.moveTo(pt.x, pt.y);
+            else ctx.lineTo(pt.x, pt.y);
+          });
+          ctx.stroke();
+
+          // B. Crisp dashed golden VWAP curve
+          ctx.strokeStyle = '#f59e0b';
+          ctx.lineWidth = 2.4;
+          ctx.setLineDash([7, 4]);
+          ctx.beginPath();
+          vwapPoints.forEach(function(pt, i) {
+            if (i === 0) ctx.moveTo(pt.x, pt.y);
+            else ctx.lineTo(pt.x, pt.y);
+          });
+          ctx.stroke();
+          ctx.setLineDash([]); // reset dash
+
+          // C. Data nodes at candle intersections
+          vwapPoints.forEach(function(pt) {
+            if (pt.x >= 0 && pt.x <= chartW) {
+              ctx.fillStyle = '#f59e0b';
+              ctx.beginPath();
+              ctx.arc(pt.x, pt.y, 3.5, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.fillStyle = '#090e1c';
+              ctx.beginPath();
+              ctx.arc(pt.x, pt.y, 1.5, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          });
+
+          // D. Right Axis VWAP Pill Badge
+          var lastPt = vwapPoints[vwapPoints.length - 1];
+          if (lastPt && lastPt.y >= 10 && lastPt.y <= chartH - 10) {
+            // Horizontal dotted reference projection to scale
+            ctx.strokeStyle = 'rgba(245, 158, 11, 0.5)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(Math.min(chartW, lastPt.x), lastPt.y);
+            ctx.lineTo(chartW, lastPt.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Right Scale Badge
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillRect(chartW + 2, lastPt.y - 9, rightAxisWidth - 6, 18);
+
+            ctx.fillStyle = '#000000';
+            ctx.font = 'bold 9px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('VWAP ₹' + Math.round(lastPt.vwap), chartW + (rightAxisWidth - 6) / 2 + 2, lastPt.y + 3.5);
+          }
+        }
+        ctx.restore();
+      }
+
+      // 4. Active Position Overlays (Entry Line, Target Line, Stop Loss Line)
+      if (activeTrade) {
+        ctx.save();
+        var yEntry = priceToY(activeTrade.entryPrice);
+        var ySL = priceToY(activeTrade.slPrice);
+        var yTP = priceToY(activeTrade.tpPrice);
+
+        // Entry Line (Cyan)
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 1.8;
+        ctx.setLineDash([6, 4]);
+        ctx.beginPath();
+        ctx.moveTo(0, yEntry); ctx.lineTo(chartW, yEntry);
+        ctx.stroke();
+
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(chartW + 2, yEntry - 9, rightAxisWidth - 6, 18);
+        ctx.fillStyle = '#000';
+        ctx.font = 'bold 8.5px "JetBrains Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('ENTRY ₹' + Math.round(activeTrade.entryPrice), chartW + (rightAxisWidth - 6)/2 + 2, yEntry + 3.5);
+
+        // Target Line (Green)
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 1.8;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(0, yTP); ctx.lineTo(chartW, yTP);
+        ctx.stroke();
+
+        ctx.fillStyle = '#10b981';
+        ctx.fillRect(chartW + 2, yTP - 9, rightAxisWidth - 6, 18);
+        ctx.fillStyle = '#000';
+        ctx.fillText('TP ₹' + Math.round(activeTrade.tpPrice), chartW + (rightAxisWidth - 6)/2 + 2, yTP + 3.5);
+
+        // Stop Loss Line (Red)
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 1.8;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(0, ySL); ctx.lineTo(chartW, ySL);
+        ctx.stroke();
+
+        ctx.fillStyle = '#ef4444';
+        ctx.fillRect(chartW + 2, ySL - 9, rightAxisWidth - 6, 18);
+        ctx.fillStyle = '#fff';
+        ctx.fillText('SL ₹' + Math.round(activeTrade.slPrice), chartW + (rightAxisWidth - 6)/2 + 2, ySL + 3.5);
+
+        ctx.restore();
+      }
+
+      // 5. Render Synced CVD Curve
+      renderCvdCurve(chartW, startBaseX);
+    }
+
+    function renderCvdCurve(chartW, startBaseX) {
+      var w = cvdCanvas.parentElement.clientWidth;
+      var h = cvdCanvas.parentElement.clientHeight;
+      if (!cvdCtx || w <= 0 || h <= 0 || revealedCandles.length === 0) return;
+
+      cvdCtx.clearRect(0, 0, w, h);
+
+      var minCvd = Infinity, maxCvd = -Infinity;
+      revealedCandles.forEach(function(f) {
+        if (f.cvd > maxCvd) maxCvd = f.cvd;
+        if (f.cvd < minCvd) minCvd = f.cvd;
+      });
+      var cvdPad = Math.abs(maxCvd - minCvd) * 0.15 || 500;
+      maxCvd += cvdPad;
+      minCvd -= cvdPad;
+      var cvdRange = maxCvd - minCvd;
+
+      function cvdToY(v) {
+        return 15 + ((maxCvd - v) / cvdRange) * (h - 30);
+      }
+
+      var yZero = cvdToY(0);
+      if (yZero >= 0 && yZero <= h) {
+        cvdCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        cvdCtx.setLineDash([3, 3]);
+        cvdCtx.beginPath();
+        cvdCtx.moveTo(0, yZero);
+        cvdCtx.lineTo(chartW, yZero);
+        cvdCtx.stroke();
+        cvdCtx.setLineDash([]);
+      }
+
+      cvdCtx.beginPath();
+      revealedCandles.forEach(function(f, idx) {
+        var cx = startBaseX + idx * candleSpacing + candleSpacing / 2;
+        var cy = cvdToY(f.cvd);
+        if (idx === 0) cvdCtx.moveTo(cx, cy);
+        else cvdCtx.lineTo(cx, cy);
+      });
+
+      cvdCtx.strokeStyle = '#06b6d4';
+      cvdCtx.lineWidth = 2;
+      cvdCtx.stroke();
+    }
+
+    function updateLegend(index) {
+      var fp = revealedCandles[index];
+      if (!fp) return;
+      var d = new Date(fp.timestamp * 1000);
+      legTime.textContent = d.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false }) + ' IST';
+      legOpen.textContent = '₹' + fp.open.toFixed(1);
+      legHigh.textContent = '₹' + fp.high.toFixed(1);
+      legLow.textContent = '₹' + fp.low.toFixed(1);
+      legClose.textContent = '₹' + fp.close.toFixed(1);
+      if (legVwap) legVwap.textContent = '₹' + (fp.vwap ? fp.vwap.toFixed(1) : ((fp.high + fp.low + fp.close)/3).toFixed(1));
+      if (legPcr) legPcr.textContent = hudPCR.textContent;
+      legDelta.textContent = (fp.candleDelta >= 0 ? '+' : '') + fp.candleDelta.toLocaleString();
+      legDelta.style.color = fp.candleDelta >= 0 ? 'var(--color-green)' : 'var(--color-red)';
+      legVol.textContent = (fp.totalVol/1000).toFixed(1) + 'k';
+      legCVD.textContent = (fp.cvd >= 0 ? '+' : '') + (fp.cvd/1000).toFixed(1) + 'k';
+      legCVD.style.color = fp.cvd >= 0 ? 'var(--color-cyan)' : 'var(--color-red)';
+      legSignal.textContent = fp.pattern ? '● ' + fp.pattern.split('(')[0] : '';
+      legSignal.style.color = fp.bias === 'BULLISH' ? 'var(--color-green)' : (fp.bias === 'BEARISH' ? 'var(--color-red)' : 'var(--color-amber)');
+    }
+
+    function showToast(icon, text) {
+      toastIcon.textContent = icon;
+      toastMsg.textContent = text;
+      toastNotify.style.display = 'flex';
+      setTimeout(function() {
+        toastNotify.style.display = 'none';
+      }, 3500);
+    }
+
+    // Chart Control Events
+    function zoomChart(factor) {
+      candleSpacing = Math.max(140, Math.min(550, candleSpacing * factor));
+      renderAll();
+    }
+
+    document.getElementById('btnZoomIn').addEventListener('click', function() {
+      zoomChart(1.2);
+    });
+    document.getElementById('btnZoomOut').addEventListener('click', function() {
+      zoomChart(0.8);
+    });
+    document.getElementById('btnResetZoom').addEventListener('click', function() {
+      candleSpacing = 260;
+      rungVerticalGap = 10;
+      rungHorizontalGap = 5;
+      rungH = 18;
+      scrollOffsetX = 0;
+      scrollOffsetY = 0;
+      renderAll();
+      showToast('🎯', 'Standard View Restored');
+    });
+    document.getElementById('btnRowPlus').addEventListener('click', function() {
+      rungVerticalGap = Math.min(60, rungVerticalGap + 2);
+      renderAll();
+    });
+    document.getElementById('btnRowMinus').addEventListener('click', function() {
+      rungVerticalGap = Math.max(4, rungVerticalGap - 2);
+      renderAll();
+    });
+    document.getElementById('btnColPlus').addEventListener('click', function() {
+      rungHorizontalGap = Math.min(30, rungHorizontalGap + 2);
+      renderAll();
+    });
+    document.getElementById('btnColMinus').addEventListener('click', function() {
+      rungHorizontalGap = Math.max(1, rungHorizontalGap - 2);
+      renderAll();
+    });
+    document.getElementById('btnToggleVwap').addEventListener('click', function() {
+      showVwap = !showVwap;
+      var btn = document.getElementById('btnToggleVwap');
+      if (showVwap) {
+        btn.textContent = '📈 VWAP: ON';
+        btn.style.background = 'rgba(245,158,11,0.22)';
+        btn.style.color = '#fbbf24';
+        btn.style.borderColor = '#f59e0b';
+      } else {
+        btn.textContent = '📈 VWAP: OFF';
+        btn.style.background = 'rgba(255,255,255,0.06)';
+        btn.style.color = '#94a3b8';
+        btn.style.borderColor = 'rgba(255,255,255,0.1)';
+      }
+      renderAll();
+    });
+
+    document.getElementById('btnLayoutSide').addEventListener('click', function() {
+      chartLayout = 'side_by_side';
+      this.classList.add('active'); this.style.background = '#0284c7'; this.style.color = '#fff';
+      document.getElementById('btnLayoutOverlaid').classList.remove('active');
+      document.getElementById('btnLayoutOverlaid').style.background = '';
+      document.getElementById('btnLayoutOverlaid').style.color = '';
+      candleSpacing = Math.max(200, candleSpacing);
+      renderAll();
+    });
+    document.getElementById('btnLayoutOverlaid').addEventListener('click', function() {
+      chartLayout = 'overlaid';
+      this.classList.add('active'); this.style.background = '#0284c7'; this.style.color = '#fff';
+      document.getElementById('btnLayoutSide').classList.remove('active');
+      document.getElementById('btnLayoutSide').style.background = '';
+      document.getElementById('btnLayoutSide').style.color = '';
+      renderAll();
+    });
+
+    // Mouse Wheel Zoom: Normal wheel zooms in/out, Shift+wheel adjusts vertical gap
+    viewport.addEventListener('wheel', function(e) {
+      e.preventDefault();
+      if (e.shiftKey) {
+        var delta = e.deltaY < 0 ? 2 : -2;
+        rungVerticalGap = Math.max(4, Math.min(60, rungVerticalGap + delta));
+        renderAll();
+      } else {
+        var zoom = e.deltaY < 0 ? 1.1 : 0.9;
+        zoomChart(zoom);
+      }
+    }, { passive: false });
+
+    // Mouse Pan & Drag
+    viewport.addEventListener('mousedown', function(e) {
+      isDragging = true;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      dragStartScrollOffsetX = scrollOffsetX;
+      dragStartScrollOffsetY = scrollOffsetY;
+      viewport.style.cursor = 'grabbing';
+      if (tooltip) tooltip.style.display = 'none';
+    });
+
+    window.addEventListener('mousemove', function(e) {
+      if (isDragging) {
+        scrollOffsetX = dragStartScrollOffsetX + (e.clientX - dragStartX);
+        scrollOffsetY = dragStartScrollOffsetY + (e.clientY - dragStartY);
+        renderAll();
+        return;
+      }
+
+      // Hover Detection (identical to footprint.html)
+      if (!canvas || !tooltip) return;
+      var rect = canvas.getBoundingClientRect();
+      var mouseX = e.clientX - rect.left;
+      var mouseY = e.clientY - rect.top;
+
+      if (mouseX >= 0 && mouseX <= canvas.width && mouseY >= 0 && mouseY <= canvas.height) {
+        var width = viewport.clientWidth;
+        var rightAxisWidth = 85;
+        var chartW = width - rightAxisWidth;
+        var totalContentWidth = revealedCandles.length * candleSpacing;
+        var startBaseX = chartW - totalContentWidth - 30 + scrollOffsetX;
+
+        var foundIdx = -1;
+        revealedCandles.forEach(function(fp, idx) {
+          var cx = startBaseX + idx * candleSpacing + candleSpacing / 2;
+          if (Math.abs(mouseX - cx) < candleSpacing / 2) {
+            foundIdx = idx;
+          }
+        });
+
+        if (foundIdx !== -1 && foundIdx !== hoveredCandleIndex) {
+          hoveredCandleIndex = foundIdx;
+          updateLegend(foundIdx);
+
+          var fp = revealedCandles[foundIdx];
+          var vwapVal = fp.vwap ? '₹' + fp.vwap.toFixed(1) : '--';
+          var pcrText = (hudPCR && hudPCR.textContent) ? hudPCR.textContent : '--';
+
+          tooltip.style.display = 'block';
+          tooltip.style.left = (mouseX + 15) + 'px';
+          tooltip.style.top = (mouseY - 20) + 'px';
+          tooltip.innerHTML = '<strong>' + fp.timeLabel + ' IST</strong> | ' + (fp.isGreen ? '🟢 Bullish' : '🔴 Bearish') + '<br>' +
+            'Close: ₹' + fp.close.toFixed(1) + ' | <span style="color:#f59e0b;">VWAP: ' + vwapVal + '</span><br>' +
+            'POC: ₹' + (fp.candlePocPrice || '--') + '<br>' +
+            'Δ Delta: ' + (fp.candleDelta >= 0 ? '+' : '') + fp.candleDelta + '<br>' +
+            'Vol: ' + (fp.totalVol/1000).toFixed(1) + 'k | CVD: ' + (fp.cvd/1000).toFixed(1) + 'k<br>' +
+            '<span style="color:#ec4899;">⚡ PCR: ' + pcrText + '</span><br>' +
+            '<span style="color:#38bdf8;">' + (fp.pattern || '') + '</span>';
+        }
+      } else {
+        if (tooltip) tooltip.style.display = 'none';
+      }
+    });
+
+    window.addEventListener('mouseup', function() {
+      if (isDragging) {
+        isDragging = false;
+        viewport.style.cursor = 'crosshair';
+      }
+    });
+
+    // Mobile Touch Drag & Pan
+    viewport.addEventListener('touchstart', function(e) {
+      if (e.touches && e.touches.length === 1) {
+        isDragging = true;
+        dragStartX = e.touches[0].clientX;
+        dragStartY = e.touches[0].clientY;
+        dragStartScrollOffsetX = scrollOffsetX;
+        dragStartScrollOffsetY = scrollOffsetY;
+        if (tooltip) tooltip.style.display = 'none';
+      }
+    }, { passive: true });
+
+    viewport.addEventListener('touchmove', function(e) {
+      if (isDragging && e.touches && e.touches.length === 1) {
+        scrollOffsetX = dragStartScrollOffsetX + (e.touches[0].clientX - dragStartX);
+        scrollOffsetY = dragStartScrollOffsetY + (e.touches[0].clientY - dragStartY);
+        renderAll();
+      }
+    }, { passive: true });
+
+    viewport.addEventListener('touchend', function() {
+      isDragging = false;
+    });
+
+    window.addEventListener('resize', function() {
+      fitCanvasSize();
+      renderAll();
+    });
+
+    // Boot
+    window.addEventListener('DOMContentLoaded', initReplayPage);
+  </script>
+</body>
+</html>

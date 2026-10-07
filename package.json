@@ -1,0 +1,21 @@
+{
+  "name": "ai-intraday-trading-assistant",
+  "version": "1.0.0",
+  "description": "Free AI-powered Intraday Trading Assistant for Stocks with live technical analysis, signals, and paper trading simulator.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "trading",
+    "intraday",
+    "ai-assistant",
+    "nse",
+    "technical-analysis",
+    "stocks"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1"
+  }
+}
