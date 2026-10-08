@@ -26,6 +26,10 @@
   box-sizing: border-box;
 }
 
+.hidden {
+  display: none !important;
+}
+
 body.dark-theme {
   background-color: var(--bg-primary);
   background-image: 
@@ -4011,6 +4015,9 @@ body.dark-theme {
   align-items: center;
   justify-content: center;
   padding: 1rem;
+}
+.alert-center-modal.hidden {
+  display: none !important;
 }
 .alert-modal-backdrop {
   position: absolute;

@@ -3610,28 +3610,42 @@ if (alertTypeSelect && alertTargetPrice) {
 }
 
 // Open & Close Alert Center Modal
-if (alertCenterBtn && alertCenterModal) {
-  alertCenterBtn.addEventListener('click', () => {
-    alertCenterModal.classList.remove('hidden');
-    alertState.unreadCount = 0;
-    updateUnreadAlertBadge();
-    updateDesktopPermUI();
-    renderActiveRules();
-    renderTriggeredAlerts();
-  });
+function openAlertCenterModal() {
+  if (!alertCenterModal) return;
+  alertCenterModal.classList.remove('hidden');
+  alertCenterModal.style.display = 'flex';
+  alertState.unreadCount = 0;
+  updateUnreadAlertBadge();
+  updateDesktopPermUI();
+  renderActiveRules();
+  renderTriggeredAlerts();
+}
+window.openAlertCenterModal = openAlertCenterModal;
+
+function closeAlertCenterModal() {
+  if (!alertCenterModal) return;
+  alertCenterModal.classList.add('hidden');
+  alertCenterModal.style.display = 'none';
+}
+window.closeAlertCenterModal = closeAlertCenterModal;
+
+if (alertCenterBtn) {
+  alertCenterBtn.addEventListener('click', openAlertCenterModal);
 }
 
-if (closeAlertModalBtn && alertCenterModal) {
-  closeAlertModalBtn.addEventListener('click', () => {
-    alertCenterModal.classList.add('hidden');
-  });
+if (closeAlertModalBtn) {
+  closeAlertModalBtn.addEventListener('click', closeAlertCenterModal);
 }
 
-if (alertModalBackdrop && alertCenterModal) {
-  alertModalBackdrop.addEventListener('click', () => {
-    alertCenterModal.classList.add('hidden');
-  });
+if (alertModalBackdrop) {
+  alertModalBackdrop.addEventListener('click', closeAlertCenterModal);
 }
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && alertCenterModal && alertCenterModal.style.display !== 'none') {
+    closeAlertCenterModal();
+  }
+});
 
 // Toggle Desktop Notification Permission
 if (toggleDesktopPermBtn) {

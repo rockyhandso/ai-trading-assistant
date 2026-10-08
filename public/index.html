@@ -56,7 +56,7 @@
       <a href="/footprint-replay.html" class="btn" style="background:linear-gradient(135deg,#a855f7,#6366f1);color:#fff;border:none;font-weight:700;font-size:0.8rem;padding:0.45rem 0.9rem;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:0.35rem;" title="Footprint Replay Simulator & Paper Trading">🎮 Replay Simulator</a>
       <a href="/option-chain.html" class="btn" style="background:linear-gradient(135deg,#7c3aed,#0ea5e9);color:#fff;border:none;font-weight:700;font-size:0.8rem;padding:0.45rem 0.9rem;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:0.35rem;" title="Option Chain Intelligence">📊 Option Chain</a>
       <a href="/golden-checklist.html" class="btn" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;font-weight:700;font-size:0.8rem;padding:0.45rem 0.9rem;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:0.35rem;" title="30-Second Golden Checklist & PDF Cheat Sheet" target="_blank">📋 30s Checklist (PDF)</a>
-      <button id="alertCenterBtn" class="btn btn-alert-bell" title="🔔 Smart Trade Alerts & Exit Notifier">
+      <button id="alertCenterBtn" class="btn btn-alert-bell" onclick="openAlertCenterModal()" title="🔔 Smart Trade Alerts & Exit Notifier">
         🔔 Alerts <span class="alert-count-badge hidden" id="unreadAlertCount">0</span>
       </button>
       <div class="auto-refresh-pill">
@@ -1085,8 +1085,8 @@
   </div>
 
   <!-- 🔔 SMART ALERTS & EXIT NOTIFIER MODAL -->
-  <div id="alertCenterModal" class="alert-center-modal hidden">
-    <div class="alert-modal-backdrop" id="alertModalBackdrop"></div>
+  <div id="alertCenterModal" class="alert-center-modal hidden" style="display: none;">
+    <div class="alert-modal-backdrop" id="alertModalBackdrop" onclick="closeAlertCenterModal()"></div>
     <div class="alert-modal-content">
       <div class="alert-modal-header">
         <div style="display: flex; align-items: center; gap: 0.6rem;">
@@ -1096,7 +1096,7 @@
             <small style="color: var(--text-muted); font-size: 0.72rem;">BUY/SELL Signals, Target Reached, Stop Loss & Price Notifications</small>
           </div>
         </div>
-        <button id="closeAlertModalBtn" class="chat-close-btn" style="color: #94a3b8; font-size: 1.2rem; cursor: pointer; background:none; border:none;">✕</button>
+        <button id="closeAlertModalBtn" onclick="closeAlertCenterModal()" class="chat-close-btn" style="color: #94a3b8; font-size: 1.3rem; cursor: pointer; background:none; border:none; padding: 4px 8px; line-height: 1;" title="Close Alerts">✕</button>
       </div>
 
       <!-- Quick Toggles Row -->
