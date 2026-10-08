@@ -85,23 +85,64 @@
     }
     @media (max-width: 768px) {
       .fp-header {
-        padding: 0.6rem 0.85rem;
+        padding: 0.45rem 0.75rem;
+      }
+      .fp-subtitle {
+        display: none !important;
       }
       .canvas-viewport {
-        height: 420px !important;
+        height: 320px;
+        max-height: 55vh;
       }
       .cvd-viewport {
-        height: 90px !important;
+        height: 65px !important;
       }
       .unified-chart-wrapper {
-        padding: 0.75rem;
+        padding: 0.5rem;
+        border-radius: 10px;
+      }
+      .chart-top-bar {
+        gap: 0.4rem;
+        margin-bottom: 0.4rem;
+        padding-bottom: 0.4rem;
+      }
+      .chart-top-title span:first-child {
+        font-size: 0.85rem;
+      }
+      /* Hide dense micro-gap buttons on mobile to prevent clutter */
+      #btnRowPlus, #btnRowMinus, #btnColPlus, #btnColMinus {
+        display: none !important;
+      }
+      .btn-chart-ctrl {
+        padding: 0.25rem 0.45rem;
+        font-size: 0.72rem;
+      }
+      .chart-live-legend {
+        font-size: 0.68rem;
+        gap: 0.4rem;
+        margin-bottom: 0.4rem;
       }
       .hud-sidebar-grid {
         grid-template-columns: 1fr 1fr;
+        gap: 0.45rem;
       }
       .modal-box {
         width: 95% !important;
         padding: 1.25rem !important;
+      }
+    }
+    @media (max-height: 520px) and (orientation: landscape) {
+      .canvas-viewport {
+        height: calc(100vh - 150px) !important;
+      }
+      .cvd-viewport {
+        height: 50px !important;
+      }
+      .fp-header {
+        padding: 0.3rem 0.65rem;
+      }
+      .fp-subtitle {
+        display: none !important;
       }
     }
 
@@ -492,7 +533,8 @@
           <button class="btn-chart-ctrl" id="btnRowMinus" style="background:rgba(239,68,68,0.22); border-color:#ef4444; color:#f87171; font-weight:700;">↕️ Row Gap -</button>
           <button class="btn-chart-ctrl" id="btnColPlus" style="background:rgba(56,189,248,0.2); border-color:#38bdf8; color:#38bdf8; font-weight:700;">↔️ Col Gap +</button>
           <button class="btn-chart-ctrl" id="btnColMinus" style="background:rgba(148,163,184,0.2); border-color:#94a3b8; color:#cbd5e1; font-weight:700;">↔️ Col Gap -</button>
-          <button class="btn-chart-ctrl active" id="btnToggleVwap" style="background:rgba(245,158,11,0.22); border-color:#f59e0b; color:#fbbf24; font-weight:700;">📈 VWAP: ON</button>
+          <button class="btn-chart-ctrl active" id="btnToggleVwap" style="background:rgba(245,158,11,0.22); border-color:#f59e0b; color:#fbbf24; font-weight:700;">📈 VWAP</button>
+          <button class="btn-chart-ctrl" id="btnToggleHeight" style="background:rgba(168,85,247,0.22); border-color:#a855f7; color:#c084fc; font-weight:700;" title="Change Canvas Height">📏 Height</button>
           <button class="btn-chart-ctrl" id="btnResetZoom" style="background:#0284c7; color:#fff; font-weight:700;">🎯 Fit All</button>
         </div>
       </div>
@@ -719,14 +761,15 @@
     var replayTimer = null;
     var replaySpeedMs = 1000;
 
-    // Pan & Zoom parameters (100% identical to footprint.html golden standard)
-    var candleSpacing = 260; // width per candle column (zoomable, default 260 for extra wide spacious view)
+    // Pan & Zoom parameters (dynamically tuned for mobile or desktop)
+    var isMobileInit = window.innerWidth < 650;
+    var candleSpacing = isMobileInit ? 130 : 260; // width per candle column
     var scrollOffsetX = 0; // horizontal pan in pixels
     var scrollOffsetY = 0; // vertical pan in pixels
-    var rungVerticalGap = 10; // EXACTLY 10px empty vertical space between consecutive rungs (e.g. 610 and 600)!
-    var rungHorizontalGap = 5; // EXACTLY 5px empty horizontal space between Sell, Price, and Buy boxes!
-    var rungH = 18; // height of each rung cell box
-    var chartLayout = 'side_by_side'; // 'side_by_side' (Candle on left, Footprint on right) or 'overlaid'
+    var rungVerticalGap = isMobileInit ? 6 : 10;
+    var rungHorizontalGap = isMobileInit ? 3 : 5;
+    var rungH = isMobileInit ? 15 : 18;
+    var chartLayout = isMobileInit ? 'overlaid' : 'side_by_side';
     var showVwap = true; // Toggle institutional VWAP line
     var isDragging = false;
     var dragStartX = 0;
@@ -890,10 +933,11 @@
       pauseReplay();
       currentReplayIndex = Math.min(2, allSessionCandles.length - 1);
       revealedCandles = allSessionCandles.slice(0, currentReplayIndex + 1);
-      candleSpacing = 260;
-      rungVerticalGap = 10;
-      rungHorizontalGap = 5;
-      rungH = 18;
+      var isMob = window.innerWidth < 650;
+      candleSpacing = isMob ? 130 : 260;
+      rungVerticalGap = isMob ? 6 : 10;
+      rungHorizontalGap = isMob ? 3 : 5;
+      rungH = isMob ? 15 : 18;
       scrollOffsetX = 0;
       scrollOffsetY = 0;
       updateReplayProgress();
@@ -1355,8 +1399,9 @@
 
       ctx.clearRect(0, 0, width, height);
 
-      var rightAxisWidth = 85;
-      var bottomAxisHeight = 45;
+      var isMobile = width < 650;
+      var rightAxisWidth = isMobile ? 55 : 85;
+      var bottomAxisHeight = isMobile ? 32 : 45;
       var chartW = width - rightAxisWidth;
       var chartH = height - bottomAxisHeight;
 
@@ -1410,7 +1455,7 @@
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
       ctx.lineWidth = 1;
       ctx.fillStyle = '#94a3b8';
-      ctx.font = '10px "JetBrains Mono", monospace';
+      ctx.font = isMobile ? '8.5px "JetBrains Mono", monospace' : '10px "JetBrains Mono", monospace';
       ctx.textAlign = 'left';
 
       var axisPriceStep = defaultPriceStep;
@@ -1426,7 +1471,7 @@
           ctx.lineTo(chartW, py);
           ctx.stroke();
 
-          ctx.fillText('₹' + Math.round(p), chartW + 8, py + 3);
+          ctx.fillText('₹' + Math.round(p), chartW + (isMobile ? 3 : 8), py + 3);
         }
       }
 
@@ -1821,9 +1866,10 @@
             ctx.fillRect(chartW + 2, lastPt.y - 9, rightAxisWidth - 6, 18);
 
             ctx.fillStyle = '#000000';
-            ctx.font = 'bold 9px "JetBrains Mono", monospace';
+            ctx.font = isMobile ? 'bold 7.5px "JetBrains Mono", monospace' : 'bold 9px "JetBrains Mono", monospace';
             ctx.textAlign = 'center';
-            ctx.fillText('VWAP ₹' + Math.round(lastPt.vwap), chartW + (rightAxisWidth - 6) / 2 + 2, lastPt.y + 3.5);
+            var vwapBadgeTxt = isMobile ? 'V ₹' + Math.round(lastPt.vwap) : 'VWAP ₹' + Math.round(lastPt.vwap);
+            ctx.fillText(vwapBadgeTxt, chartW + (rightAxisWidth - 6) / 2 + 2, lastPt.y + 3.5);
           }
         }
         ctx.restore();
@@ -1847,9 +1893,10 @@
         ctx.fillStyle = '#38bdf8';
         ctx.fillRect(chartW + 2, yEntry - 9, rightAxisWidth - 6, 18);
         ctx.fillStyle = '#000';
-        ctx.font = 'bold 8.5px "JetBrains Mono", monospace';
+        ctx.font = isMobile ? 'bold 7px "JetBrains Mono", monospace' : 'bold 8.5px "JetBrains Mono", monospace';
         ctx.textAlign = 'center';
-        ctx.fillText('ENTRY ₹' + Math.round(activeTrade.entryPrice), chartW + (rightAxisWidth - 6)/2 + 2, yEntry + 3.5);
+        var entryTxt = isMobile ? 'E ' + Math.round(activeTrade.entryPrice) : 'ENTRY ₹' + Math.round(activeTrade.entryPrice);
+        ctx.fillText(entryTxt, chartW + (rightAxisWidth - 6)/2 + 2, yEntry + 3.5);
 
         // Target Line (Green)
         ctx.strokeStyle = '#10b981';
@@ -1862,7 +1909,9 @@
         ctx.fillStyle = '#10b981';
         ctx.fillRect(chartW + 2, yTP - 9, rightAxisWidth - 6, 18);
         ctx.fillStyle = '#000';
-        ctx.fillText('TP ₹' + Math.round(activeTrade.tpPrice), chartW + (rightAxisWidth - 6)/2 + 2, yTP + 3.5);
+        ctx.font = isMobile ? 'bold 7px "JetBrains Mono", monospace' : 'bold 8.5px "JetBrains Mono", monospace';
+        var tpTxt = isMobile ? 'TP ' + Math.round(activeTrade.tpPrice) : 'TP ₹' + Math.round(activeTrade.tpPrice);
+        ctx.fillText(tpTxt, chartW + (rightAxisWidth - 6)/2 + 2, yTP + 3.5);
 
         // Stop Loss Line (Red)
         ctx.strokeStyle = '#ef4444';
@@ -1875,7 +1924,9 @@
         ctx.fillStyle = '#ef4444';
         ctx.fillRect(chartW + 2, ySL - 9, rightAxisWidth - 6, 18);
         ctx.fillStyle = '#fff';
-        ctx.fillText('SL ₹' + Math.round(activeTrade.slPrice), chartW + (rightAxisWidth - 6)/2 + 2, ySL + 3.5);
+        ctx.font = isMobile ? 'bold 7px "JetBrains Mono", monospace' : 'bold 8.5px "JetBrains Mono", monospace';
+        var slTxt = isMobile ? 'SL ' + Math.round(activeTrade.slPrice) : 'SL ₹' + Math.round(activeTrade.slPrice);
+        ctx.fillText(slTxt, chartW + (rightAxisWidth - 6)/2 + 2, ySL + 3.5);
 
         ctx.restore();
       }
@@ -1960,7 +2011,8 @@
 
     // Chart Control Events
     function zoomChart(factor) {
-      candleSpacing = Math.max(140, Math.min(550, candleSpacing * factor));
+      var minSpacing = (window.innerWidth < 650) ? 75 : 140;
+      candleSpacing = Math.max(minSpacing, Math.min(550, candleSpacing * factor));
       renderAll();
     }
 
@@ -1971,15 +2023,33 @@
       zoomChart(0.8);
     });
     document.getElementById('btnResetZoom').addEventListener('click', function() {
-      candleSpacing = 260;
-      rungVerticalGap = 10;
-      rungHorizontalGap = 5;
-      rungH = 18;
+      var isMob = window.innerWidth < 650;
+      candleSpacing = isMob ? 130 : 260;
+      rungVerticalGap = isMob ? 6 : 10;
+      rungHorizontalGap = isMob ? 3 : 5;
+      rungH = isMob ? 15 : 18;
       scrollOffsetX = 0;
       scrollOffsetY = 0;
       renderAll();
       showToast('🎯', 'Standard View Restored');
     });
+
+    // Dynamic Height Preset Controller (cycles 320px -> 440px -> 580px)
+    var heightPresets = [320, 440, 580];
+    var curHeightIdx = (window.innerWidth < 650) ? 0 : 1;
+    var btnToggleHeight = document.getElementById('btnToggleHeight');
+    if (btnToggleHeight) {
+      btnToggleHeight.textContent = '📏 ' + heightPresets[curHeightIdx] + 'px';
+      btnToggleHeight.addEventListener('click', function() {
+        curHeightIdx = (curHeightIdx + 1) % heightPresets.length;
+        var newH = heightPresets[curHeightIdx];
+        viewport.style.height = newH + 'px';
+        this.textContent = '📏 ' + newH + 'px';
+        fitCanvasSize();
+        renderAll();
+        showToast('📏', 'Canvas Height: ' + newH + 'px');
+      });
+    }
     document.getElementById('btnRowPlus').addEventListener('click', function() {
       rungVerticalGap = Math.min(60, rungVerticalGap + 2);
       renderAll();
@@ -2139,14 +2209,21 @@
         var dy = e.touches[0].clientY - e.touches[1].clientY;
         touchInitialPinchDist = Math.hypot(dx, dy);
         touchInitialSpacing = candleSpacing;
+        e.preventDefault();
       }
-      e.preventDefault();
     }
 
     function onTouchMove(e) {
       if (isTouchPanning && e.touches.length === 1) {
         var dx = e.touches[0].clientX - touchStartX;
         var dy = e.touches[0].clientY - touchStartY;
+
+        // If swipe is clearly vertical on mobile (> 1.4x horizontal), let browser scroll down to trade controls!
+        if (Math.abs(dy) > Math.abs(dx) * 1.4 && Math.abs(dy) > 16) {
+          isTouchPanning = false;
+          return;
+        }
+
         scrollOffsetX = touchStartOffsetX + dx;
         scrollOffsetY = touchStartOffsetY + dy;
         renderAll();
@@ -2156,7 +2233,8 @@
         var dy = e.touches[0].clientY - e.touches[1].clientY;
         var dist = Math.hypot(dx, dy);
         var factor = dist / touchInitialPinchDist;
-        candleSpacing = Math.max(30, Math.min(220, touchInitialSpacing * factor));
+        var minSpacing = (window.innerWidth < 650) ? 75 : 140;
+        candleSpacing = Math.max(minSpacing, Math.min(550, touchInitialSpacing * factor));
         renderAll();
         e.preventDefault();
       }
