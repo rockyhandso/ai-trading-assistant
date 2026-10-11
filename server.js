@@ -1632,8 +1632,9 @@ function detectAllCandlePatterns(candles) {
     const prev = candles[i - 1];
     const body = Math.abs(c.close - c.open);
     const range = c.high - c.low;
-    const isGreen = c.close >= c.open;
-    const isRed = c.close < c.open;
+    const prevC = prev ? prev.close : c.open;
+    const isGreen = c.close > c.open ? true : (c.close < c.open ? false : (c.close >= prevC));
+    const isRed = c.close < c.open ? true : (c.close > c.open ? false : (c.close < prevC));
     const upperWick = c.high - Math.max(c.open, c.close);
     const lowerWick = Math.min(c.open, c.close) - c.low;
 
@@ -2355,26 +2356,24 @@ async function analyzeStockComplete(symbol, interval = '5m') {
       hourlyPerformance: autoTraderState.hourlyPerformance,
       recentAgentLogs: autoTraderState.agentLogs.slice(0, 10)
     },
-    chartData: (() => {
-      const sliceCount = Math.min(60, n);
-      const startIdx = n - sliceCount;
-      return candles.slice(-sliceCount).map((c, idx) => {
-        const fullIdx = startIdx + idx;
-        return {
-          time: c.timestamp,
-          timeLabel: c.time,
-          open: Number(c.open.toFixed(2)),
-          high: Number(c.high.toFixed(2)),
-          low: Number(c.low.toFixed(2)),
-          close: Number(c.close.toFixed(2)),
-          volume: c.volume,
-          vwap: vwap[fullIdx] ? Number(vwap[fullIdx].toFixed(2)) : Number(c.close.toFixed(2)),
-          ema9: ema9[fullIdx] ? Number(ema9[fullIdx].toFixed(2)) : null,
-          ema21: ema21[fullIdx] ? Number(ema21[fullIdx].toFixed(2)) : null,
-          poc: volumeProfile.poc
-        };
-      });
-    })()
+    chartData: candles.map((c, fullIdx) => {
+      const prevC = fullIdx > 0 ? candles[fullIdx - 1].close : prevClose;
+      const isUp = c.close > c.open ? true : (c.close < c.open ? false : (c.close >= prevC));
+      return {
+        time: c.timestamp,
+        timeLabel: c.time,
+        open: Number(c.open.toFixed(2)),
+        high: Number(c.high.toFixed(2)),
+        low: Number(c.low.toFixed(2)),
+        close: Number(c.close.toFixed(2)),
+        volume: c.volume,
+        isGreen: isUp,
+        vwap: vwap[fullIdx] ? Number(vwap[fullIdx].toFixed(2)) : Number(c.close.toFixed(2)),
+        ema9: ema9[fullIdx] ? Number(ema9[fullIdx].toFixed(2)) : null,
+        ema21: ema21[fullIdx] ? Number(ema21[fullIdx].toFixed(2)) : null,
+        poc: volumeProfile.poc
+      };
+    })
   };
 }
 
@@ -3613,7 +3612,13 @@ async function calculateVolumeFootprint(symbol = 'BANKNIFTY', timeframe = '5m', 
   if (isBacktest) {
     targetCandles = days[selectedDate] || [];
   } else {
-    targetCandles = candles.slice(-limit);
+    const latestDate = availableDates[0];
+    const sessionCandles = days[latestDate] || [];
+    if (!limit || limit === 'all' || Number(limit) >= sessionCandles.length) {
+      targetCandles = sessionCandles;
+    } else {
+      targetCandles = sessionCandles.slice(-Number(limit));
+    }
   }
 
   let runningCvd = 0;
@@ -3625,7 +3630,8 @@ async function calculateVolumeFootprint(symbol = 'BANKNIFTY', timeframe = '5m', 
     const c = targetCandles[i];
     const { open, high, low, close, volume, timestamp } = c;
     const range = high - low;
-    const isGreen = close >= open;
+    const prevC = i > 0 ? targetCandles[i - 1].close : open;
+    const isGreen = close > open ? true : (close < open ? false : (close >= prevC));
     const bodyTop = Math.max(open, close);
     const bodyBottom = Math.min(open, close);
     const upperWick = high - bodyTop;

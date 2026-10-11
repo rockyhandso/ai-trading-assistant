@@ -799,13 +799,20 @@ function renderCandlestickChart(chartData, forecastSteps, candlePatterns) {
 
   try {
     // 1. Format Candlestick Data (time must be sorted ascending)
-    const formattedCandles = chartData.map(c => ({
-      time: c.time,
-      open: c.open,
-      high: c.high,
-      low: c.low,
-      close: c.close
-    })).sort((a, b) => a.time - b.time);
+    const formattedCandles = chartData.map((c, idx) => {
+      const isUp = c.isGreen !== undefined ? c.isGreen : (c.close > c.open ? true : (c.close < c.open ? false : (idx > 0 ? c.close >= chartData[idx - 1].close : true)));
+      const candleColor = isUp ? '#10b981' : '#ef4444';
+      return {
+        time: c.time,
+        open: c.open,
+        high: c.high,
+        low: c.low,
+        close: c.close,
+        color: candleColor,
+        borderColor: candleColor,
+        wickColor: candleColor
+      };
+    }).sort((a, b) => a.time - b.time);
 
     candleSeries.setData(formattedCandles);
 
