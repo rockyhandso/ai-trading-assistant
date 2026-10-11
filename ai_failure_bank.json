@@ -1,7 +1,55 @@
 {
-  "totalMistakesRecorded": 794,
+  "totalMistakesRecorded": 796,
   "totalMistakesResolved": 651,
   "records": [
+    {
+      "id": "ERR-1791683275531-997",
+      "recordedAt": "2026-10-11T01:47:55.531Z",
+      "resolved": false,
+      "resolutionNote": "Pending prioritized reinforcement training cycle",
+      "symbol": "GOLDBEES",
+      "originTime": "01:45 pm",
+      "verifiedTime": "02:30 pm",
+      "actionAttempted": "BULLISH",
+      "originPrice": 122.93,
+      "projectedTargetPrice": 123.04,
+      "actualPrice": 122.68,
+      "actualMovePct": -0.2,
+      "failureCategory": "RSI_EXHAUSTION_TRAP",
+      "rootCause": "⚠️ **RSI Overbought Trap**: RSI 70.9 पर था, खरीदार थक चुके थे और नए बायर्स की कमी से sudden profit booking आ गई।",
+      "aiLearning": "🧠 **AI Adaptive Rule**: RSI > 68 होने पर Bullish forecast का weight 25% कम किया गया।",
+      "indicators": {
+        "rsi": 70.9,
+        "vwap": 122.55,
+        "ema9": 122.83,
+        "ema21": 122.77,
+        "atr": 0.07
+      }
+    },
+    {
+      "id": "ERR-1791683233219-366",
+      "recordedAt": "2026-10-11T01:47:13.219Z",
+      "resolved": false,
+      "resolutionNote": "Pending prioritized reinforcement training cycle",
+      "symbol": "GOLD",
+      "originTime": "12:40 am",
+      "verifiedTime": "01:25 am",
+      "actionAttempted": "BULLISH",
+      "originPrice": 4223.1,
+      "projectedTargetPrice": 4227.99,
+      "actualPrice": 4220.2,
+      "actualMovePct": -0.07,
+      "failureCategory": "VOLUME_DRY_FAKEOUT",
+      "rootCause": "⚠️ **Breakout Volume Trap (Fakeout)**: ब्रेकआउट के तुरंत बाद वॉल्यूम 30%+ सूख गया।",
+      "aiLearning": "🧠 **AI Adaptive Rule**: Breakout signal के बाद Volume confirmation अनिवार्य किया गया।",
+      "indicators": {
+        "rsi": 55.3,
+        "vwap": 4213.48,
+        "ema9": 4223.53,
+        "ema21": 4221.75,
+        "atr": 3.26
+      }
+    },
     {
       "id": "ERR-1791217699410-597",
       "recordedAt": "2026-10-05T16:28:19.410Z",

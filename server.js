@@ -582,6 +582,20 @@ function resolveSymbol(symbol) {
     return sym;
   }
 
+  // Commodities & Precious Metals
+  if (sym === 'GOLD' || sym === 'GOLDFUT' || sym === 'GC=F' || sym === 'GOLD_FUT' || sym === 'XAUUSD') {
+    return 'GC=F';
+  }
+  if (sym === 'GOLDBEES' || sym === 'GOLD_BEES' || sym === 'GOLDIAM') {
+    return 'GOLDBEES.NS';
+  }
+  if (sym === 'SILVER' || sym === 'SI=F' || sym === 'SILVERFUT') {
+    return 'SI=F';
+  }
+  if (sym === 'CRUDEOIL' || sym === 'CL=F' || sym === 'CRUDE') {
+    return 'CL=F';
+  }
+
   if (sym.includes('.') || sym.startsWith('^')) {
     return sym;
   }
@@ -2456,6 +2470,8 @@ async function getTodayTopStockPicks(category = 'all') {
       if (sym === 'NIFTY') displayName = 'NIFTY 50 Index';
       else if (sym === 'BANKNIFTY') displayName = 'Bank Nifty Index';
       else if (sym === 'NIFTYBEES') displayName = 'Nippon Nifty 50 ETF';
+      else if (sym === 'GOLD' || sym === 'GC=F') displayName = 'Gold Continuous Futures';
+      else if (sym === 'GOLDBEES') displayName = 'Nippon India Gold ETF';
 
       results.push({
         symbol: sym,
@@ -2625,6 +2641,9 @@ function generateDeterministicDayCandles(symbol, dateStr, interval = '5m') {
     'BANKNIFTY': 51300,
     'NIFTYBEES': 270,
     'BANKBEES': 535,
+    'GOLD': 4200,
+    'GC=F': 4200,
+    'GOLDBEES': 122,
     'TATASTEEL': 152,
     'RELIANCE': 2980,
     'ICICIBANK': 1220,
@@ -3614,12 +3633,18 @@ async function calculateVolumeFootprint(symbol = 'BANKNIFTY', timeframe = '5m', 
 
     const isBankNifty = formattedSymbol.includes('BANK');
     const isNifty = formattedSymbol.includes('NSEI') || formattedSymbol.includes('NIFTY');
+    const isGold = formattedSymbol === 'GC=F' || formattedSymbol.includes('GOLD');
+    const isGoldBees = formattedSymbol.includes('GOLDBEES');
 
     let step = 10;
     if (isBankNifty) {
       step = range > 400 ? 25 : (range > 200 ? 20 : 10);
     } else if (isNifty) {
       step = range > 100 ? 10 : 5;
+    } else if (isGold && !isGoldBees) {
+      step = range > 40 ? 5 : (range > 15 ? 2 : 1);
+    } else if (isGoldBees) {
+      step = 0.25;
     } else {
       step = range > 50 ? 5 : (range > 15 ? 2 : 1);
     }
@@ -3630,11 +3655,12 @@ async function calculateVolumeFootprint(symbol = 'BANKNIFTY', timeframe = '5m', 
       maxLevel = minLevel + step * 2;
     }
 
+    const decimals = isGoldBees ? 2 : (step < 1 ? 2 : 1);
     const levels = [];
     let price = maxLevel;
-    while (price >= minLevel) {
-      levels.push(Number(price.toFixed(1)));
-      price -= step;
+    while (price >= minLevel - (step * 0.1)) {
+      levels.push(Number(price.toFixed(decimals)));
+      price = Number((price - step).toFixed(decimals));
     }
 
     const centerPrice = (high + low + close * 2) / 4;
