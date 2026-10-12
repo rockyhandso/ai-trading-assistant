@@ -3809,6 +3809,18 @@ async function calculateVolumeFootprint(symbol = 'BANKNIFTY', timeframe = '5m', 
       bias = 'BULLISH';
       signalAction = 'BUY_CE';
       verdictHindi = 'बॉटम पर सेलर्स को बड़े बायर्स ने सोख लिया! सेलर्स ट्रैप, CALL (CE) रिवर्सल।';
+    } else if (lowerWick > range * 0.4 && candleDelta > 0) {
+      pattern = '🔨 BULLISH HAMMER BOUNCE (Bottom Rejection + Positive Delta)';
+      patternCode = 'HAMMER_BOUNCE';
+      bias = 'BULLISH';
+      signalAction = 'BUY_CE';
+      verdictHindi = `बॉटम से आक्रामक बायर्स ने मार्केट ऊपर खींचा! लंबा निचला विक + पॉजिटिव डेल्टा (+${candleDelta}), CALL (CE) में तेज़ी रहेगी।`;
+    } else if (upperWick > range * 0.4 && candleDelta < 0) {
+      pattern = '⭐ BEARISH PIN-BAR REJECTION (Top Rejection + Negative Delta)';
+      patternCode = 'PINBAR_REJECTION';
+      bias = 'BEARISH';
+      signalAction = 'BUY_PE';
+      verdictHindi = `टॉप से आक्रामक सेलर्स ने मार्केट नीचे धकेला! लंबा ऊपरी विक + नेगेटिव डेल्टा (${candleDelta}), PUT (PE) में गिरावट जारी रहेगी।`;
     } else if (candleDelta > 0 && isGreen) {
       pattern = '🟢 INITIATIVE BUYING MOMENTUM';
       patternCode = 'INITIATIVE_BUY';
