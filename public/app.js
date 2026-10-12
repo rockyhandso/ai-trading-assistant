@@ -251,6 +251,40 @@ function initLightweightChart() {
     title: '10-Step AI Forecast'
   });
 
+  // Real-time Interactive Candle Inspector HUD
+  lwChart.subscribeCrosshairMove((param) => {
+    const hudTime = document.getElementById('hudCandleTime');
+    const hudO = document.getElementById('hudCandleO');
+    const hudH = document.getElementById('hudCandleH');
+    const hudL = document.getElementById('hudCandleL');
+    const hudC = document.getElementById('hudCandleC');
+    const hudDiff = document.getElementById('hudCandleDiff');
+    const hudNote = document.getElementById('hudCandleNote');
+    if (!hudTime || !param || !param.time) return;
+
+    const price = param.seriesPrices ? param.seriesPrices.get(candleSeries) : null;
+    if (price && typeof price.open === 'number') {
+      const dt = new Date(param.time * 1000);
+      hudTime.textContent = '⏰ ' + dt.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true });
+      hudO.textContent = 'O: ₹' + price.open.toFixed(2);
+      hudH.textContent = 'H: ₹' + price.high.toFixed(2);
+      hudL.textContent = 'L: ₹' + price.low.toFixed(2);
+      hudC.textContent = 'C: ₹' + price.close.toFixed(2);
+      const diff = price.close - price.open;
+      const bodyPct = Math.abs(diff) / Math.max(0.01, price.high - price.low) * 100;
+      if (bodyPct <= 12 || Math.abs(diff) <= 8) {
+        hudDiff.innerHTML = `<span style="color:#fbbf24;">Diff: ${diff >= 0 ? '+' : ''}₹${diff.toFixed(2)} (Doji / Hammer)</span>`;
+        if (hudNote) hudNote.textContent = '⚖️ Micro-body Doji (Tiny body: broker open ticks may vary by 2-5 pts)';
+      } else if (diff >= 0) {
+        hudDiff.innerHTML = `<span style="color:#10b981;">Diff: +₹${diff.toFixed(2)} (Bullish)</span>`;
+        if (hudNote) hudNote.textContent = '';
+      } else {
+        hudDiff.innerHTML = `<span style="color:#ef4444;">Diff: -₹${Math.abs(diff).toFixed(2)} (Bearish)</span>`;
+        if (hudNote) hudNote.textContent = '';
+      }
+    }
+  });
+
   window.addEventListener('resize', () => {
     if (lwChart && candlestickChartContainer) {
       lwChart.applyOptions({ width: candlestickChartContainer.clientWidth });

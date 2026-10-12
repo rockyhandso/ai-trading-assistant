@@ -579,6 +579,17 @@
           <span class="legend-pill"><span class="legend-color-box forecast-box"></span> 10-Step Forecast (Purple)</span>
         </div>
 
+        <!-- Live Candle Inspector HUD (Shows exact Open, High, Low, Close on hover) -->
+        <div class="candle-inspect-hud" id="candleInspectHud" style="display:flex; flex-wrap:wrap; align-items:center; gap:0.6rem; padding:0.4rem 0.8rem; background:rgba(15,23,42,0.85); border:1px solid rgba(255,255,255,0.08); border-radius:6px; font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:#94a3b8; margin-bottom:0.4rem;">
+          <span style="color:#38bdf8; font-weight:700;" id="hudCandleTime">⏰ Live Candle Inspector</span>
+          <span id="hudCandleO">O: --</span>
+          <span id="hudCandleH">H: --</span>
+          <span id="hudCandleL">L: --</span>
+          <span id="hudCandleC">C: --</span>
+          <span id="hudCandleDiff" style="font-weight:700;">Diff: --</span>
+          <span id="hudCandleNote" style="color:#f59e0b; font-size:0.72rem;"></span>
+        </div>
+
         <!-- TradingView Chart Container -->
         <div class="chart-box-main" id="candlestickChartContainer"></div>
 
