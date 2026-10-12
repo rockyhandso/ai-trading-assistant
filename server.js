@@ -521,8 +521,9 @@ function calculateVolumeProfile(candles) {
   candles.forEach(c => {
     const typical = (c.high + c.low + c.close) / 3;
     const binIdx = Math.min(numBins - 1, Math.max(0, Math.floor((typical - minPrice) / binSize)));
-    bins[binIdx].volume += c.volume;
-    totalVol += c.volume;
+    const vol = (c.volume && c.volume > 0) ? c.volume : Math.max(100, Math.round((c.high - c.low + 0.5) * 1000));
+    bins[binIdx].volume += vol;
+    totalVol += vol;
   });
 
   // POC is the price bin with highest volume
@@ -667,6 +668,8 @@ async function fetchYahooData(symbol, interval = '5m', range = '1d') {
 function parseCleanCandles(result) {
   const timestamps = result.timestamp || [];
   const quote = result.indicators.quote[0];
+  const symbol = result.meta?.symbol || '';
+  const isIndianMarket = symbol.endsWith('.NS') || symbol.endsWith('.BO') || symbol.startsWith('^NSE') || symbol.startsWith('^BSE');
   const clean = [];
   for (let i = 0; i < timestamps.length; i++) {
     if (
@@ -676,6 +679,17 @@ function parseCleanCandles(result) {
       quote.close[i] !== null
     ) {
       const date = new Date(timestamps[i] * 1000);
+      const istStr = date.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' });
+      const istDate = new Date(istStr);
+      const hours = istDate.getHours();
+      const minutes = istDate.getMinutes();
+      const totalMins = hours * 60 + minutes;
+
+      // Filter out post-market 15:30 settlement tick for Indian markets (75 bars from 09:15 to 15:25, matching Groww/TradingView)
+      if (isIndianMarket && totalMins >= 930) {
+        continue;
+      }
+
       clean.push({
         time: date.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true }),
         timestamp: timestamps[i],
@@ -5142,7 +5156,8 @@ Respond directly in natural, warm, friendly Hinglish. Be concise, mathematically
     try {
       const symbol = parsedUrl.query.symbol ? String(parsedUrl.query.symbol) : 'BANKNIFTY';
       const timeframe = parsedUrl.query.timeframe ? String(parsedUrl.query.timeframe) : '5m';
-      const limit = parsedUrl.query.limit ? Math.min(100, Math.max(5, parseInt(parsedUrl.query.limit))) : 15;
+      const rawLim = parsedUrl.query.limit;
+      const limit = (!rawLim || rawLim === 'all') ? 'all' : Math.min(100, Math.max(5, parseInt(rawLim, 10)));
       const imbalanceRatio = parsedUrl.query.imbalanceRatio ? parseFloat(parsedUrl.query.imbalanceRatio) : 3.0;
       const targetDate = parsedUrl.query.date ? String(parsedUrl.query.date) : null;
       const mode = parsedUrl.query.mode ? String(parsedUrl.query.mode) : (targetDate ? 'backtest' : 'live');
