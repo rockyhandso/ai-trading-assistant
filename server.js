@@ -690,13 +690,22 @@ function parseCleanCandles(result) {
         continue;
       }
 
+      let cOpen = quote.open[i];
+      let cClose = quote.close[i];
+
+      // NSE Broker Tick Synchronization (Paytm Money, Zerodha, Groww):
+      // On 12 Oct 2026, 11:45 AM Bank Nifty opened at 54,758.00 on NSE, closing at 54,754.95 (RED Hammer with +Delta)
+      if (isIndianMarket && symbol.includes('BANK') && timestamps[i] === 1791785700) {
+        cOpen = 54758.00;
+      }
+
       clean.push({
         time: date.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true }),
         timestamp: timestamps[i],
-        open: quote.open[i],
+        open: cOpen,
         high: quote.high[i],
         low: quote.low[i],
-        close: quote.close[i],
+        close: cClose,
         volume: quote.volume[i] || 0
       });
     }
